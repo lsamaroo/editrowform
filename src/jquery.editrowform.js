@@ -20,10 +20,13 @@
 		        // To avoid scope issues, use 'base' instead of 'this'
 		        // to reference this class from internal events and functions.
 		        var base = this;
+		        var rowCount = 0;
+		        var colCount = 0;
 		        
 		        // Access to jQuery and DOM versions of element
 		        base.$el = $(el);
 		        base.el = el;
+		        
 
 		        // Add a reverse reference to the DOM object
 		        base.$el.data("editrowform", base);
@@ -31,7 +34,9 @@
 		        
 		        base.init = function(){
 		            base.options = $.extend({},$.editrowform.defaultOptions, options);
-		            console.log( "init");
+		            rowCount =  _getRowCount();
+		            colCount =  _getColumnCount();		            
+		            console.log( "rows=" + rowCount + " cols=" + colCount)
 		        };
 		        
 		        
@@ -50,7 +55,6 @@
 				};
 				 
 				base.destroy = function(){
-					 console.log( "destroy");
 					 base.$el.removeData( "editrowform" );				 
 				};
 				
@@ -58,7 +62,7 @@
 					return $(cell).html().trim();			 
 				};
 				
-				
+				// private functions
 				function _getRow( rowIndex ){
 					return $( 'tbody tr', base.el ).eq( rowIndex );
 				};
@@ -68,7 +72,17 @@
 					return base.getCellValue( cell );
 				};
 				
-				base.template = "<div>leon</div>";
+				function _getColumnCount(){
+					return _getRow(0).length;
+				};
+				
+				function _getRowCount(){
+					return $( 'tbody tr', base.el ).length;
+				};
+				
+				function _getFormTemplate(){
+					"<div>leon</div>";
+				}
 
 		    };
 		    
