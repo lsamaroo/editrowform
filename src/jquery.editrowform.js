@@ -37,7 +37,7 @@
 					// a new plugin initialization
 					else {
 						thisplugin = (new $.editrowform(el, options));
-						thisplugin.init();
+						thisplugin.init();	            
 					}
 		        });
 		        
@@ -62,20 +62,26 @@
 			        base.$el.data("editrowform", base);
 		            base.options = $.extend({},$.editrowform.defaultOptions, options);
 		            rowCount =  getRowCount();
-		            colCount =  getColumnCount();	
+		            colCount =  getColumnCount();
+		            build();
 		            
-		            buildFormDiv();
+		            if( getOptions().doubleClick ){
+		            	$( "tr", base.el ).dblclick( function(e){
+		            		base.show( $(this).index() );
+		            	});
+		            }
 		        };
 		        
 				
-				base.showForm = function(rowIndex){
+				base.show = function(rowIndex){
 					if( formDiv != null ){
 						formDiv.show();
+						setFormValues(rowIndex);
 					}
 
 				};
 				
-				base.hideForm = function(rowIndex){
+				base.hide = function(rowIndex){
 					if( formDiv != null ){
 						formDiv.hide();
 					}
@@ -91,26 +97,14 @@
 		        var rowCount = 0;
 		        var colCount = 0;
 		        var formDiv = null;
-		        var formDivTemplate = "<div id='{id}' style='display:none' class='erf'>{formContent}</div>";
-		        var formTemplate = "<form id='{id}' class='form'>{formContent}</form>";
-		        var formRowTemplate = "<div id='{id}' class='row'>{rowContent}</div>";
-		        var formCellTemplate = "<div id='{id}' class='cell'>{cellContent}</div>";
+
+		        				
+				// private functions	      
+				function getOptions(){
+					return base.options;
+				};
 				
-				// private functions
-		        
-		        
-		        function getIdPrefix(){
-		        	return "erf-";
-		        };
-		        		        
-		        function getTableId(){
-					var tableId = base.el.id;
-					if( isEmpty( tableId ) ){
-						tableId = "table-id";
-					};					
-					return tableId;
-		        };
-		        
+				
 				function getRow( rowIndex ){
 					return $( 'tbody tr', base.el ).eq( rowIndex );
 				};
@@ -118,8 +112,8 @@
 				function getCellValue( rowIndex, colIndex, row ){
 					var cell = $( 'td', row )[colIndex];
 					
-					if( functionExists( base.options.getCellValue ) ){
-						return base.options.getCellValue( rowIndex, colIndex, cell );
+					if( util.functionExists( getOptions().getCellValue ) ){
+						return getOptions().getCellValue( rowIndex, colIndex, cell );
 					}
 					else{
 						return $(cell).html().trim();
@@ -137,82 +131,155 @@
 				};
 				
 				
-				function buildFormDiv(){
-					var template = formDivTemplate;
-					template = template.replace( "{id}", getIdPrefix() + getTableId() );
-					template = template.replace( "{formContent}", buildForm() );
-										
-					formDiv = $( template  );
-					formDiv.appendTo( document.body );
-				}
+				function setFormValues(rowIndex){
+					var row = getRow( rowIndex );
+					for( var i = 0; i < colCount; i++ ){
+						var value = getCellValue( rowIndex, i, row );
+						$( "#" + idGen.getInputId( i ) ).val( value );
+					}
+				};
+				
+				
+				function build(){
+					var div = $( template.div );
+					div.attr( "id", idGen.getEditRowFormId() );
+					div.addClass( "erf" );			
+					div.appendTo( document.body );
+					
+					var form = buildForm();
+					form.appendTo( div );
+				};
 				
 				
 				function buildForm(){
-					var template = formTemplate;
-					template = template.replace( "{id}", getIdPrefix() + getTableId() + "-form" );
-					template = template.replace( "{formContent}", buildFormRow() );
-					return template;
-				}
-				
+					var div = $( template.div );
+					div.attr( "id", idGen.getFormId() );
+					div.addClass( "form" );
+					div.hide();
+									
+					var row = buildFormRow();
+					row.appendTo( div );	
+					return div;
+				};
+								
 				
 				function buildFormRow(){
-					var temp = "";
-					for( var i = 0; i < colCount; i++ ){
-						temp = temp + buildFormCell( i );
-					}
+					var div = $( template.div );
+					div.attr( "id", idGen.getFormRowId() );
+					div.addClass( "row" );
 					
-					var template = formRowTemplate;
-					template = template.replace( "{id}", getIdPrefix() + getTableId() + "-row" );
-					template = template.replace( "{rowContent}", temp );
-					return template;
-				}
-				
+					var cell = null;
+					for( var i = 0; i < colCount; i++ ){
+						cell =  buildFormCell( i );
+						cell.appendTo( div );
+					}				
+					return div;
+				};
+								
 				
 				function buildFormCell(colIndex){
-					var input = getInput( colIndex );				
-					var template = formCellTemplate;
-					template = template.replace( "{id}", getIdPrefix() + getTableId() + "-cell-" + colIndex );
-					template = template.replace( "{cellContent}", input );			
-					return template;
-				}
+					var div = $( template.div );
+					div.attr( "id", idGen.getFormCellId( colIndex ) );
+					div.addClass( "cell" );					
+					var input = getInput( colIndex );	
+					input.appendTo( div );			
+					return div;
+				};
 				
 				
 				function getColumnType(colIndex){
 					return "text";
-				}
-				
-				function getInput( colIndex ){
-					var colType = getColumnType( colIndex );
-					if( colType == "checkbox" ){
-						return "<input type='checkbox' />";
-					}
-					else {
-						return "<input type='text' />";
-					}
-					
-				}
-				
-				
-				function functionExists( myfunc ){
-					return typeof myfunc !== 'undefined' && $.isFunction(myfunc)
 				};
 				
 				
-				function isEmpty(text){
-					return ( 
-							 text == null || text === null || 
-							 text === undefined || 
-							 $.trim(text) == 'null' || 
-							 $.trim(text) == '' 
-						   );
+				function getInput( colIndex ){
+					var input = null;
+					var inputId = idGen.getInputId(colIndex);
+					var colType = getColumnType( colIndex );
+
+					if( colType == "checkbox" ){
+						input = $( template.checkbox );
+					}
+					else {
+						input = $( template.textfield );
+					}	
+					
+					input.attr( "id", inputId );
+					return input;
+				};
+				
+			
+				
+				var idGen = {
+						idPrefix: "erf-",
+						
+						getEditRowFormId: function( colIndex ){
+							var id = options.id;
+							if( util.isEmpty( id ) ){
+								id = base.el.id;
+							}
+							
+							if( util.isEmpty( id ) ){
+								id = "defaultid";
+							}			
+							return this.idPrefix + id;
+						},
+						
+						getInputId: function( colIndex ){
+							return this.getEditRowFormId() + "-input" + colIndex;
+						},
+						
+						getFormCellId: function( colIndex ){
+							return this.getEditRowFormId() + "-cell-" + colIndex;
+						},
+						
+						getFormRowId: function( ){
+							return this.getEditRowFormId() + "-row";
+						},
+												
+						getFormId: function( ){
+							return this.getEditRowFormId() + "-form";
+						}								
+				};
+				
+
+				var util = {
+						functionExists: function( myFunc ){
+							return typeof myfunc !== 'undefined' && $.isFunction(myfunc);
+						},
+						
+						isEmpty: function( text ){
+							return ( 
+									 text == null || text === null || 
+									 text === undefined || 
+									 $.trim(text) == 'null' || 
+									 $.trim(text) == '' 
+								   );							
+						},
+						
+						getTableWidth: function( table ){
+							return $(table).width();
+						}
+				};
+				
+				
+				var template = {
+						div: "<div />",
+						textfield: "<input type='text' />",
+						checkbox: "<input type='checkbox' />"
 				};
 
 		    };
 		    
 		    
+
+
+		    
 			
 			// Default options
 		    $.editrowform.defaultOptions = {
+		    		id: "",
+		    		doubleClick: true,
 		    		getCellValue: ""
 		    };
 		    
