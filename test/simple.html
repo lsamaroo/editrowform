@@ -10,7 +10,10 @@
 	
 	<script type="text/javascript">
 		$(function() {		
-			$( "#table").editrowform();
+			$( "#table").editrowform( 
+					{	
+					} 
+			);
 			$( "#table").editrowform("showForm", 1);
 		});
 	</script>	
@@ -18,7 +21,7 @@
 </head>
 <body>
 	<br/>
-	<table id="table" class="pure-table pure-table-horizontal" style="margin-left: 50px;">
+	<table id="table" class="pure-table pure-table-horizontal" style="margin: 100px;">
 		<thead>
 			<tr>
 				<th>
