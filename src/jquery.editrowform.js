@@ -35,20 +35,46 @@
 		        };
 		        
 		        
-				base.getName = function(args){
+				base.getName = function(){
 					 return "editrowform";
 				};
-				 
-				base.destroy = function(args){
-					 console.log( "destroy");
-					 base.$el.removeData( "editrowform" );
-					 return base;					 
+				
+				
+				base.showForm = function(rowIndex){
+					var row = _getRow( rowIndex );	
+					$( 'td', row ).each( function( i, td) {
+						var cellValue = _getCellValue( row, i );
+						console.log( cellValue );
+					});
+
 				};
+				 
+				base.destroy = function(){
+					 console.log( "destroy");
+					 base.$el.removeData( "editrowform" );				 
+				};
+				
+				base.getCellValue = function( cell ){
+					return $(cell).html().trim();			 
+				};
+				
+				
+				function _getRow( rowIndex ){
+					return $( 'tbody tr', base.el ).eq( rowIndex );
+				};
+				
+				function _getCellValue( row, colIndex ){
+					var cell = $( 'td', row )[colIndex];
+					return base.getCellValue( cell );
+				};
+				
+				base.template = "<div>leon</div>";
 
 		    };
 		    
 		    
 		    $.editrowform.defaultOptions = {
+		    		getRowValue: ""
 		    };
 		    
 		    
