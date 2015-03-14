@@ -63,9 +63,11 @@
 		            base.options = $.extend({},$.editrowform.defaultOptions, options);
 		            rowCount =  getRowCount();
 		            colCount =  getColumnCount();
+
 		            build();
 		            
-		            if( getOptions().doubleClick ){
+		            // add listeners
+		            if( base.options.doubleClick ){
 		            	$( "tr", base.el ).dblclick( function(e){
 		            		base.show( $(this).index() );
 		            	});
@@ -92,14 +94,37 @@
 					 base.$el.removeData( "editrowform" );				 
 				};
 				
-
-				//private variables
+				// ---------------------------------------
+				// private variables and functions
+				// ---------------------------------------
 		        var rowCount = 0;
 		        var colCount = 0;
 		        var formDiv = null;
+		        var columnMap = {};
 
 		        				
-				// private functions	      
+				// private functions	
+		        function buildColumnMap(){
+		            var columns = base.options.columns;
+		        	var i = 0;
+		        	var col = null;
+
+		            if( !util.isEmpty( columns ) && $.isArray(columns) ){
+		            	col = columns[i];
+		            	if( !util.isEmpty( col ) ){
+		            		columnMap[i] = col;
+		            	}
+		            	else{
+		            		columnMap[i] = $(base.options.defaultColumn).clone();
+		            	}
+		            }
+		            else{
+		            	for( i = 0; i < getColumnCount(); i++ ){
+		            		columnMap[i] = util.clone(base.options.defaultColumn);
+		            	}
+		            }
+		        };
+		        
 				function getOptions(){
 					return base.options;
 				};
@@ -141,25 +166,27 @@
 				
 				
 				function build(){
-					var div = $( template.div );
-					div.attr( "id", idGen.getEditRowFormId() );
-					div.addClass( "erf" );			
-					div.appendTo( document.body );
-					
-					var form = buildForm();
-					form.appendTo( div );
+					buildColumnMap();
+					buildForm();
 				};
 				
 				
 				function buildForm(){
 					var div = $( template.div );
-					div.attr( "id", idGen.getFormId() );
-					div.addClass( "form" );
+					div.attr( "id", idGen.getEditRowFormId() );
+					div.addClass( "erf" );	
 					div.hide();
-									
+					div.appendTo( document.body );
+		
+					var form = $( template.form );
+					form.attr( "id", idGen.getFormId() );
+					form.addClass( "form" );
+					form.appendTo( div );				
+							
 					var row = buildFormRow();
-					row.appendTo( div );	
-					return div;
+					row.appendTo( form );	
+					
+					formDiv = div;
 				};
 								
 				
@@ -259,12 +286,17 @@
 						
 						getTableWidth: function( table ){
 							return $(table).width();
+						},
+						
+						clone: function( obj ){
+							return $.extend(true, {}, obj);
 						}
 				};
 				
 				
 				var template = {
 						div: "<div />",
+						form: "<form />",
 						textfield: "<input type='text' />",
 						checkbox: "<input type='checkbox' />"
 				};
@@ -279,6 +311,11 @@
 			// Default options
 		    $.editrowform.defaultOptions = {
 		    		id: "",
+		    		columns: "",
+		    		defaultColumn: {
+		    			colType: "text",
+		    			editable: true
+		    		},
 		    		doubleClick: true,
 		    		getCellValue: ""
 		    };
