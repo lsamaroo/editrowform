@@ -72,7 +72,7 @@
 
 		            	$( "tr", base.el ).on( "click", function(e){
 		            		if( !util.isHidden( $formDiv ) ){
-		            			setFormValues( $(this).index() );
+		            			base.show( $(this).index() );
 		            		}	
 		            	});
 		            	
@@ -115,6 +115,7 @@
 				base.destroy = function(){
 					 base.$el.removeData( "editrowform" );				 
 				};
+		
 				
 				// ---------------------------------------
 				// private variables and functions
@@ -130,23 +131,20 @@
 				function getOptions(){
 					return base.options;
 				};
-				
-				
+							
 				function getRow( rowIndex ){
 					return $( 'tbody tr', base.el ).eq( rowIndex );
 				};
 				
-				function getCellValue( rowIndex, colIndex, row ){
-					var cell = $( 'td', row )[colIndex];
-					
-					if( util.functionExists( getOptions().getCellValue ) ){
-						return getOptions().getCellValue( rowIndex, colIndex, cell );
+				function getCellValue( cell, rowIndex, colIndex, row ){
+					var value = $(cell).html().trim();
+			
+					var getCellValueFunc = getOptions().getCellValue;
+					if( util.functionExists(  getCellValueFunc ) ){
+						value = getCellValueFunc( value, cell, rowIndex, colIndex, row );
 					}
-					else{
-						return $(cell).html().trim();
-					}
-					
-					return base.getCellValue( rowIndex, colIndex, cell );
+
+					return value;
 				};
 				
 				function getColumnCount(){
@@ -166,13 +164,56 @@
 				
 				function setFormValues(rowIndex){
 					var row = getRow( rowIndex );
-					for( var i = 0; i < getColumnCount(); i++ ){
-						var value = getCellValue( rowIndex, i, row );
-						$( "#" + idGen.getInputId( i ) ).val( value );
+					var i, value, inputId, colType, cell;
+					
+					for( i = 0; i < getColumnCount(); i++ ){
+						cell = $( 'td', row )[i];
+						value = getCellValue( cell, rowIndex, i, row );
+						inputId = idGen.getInputId( i );
+						colType = getColumnType( i );
+						setInputValue( inputId, value, colType, rowIndex, i, row, cell );
 					}
 				};
 				
-		
+				
+				function setInputValue( inputId, value, colType, rowIndex, colIndex, row, cell ){	
+					var func = getOptions().setInputValue;
+					if( util.functionExists(  func ) ){
+						func( inputId, value, colType, rowIndex, colIndex, row );
+					}
+					else{
+						$( "#" + inputId ).val( value );
+					}
+				};
+				
+				
+				function renderInput( colIndex  ){
+					var inputId = idGen.getInputId(colIndex);
+					var inputName = "";
+					var colType = getColumnType( colIndex );
+					var input;
+					
+					if( colType == "checkbox" ){
+						input = $( template.checkbox );
+					}
+					else {
+						input = $( template.textfield );
+					}					
+					input.attr( "id", inputId );	
+					
+					// Check if a function was passed into the option and execute that
+					var func = getOptions().renderInput;
+					if( util.functionExists(  func ) ){
+						input = $(func( input, colIndex ));
+						// input must have an id!!
+						if( util.isEmpty( input.attr("id")) ){
+							input.attr("id", inputId);
+						}
+					}
+									
+					return input;
+				};
+
 				
 				function build(){
 					buildColumnMap();
@@ -211,9 +252,10 @@
 					div.attr( "id", idGen.getEditRowFormId() );
 					div.addClass( "erf" );
 					div.addClass( getOptions().cssClass );
+					div.width( util.getWidth(base.el) );
 					div.hide();
-					div.appendTo( document.body );
-		
+					div.appendTo( document.body );		
+			
 					var form = $( template.form );
 					form.attr( "id", idGen.getFormId() );
 					form.addClass( "form" );
@@ -248,8 +290,8 @@
 				function buildFormCell(colIndex){
 					var div = $( template.div );
 					div.attr( "id", idGen.getFormCellId( colIndex ) );
-					div.addClass( "cell" );					
-					var input = getInput( colIndex );	
+					div.addClass( "cell" );								
+					var input = renderInput( colIndex );	
 					input.appendTo( div );			
 					return div;
 				};
@@ -277,27 +319,16 @@
 				};
 				
 				function getColumnType(colIndex){
-					return $columnMap[colIndex].colType;
+					return $columnMap[colIndex].type;
 				};
 				
-				
-				function getInput( colIndex ){
-					var input = null;
-					var inputId = idGen.getInputId(colIndex);
-					var colType = getColumnType( colIndex );
-
-					if( colType == "checkbox" ){
-						input = $( template.checkbox );
-					}
-					else {
-						input = $( template.textfield );
-					}	
+				function getColumnWidth(colIndex){
+					// check for header
 					
-					input.attr( "id", inputId );
-					return input;
+					return $columnMap[colIndex].width;
 				};
-				
 			
+				
 				
 				var idGen = {
 						idPrefix: "erf-",
@@ -354,8 +385,8 @@
 								   );							
 						},
 						
-						getTableWidth: function( table ){
-							return $(table).width();
+						getWidth: function( el ){
+							return $(el).width();
 						},
 						
 						clone: function( obj ){
@@ -386,15 +417,25 @@
 		    		cssClass: "",
 		    		columns: "",
 		    		defaultColumn: {
-		    			colType: "text",
+		    			name: "",
+		    			width: 100,
+		    			type: "text",
 		    			editable: true
 		    		},
 		    		click: true,
-		    		getCellValue: "",
 		    		onSave: "",
 		    		onCancel: "",
 		    		saveText: "Save",
-		    		cancelText: "Cancel"
+		    		cancelText: "Cancel",
+
+		    		/* function(value, cell, rowIndex, colIndex, row){} */
+		    		getCellValue: "", 
+		    		
+		    		/* function(inputId, value, colType, rowIndex, i, row, cell ){} */
+		    		setInputValue: "", 
+		    		
+		    		/* function(input, colIndex){} */
+		    		renderInput: "" 
 		    };
 		    
 		    
