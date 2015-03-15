@@ -9,10 +9,15 @@
 	<script src="../src/jquery.editrowform.js"></script>
 	
 	<script type="text/javascript">
-		$(function() {		
-			$( "#table").editrowform( 
-					{	
-					} 
+	
+		$(function() {
+			$( "#table").editrowform(
+				{
+					click: true,
+					onSave: function(e, form){ 
+						console.log("I'm saving!!");
+					}
+				}		
 			);
 		});
 	</script>	
@@ -29,6 +34,9 @@
 				<th>
 					h2
 				</th>
+				<th>
+					h3
+				</th>
 			</tr>
 		</thead>
 		<tbody>
@@ -39,6 +47,9 @@
 				<td>
 					r1c2
 				</td>
+				<td>
+					r1c3
+				</td>
 			</tr>
 			<tr>
 				<td>
@@ -46,6 +57,9 @@
 				</td>
 				<td>
 					r2c2
+				</td>
+				<td>
+					r2c3
 				</td>
 			</tr>						
 		</tbody>

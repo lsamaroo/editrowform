@@ -61,33 +61,55 @@
 			        // Add a reverse reference to the DOM object
 			        base.$el.data("editrowform", base);
 		            base.options = $.extend({},$.editrowform.defaultOptions, options);
-		            rowCount =  getRowCount();
-		            colCount =  getColumnCount();
 
 		            build();
 		            
 		            // add listeners
-		            if( base.options.doubleClick ){
+		            if( base.options.click ){
 		            	$( "tr", base.el ).dblclick( function(e){
 		            		base.show( $(this).index() );
 		            	});
+
+		            	$( "tr", base.el ).on( "click", function(e){
+		            		if( !util.isHidden( $formDiv ) ){
+		            			setFormValues( $(this).index() );
+		            		}	
+		            	});
+		            	
 		            }
 		        };
 		        
 				
 				base.show = function(rowIndex){
-					if( formDiv != null ){
-						formDiv.show();
+					if( $formDiv != null ){
+						$formDiv.show();
 						setFormValues(rowIndex);
 					}
 
 				};
 				
-				base.hide = function(rowIndex){
-					if( formDiv != null ){
-						formDiv.hide();
+				base.hide = function(){
+					if( $formDiv != null ){
+						$formDiv.hide();
 					}
-
+				};
+				
+				
+				base.save = function(e){	
+					var onSave = getOptions().onSave;
+					
+					if( util.functionExists( onSave ) ){
+						onSave(e, $form);	
+					}
+				};
+					
+				base.cancel = function (e){
+					base.hide();
+					
+					var onCancel = getOptions().onCancel;		
+					if( util.functionExists( onCancel ) ){
+						onCancel( e, $form);
+					}				
 				};
 				 
 				base.destroy = function(){
@@ -97,34 +119,14 @@
 				// ---------------------------------------
 				// private variables and functions
 				// ---------------------------------------
-		        var rowCount = 0;
-		        var colCount = 0;
-		        var formDiv = null;
-		        var columnMap = {};
+		        var $rowCount = null;
+		        var $colCount = null;
+		        var $formDiv = null;
+		        var $form = null;
+		        var $columnMap = {};
 
 		        				
 				// private functions	
-		        function buildColumnMap(){
-		            var columns = base.options.columns;
-		        	var i = 0;
-		        	var col = null;
-
-		            if( !util.isEmpty( columns ) && $.isArray(columns) ){
-		            	col = columns[i];
-		            	if( !util.isEmpty( col ) ){
-		            		columnMap[i] = col;
-		            	}
-		            	else{
-		            		columnMap[i] = $(base.options.defaultColumn).clone();
-		            	}
-		            }
-		            else{
-		            	for( i = 0; i < getColumnCount(); i++ ){
-		            		columnMap[i] = util.clone(base.options.defaultColumn);
-		            	}
-		            }
-		        };
-		        
 				function getOptions(){
 					return base.options;
 				};
@@ -148,33 +150,67 @@
 				};
 				
 				function getColumnCount(){
-					return $( 'td', getRow(0) ).length;
+					if( util.isEmpty($colCount) ){
+						$colCount = $( 'td', getRow(0) ).length;
+					}
+					return $colCount;
 				};
 				
 				function getRowCount(){
-					return $( 'tbody tr', base.el ).length;
+					if( util.isEmpty($rowCount) ){
+						$rowCount = $( 'tbody tr', base.el ).length;
+					}				
+					return $rowCount;			
 				};
 				
 				
 				function setFormValues(rowIndex){
 					var row = getRow( rowIndex );
-					for( var i = 0; i < colCount; i++ ){
+					for( var i = 0; i < getColumnCount(); i++ ){
 						var value = getCellValue( rowIndex, i, row );
 						$( "#" + idGen.getInputId( i ) ).val( value );
 					}
 				};
 				
+		
 				
 				function build(){
 					buildColumnMap();
-					buildForm();
+					buildForm();				
 				};
+				
+
+		        function buildColumnMap(){
+		            var columns = base.options.columns;
+		        	var i = 0;
+		        	var col, index;
+		        	var columnMap = {};
+		        	
+		        	// fill with default values;
+	            	for( i = 0; i < getColumnCount(); i++ ){
+	            		columnMap[i] = util.clone(base.options.defaultColumn);
+	            	}
+		        	            	
+		            if( !util.isEmpty( columns ) && $.isArray(columns) ){
+		            	for( i = 0; i < columns.length; i++ ){
+		            		col = columns[i];
+			            	if( !util.isEmpty( col ) ){
+			            		index = col.colIndex || i;            		
+			            		columnMap[index] = col;
+			            	}
+		            	}
+		            }
+		            
+		            $columnMap = columnMap;
+		        };
+		        
 				
 				
 				function buildForm(){
 					var div = $( template.div );
 					div.attr( "id", idGen.getEditRowFormId() );
-					div.addClass( "erf" );	
+					div.addClass( "erf" );
+					div.addClass( getOptions().cssClass );
 					div.hide();
 					div.appendTo( document.body );
 		
@@ -186,7 +222,12 @@
 					var row = buildFormRow();
 					row.appendTo( form );	
 					
-					formDiv = div;
+					var saveAndCancel = buildSaveAndCancelButton();
+					saveAndCancel.appendTo( div );
+					
+					// add to plugin global scope
+					$formDiv = div;
+					$form = form
 				};
 								
 				
@@ -196,7 +237,7 @@
 					div.addClass( "row" );
 					
 					var cell = null;
-					for( var i = 0; i < colCount; i++ ){
+					for( var i = 0; i < getColumnCount(); i++ ){
 						cell =  buildFormCell( i );
 						cell.appendTo( div );
 					}				
@@ -214,8 +255,29 @@
 				};
 				
 				
+				function buildSaveAndCancelButton(){
+					var div = $( template.div );
+					div.addClass( "save-and-cancel-bar" );	
+					
+					var save = $( template.button );
+					save.attr( "id", idGen.getSaveButtonId() );
+					save.addClass( "save");
+					save.appendTo( div );
+					save.html( getOptions().saveText );
+					save.on( "click", base.save );
+					
+					var cancel = $( template.button );
+					cancel.attr( "id", idGen.getCancelButtonId() );
+					cancel.addClass( "cancel");
+					cancel.appendTo( div );
+					cancel.html( getOptions().cancelText );
+					cancel.on( "click", base.cancel );
+					
+					return div;
+				};
+				
 				function getColumnType(colIndex){
-					return "text";
+					return $columnMap[colIndex].colType;
 				};
 				
 				
@@ -241,7 +303,7 @@
 						idPrefix: "erf-",
 						
 						getEditRowFormId: function( colIndex ){
-							var id = options.id;
+							var id = base.options.id;
 							if( util.isEmpty( id ) ){
 								id = base.el.id;
 							}
@@ -266,13 +328,21 @@
 												
 						getFormId: function( ){
 							return this.getEditRowFormId() + "-form";
-						}								
+						},
+						
+						getSaveButtonId: function( ){
+							return this.getEditRowFormId() + "-save";
+						},
+						
+						getCancelButtonId: function( ){
+							return this.getEditRowFormId() + "-cancel";
+						}	
 				};
 				
 
 				var util = {
-						functionExists: function( myFunc ){
-							return typeof myfunc !== 'undefined' && $.isFunction(myfunc);
+						functionExists: function( func ){
+							return typeof func !== 'undefined' && $.isFunction(func);
 						},
 						
 						isEmpty: function( text ){
@@ -290,6 +360,10 @@
 						
 						clone: function( obj ){
 							return $.extend(true, {}, obj);
+						},
+						
+						isHidden: function( el ){
+							return $(el).css('display') == 'none';
 						}
 				};
 				
@@ -297,6 +371,7 @@
 				var template = {
 						div: "<div />",
 						form: "<form />",
+						button: "<button />",
 						textfield: "<input type='text' />",
 						checkbox: "<input type='checkbox' />"
 				};
@@ -304,20 +379,22 @@
 		    };
 		    
 		    
-
-
-		    
 			
 			// Default options
 		    $.editrowform.defaultOptions = {
 		    		id: "",
+		    		cssClass: "",
 		    		columns: "",
 		    		defaultColumn: {
 		    			colType: "text",
 		    			editable: true
 		    		},
-		    		doubleClick: true,
-		    		getCellValue: ""
+		    		click: true,
+		    		getCellValue: "",
+		    		onSave: "",
+		    		onCancel: "",
+		    		saveText: "Save",
+		    		cancelText: "Cancel"
 		    };
 		    
 		    
