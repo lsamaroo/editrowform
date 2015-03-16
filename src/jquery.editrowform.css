@@ -1,0 +1,25 @@
+@CHARSET "ISO-8859-1";
+
+.erf {
+	background-color: gray;
+}
+
+.erf .row {
+	display: inline-block;
+	margin-top: 2px;
+	
+}
+
+.erf .row .cell {
+	display: inline-block;
+}
+
+.erf .row .cell input {
+	padding: 0px;
+	margin: 0px;
+}
+
+
+.erf .save-and-cancel-bar {
+	text-align: center;
+}

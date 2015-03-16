@@ -82,6 +82,9 @@
 				
 				base.show = function(rowIndex){
 					if( $formDiv != null ){
+						// position form
+						var positionOfRow = $(getRow(rowIndex )).position();
+						util.position( $formDiv, positionOfRow.top, positionOfRow.left );					
 						$formDiv.show();
 						setFormValues(rowIndex);
 					}
@@ -131,10 +134,39 @@
 				function getOptions(){
 					return base.options;
 				};
+				
+				function getHeaderRow(){
+					var header = $( 'thead tr', base.el );
+					if( util.isEmpty( header ) ){
+						// find parent of a th
+						header = $( 'th', base.el ).parent;
+					}					
+					return header;
+				};
+				
+				function getHeader( colIndex ){
+					var headerRow = getHeaderRow();
+					var header;				
+					if( util.isNotEmpty( headerRow ) ){
+						header = $( "th", headerRow )[colIndex];
+					}					
+					return header;
+				};
+				
 							
 				function getRow( rowIndex ){
 					return $( 'tbody tr', base.el ).eq( rowIndex );
 				};
+				
+				
+				function getCell( colIndex, row ){
+					var cell;
+					if( util.isNotEmpty( row ) ){
+						cell = $( 'td', row )[colIndex];;
+					}
+					return cell;
+				};
+				
 				
 				function getCellValue( cell, rowIndex, colIndex, row ){
 					var value = $(cell).html().trim();
@@ -167,7 +199,7 @@
 					var i, value, inputId, colType, cell;
 					
 					for( i = 0; i < getColumnCount(); i++ ){
-						cell = $( 'td', row )[i];
+						cell = getCell( i, row );
 						value = getCellValue( cell, rowIndex, i, row );
 						inputId = idGen.getInputId( i );
 						colType = getColumnType( i );
@@ -187,7 +219,7 @@
 				};
 				
 				
-				function renderInput( colIndex  ){
+				function renderInput( colIndex, width  ){
 					var inputId = idGen.getInputId(colIndex);
 					var inputName = "";
 					var colType = getColumnType( colIndex );
@@ -200,11 +232,12 @@
 						input = $( template.textfield );
 					}					
 					input.attr( "id", inputId );	
+					input.width( width );
 					
 					// Check if a function was passed into the option and execute that
 					var func = getOptions().renderInput;
 					if( util.functionExists(  func ) ){
-						input = $(func( input, colIndex ));
+						input = $(func( input, colIndex, width ));
 						// input must have an id!!
 						if( util.isEmpty( input.attr("id")) ){
 							input.attr("id", inputId);
@@ -232,10 +265,10 @@
 	            		columnMap[i] = util.clone(base.options.defaultColumn);
 	            	}
 		        	            	
-		            if( !util.isEmpty( columns ) && $.isArray(columns) ){
+		            if( util.isNotEmpty( columns ) && $.isArray(columns) ){
 		            	for( i = 0; i < columns.length; i++ ){
 		            		col = columns[i];
-			            	if( !util.isEmpty( col ) ){
+			            	if( util.isNotEmpty( col ) ){
 			            		index = col.colIndex || i;            		
 			            		columnMap[index] = col;
 			            	}
@@ -264,8 +297,10 @@
 					var row = buildFormRow();
 					row.appendTo( form );	
 					
+					var wrapper = $( template.div );
 					var saveAndCancel = buildSaveAndCancelButton();
-					saveAndCancel.appendTo( div );
+					saveAndCancel.appendTo( wrapper );
+					wrapper.appendTo( div );
 					
 					// add to plugin global scope
 					$formDiv = div;
@@ -288,10 +323,14 @@
 								
 				
 				function buildFormCell(colIndex){
+					var width = getColumnWidth(colIndex);
 					var div = $( template.div );
 					div.attr( "id", idGen.getFormCellId( colIndex ) );
-					div.addClass( "cell" );								
-					var input = renderInput( colIndex );	
+					div.addClass( "cell" );						
+					div.width(  width );
+					//div.height( getColumnHeight(colIndex) );
+								
+					var input = renderInput( colIndex, width );	
 					input.appendTo( div );			
 					return div;
 				};
@@ -323,12 +362,48 @@
 				};
 				
 				function getColumnWidth(colIndex){
-					// check for header
+					var width = $columnMap[colIndex].width;
+					if( util.isNotEmpty( width ) ){
+						return width;
+					}
 					
-					return $columnMap[colIndex].width;
+					// check for header
+					var header = getHeader(colIndex);
+					if( util.isNotEmpty( header ) ){
+						var innerWidth = $(header).innerWidth();
+						var width = $(header).innerWidth();
+						return $(header).innerWidth();
+					}
+					
+					var cell = getCell( colIndex, getRow( 0 ) );
+					if( util.isNotEmpty( cell ) ){
+						return $(cell).innerWidth();
+					}
+					
+					return 0;
 				};
-			
 				
+				
+				function getColumnHeight(colIndex){
+					var height = $columnMap[colIndex].height;
+					if( util.isNotEmpty( height ) ){
+						return height;
+					}
+					
+					// check for header
+					var header = getHeader(colIndex);
+					if( util.isNotEmpty( header ) ){
+						return $(header).innerHeight();
+					}
+					
+					var cell = getCell( colIndex, getRow( 0 ) );
+					if( util.isNotEmpty( cell ) ){
+						return $(cell).innerHeight();
+					}
+							
+					return 0;
+				};
+							
 				
 				var idGen = {
 						idPrefix: "erf-",
@@ -376,13 +451,19 @@
 							return typeof func !== 'undefined' && $.isFunction(func);
 						},
 						
-						isEmpty: function( text ){
+						isEmpty: function( obj ){
 							return ( 
-									 text == null || text === null || 
-									 text === undefined || 
-									 $.trim(text) == 'null' || 
-									 $.trim(text) == '' 
+									obj == null || obj === null || 
+									obj === undefined ||  
+									typeof obj === 'undefined' ||
+									 $.trim(obj) == 'null' || 
+									 $.trim(obj) == '' ||
+									 ( $.isArray( obj ) && obj.length == 0 )
 								   );							
+						},
+						
+						isNotEmpty: function( obj ){
+							return ! this.isEmpty( obj );
 						},
 						
 						getWidth: function( el ){
@@ -395,6 +476,10 @@
 						
 						isHidden: function( el ){
 							return $(el).css('display') == 'none';
+						},
+						
+						position: function( obj, top, left ){
+							$( obj ).css({top: top, left: left, position:'absolute'});
 						}
 				};
 				
@@ -418,7 +503,8 @@
 		    		columns: "",
 		    		defaultColumn: {
 		    			name: "",
-		    			width: 100,
+		    			width: "",
+		    			height: "",
 		    			type: "text",
 		    			editable: true
 		    		},
@@ -434,7 +520,7 @@
 		    		/* function(inputId, value, colType, rowIndex, i, row, cell ){} */
 		    		setInputValue: "", 
 		    		
-		    		/* function(input, colIndex){} */
+		    		/* function(input, colIndex, width){} */
 		    		renderInput: "" 
 		    };
 		    
