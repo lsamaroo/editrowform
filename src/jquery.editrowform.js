@@ -108,30 +108,30 @@
 				};
 				
 				
-				base.save = function(e){	
+				base.save = function(event){	
 					var i, inputValue;
 					var saved = true;
 					
 					var onSave = getOptions().onSave;			
 					if( util.functionExists( onSave ) ){
-						saved = onSave(e, $form, $currentRow);	
+						saved = onSave(event, $form, $currentRowIndex, $currentRow);	
 					}
 					
 					if( saved || util.isEmpty(saved) ){
 						for( i = 0; i < getColumnCount(); i++ ){
-							inputValue = getInputValue( i, $form );
-							setCellValue( $currentRowIndex, i, inputValue, $currentRow );
+							inputValue = getInputValue( i );
+							setCellValue( $currentRowIndex, i, inputValue );
 						}
 						base.hide();
 					}
 				};
 					
-				base.cancel = function (e){
+				base.cancel = function (event){
 					var hide = true;
 					
 					var onCancel = getOptions().onCancel;		
 					if( util.functionExists( onCancel ) ){
-						hide = onCancel( e, $form, $currentRow);
+						hide = onCancel( event, $form, $currentRowIndex, $currentRow);
 					}			
 					
 					if( hide || util.isEmpty( hide ) ){
@@ -148,33 +148,34 @@
 				// ---------------------------------------
 				// private variables and functions
 				// ---------------------------------------
+		        var INPUT_OFFSET = 4;
+		        var PLUGIN_CSS_CLASS = "erf";
+		        var INPUT_CLASS_PREFIX = "col-";
+		        var $columnMap = {};
 		        var $rowCount = null;
 		        var $colCount = null;
 		        var $formDiv = null;
 		        var $form = null;
-		        var $columnMap = {};
 		        var $buttonBar = null;
 		        var $currentRow = null;
 		        var $currentRowIndex = null;
-		        var INPUT_OFFSET = 4;
 
-		        				
-				// private functions	
 				function getOptions(){
 					return base.options;
 				};
 				
 				function getHeaderRow(){
 					var header = $( 'thead tr', base.el );
-					if( util.isEmpty( header ) ){
-						// find parent of a th
-						header = $( 'th', base.el ).parent;
-					}					
-					return header;
+					if( util.isNotEmpty( header ) ){
+						return header;
+					}
+					
+					return $( 'th', base.el ).parent;
 				};
 				
 				function getHeader( colIndex ){
 					var headerRow = getHeaderRow();
+									
 					var header;				
 					if( util.isNotEmpty( headerRow ) ){
 						header = $( "th", headerRow )[colIndex];
@@ -188,7 +189,8 @@
 				};
 				
 				
-				function getCell( colIndex, row ){
+				function getCell( rowIndex, colIndex ){
+					var row = getRow( rowIndex );
 					var cell;
 					if( util.isNotEmpty( row ) ){
 						cell = $( 'td', row )[colIndex];;
@@ -197,20 +199,20 @@
 				};
 				
 				
-				function getCellValue( rowIndex, colIndex, row ){
-					var cell = getCell( colIndex, row );
+				function getCellValue( rowIndex, colIndex ){
+					var cell = getCell( rowIndex, colIndex );
 					var value = $(cell).html().trim();
 			
 					var getCellValueFunc = getOptions().getCellValue;
 					if( util.functionExists(  getCellValueFunc ) ){
-						value = getCellValueFunc( value, cell, rowIndex, colIndex, row );
+						value = getCellValueFunc( value, rowIndex, colIndex, getRow(rowIndex), cell );
 					}
 
 					return value;
 				};
 				
-				function setCellValue( rowIndex, colIndex, value, row ){
-					var cell = getCell( colIndex, row );
+				function setCellValue( rowIndex, colIndex, value ){
+					var cell = getCell( rowIndex, colIndex );
 					$( cell ).html( value );
 				};
 				
@@ -229,34 +231,31 @@
 				};
 				
 				
-				function setFormValues(rowIndex){
-					var row = getRow( rowIndex );
-					var i, value, inputId, colType, cell;
-					
-					for( i = 0; i < getColumnCount(); i++ ){
-						value = getCellValue( rowIndex, i, row );
-						inputId = idGen.getInputId( i );
-						colType = getColumnType( i );
-						setInputValue( inputId, value, $form, row  );
+				function setFormValues(rowIndex){		
+					for( var i = 0; i < getColumnCount(); i++ ){
+						setInputValue( rowIndex, i, getCellValue( rowIndex, i ) );
 					}
 				};
 				
 				
-				function setInputValue( inputId, value, form, row ){	
+				function setInputValue( rowIndex, colIndex, value){	
+					var inputId = idGen.getInputId( colIndex );
+					var row = getRow( rowIndex );	
+					
 					var func = getOptions().setInputValue;
 					if( util.functionExists(  func ) ){
-						func( inputId, value, form, row );
+						func( rowIndex, colIndex, value, inputId, $form, getRow( rowIndex ), getCell( rowIndex, colIndex ) );
 					}
 					else{
-						$( "#" + inputId, form ).val( value );
+						$( "." + INPUT_CLASS_PREFIX + colIndex, $form ).val( value );
 					}
 				};
 				
 				
-				function getInputValue( colIndex, form ){
+				function getInputValue( colIndex ){
 					var value;
 					
-					input = $( ".col-" + colIndex , form );
+					input = $( "." + INPUT_CLASS_PREFIX + colIndex , $form );
 					if( util.isNotEmpty( input ) ){
 						value = $(input).val();
 					}
@@ -265,7 +264,9 @@
 				};
 				
 				
-				function renderInput( colIndex, width  ){
+				function renderInput( colIndex  ){				
+					var width = getColumnWidth( colIndex ) - INPUT_OFFSET;
+					
 					var inputId = idGen.getInputId(colIndex);
 					var inputName = idGen.getInputName(colIndex);
 					var colType = getColumnType( colIndex );
@@ -284,15 +285,10 @@
 					// Check if a function was passed into the option and execute that
 					var func = getOptions().renderInput;
 					if( util.functionExists(  func ) ){
-						input = $(func( input, colIndex, width ));
-						// input must have an id!!
-						if( util.isEmpty( input.prop("id")) ){
-							input.prop("id", inputId);
-						}
+						input = $(func( input, $currentRowIndex, colIndex ));
 					}
 					
-					input.addClass( "col-" + colIndex );
-									
+					input.addClass( INPUT_CLASS_PREFIX + colIndex );				
 					return input;
 				};
 
@@ -324,6 +320,8 @@
 		            	}
 		            }
 		            
+		            
+		            // set plugin global
 		            $columnMap = columnMap;
 		        };
 		        
@@ -332,10 +330,10 @@
 				function buildForm(){
 					var div = $( template.div );
 					div.prop( "id", idGen.getEditRowFormId() );
-					div.addClass( "erf" );
+					div.addClass( PLUGIN_CSS_CLASS );
 					div.addClass( getOptions().cssClass );
 					div.width( util.getWidth(base.el) );
-					div.height( getRowHeight() );
+					div.height( getRowHeight(0) );
 					div.hide();
 					div.appendTo( document.body );		
 			
@@ -353,15 +351,14 @@
 					// add to plugin global scope
 					$buttonBar = buttonBar;
 					$formDiv = div;
-					$form = form
-					
+					$form = form					
 				};
 								
 				
 				function buildFormRow(){
 					var div = $( template.div );
 					div.prop( "id", idGen.getFormRowId() );
-					div.height( getRowHeight() );
+					div.height( getRowHeight(0) );
 					div.addClass( "row" );
 					
 					var cell = null;
@@ -380,9 +377,7 @@
 					div.addClass( "cell" );						
 					div.width(  width );
 							
-					// offset the size of the input
-					var offsetWidth = width - INPUT_OFFSET;
-					var input = renderInput( colIndex, offsetWidth );	
+					var input = renderInput( colIndex );	
 					input.appendTo( div );			
 					return div;
 				};
@@ -420,15 +415,16 @@
 				};
 				
 				function getColumnType(colIndex){
-					return $columnMap[colIndex].type;
+					var type = $columnMap[colIndex].type;
+					if( util.isNotEmpty(type) ){
+						return type;
+					}
+					else{
+						return "text";
+					}
 				};
 				
 				function getColumnWidth(colIndex){
-					var width = $columnMap[colIndex].width;
-					if( util.isNotEmpty( width ) ){
-						return width;
-					}
-					
 					// check for header
 					var header = getHeader(colIndex);
 					if( util.isNotEmpty( header ) ){
@@ -446,28 +442,8 @@
 				};
 				
 				
-				function getColumnHeight(colIndex){
-					var height = $columnMap[colIndex].height;
-					if( util.isNotEmpty( height ) ){
-						return height;
-					}
-					
-					// check for header
-					var header = getHeader(colIndex);
-					if( util.isNotEmpty( header ) ){
-						return $(header).innerHeight();
-					}
-					
-					var cell = getCell( colIndex, getRow( 0 ) );
-					if( util.isNotEmpty( cell ) ){
-						return $(cell).innerHeight();
-					}
-							
-					return 0;
-				};
-				
-				function getRowHeight(){
-					var row = getRow( 0 );
+				function getRowHeight(rowIndex){
+					var row = getRow( rowIndex );
 					if( util.isNotEmpty( row ) ){
 						return $(row).innerHeight();
 					}
@@ -609,25 +585,23 @@
 		    		defaultColumn: {
 		    			id: "",
 		    			name: "",
-		    			width: "",
-		    			height: "",
-		    			type: "text",
+		    			type: "", /* defaults to text */
 		    			editable: true
 		    		},
 	
-		    		/* function(event, form, row){} */
+		    		/* function(event, form, rowIndex, row){} */
 		    		onSave: "",
 		    		
-		    		/* function(event, form, row){} */
+		    		/* function(event, form, rowIndex, row){} */
 		    		onCancel: "",
 
-		    		/* function(value, cell, rowIndex, colIndex, row){} */
+		    		/* function(value, rowIndex, colIndex, row, cell){} */
 		    		getCellValue: "", 
 		    		
-		    		/* function(inputId, value, colType, rowIndex, i, row, cell ){} */
+		    		/* function( rowIndex, colIndex, value, inputId, form, row, cell ){} */
 		    		setInputValue: "", 
 		    		
-		    		/* function(input, colIndex, width){} */
+		    		/* function(input, rowIdex, colIndex){} */
 		    		renderInput: "" 
 		    };
 		    
