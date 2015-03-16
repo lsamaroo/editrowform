@@ -461,6 +461,21 @@
 					if( util.isNotEmpty(type) ){
 						return type;
 					}
+					
+					// try to auto-detect type
+					return getColumnTypeFromCell( colIndex );
+				};
+				
+				function getColumnTypeFromCell( colIndex ){
+					var cell = getCell(0, colIndex);
+					var type = $( "input, select, textarea", cell ).prop( "type" );
+					
+					if( util.isNotEmpty(type) && type.indexOf( "select" ) != -1 ){
+						return "select";
+					}
+					else if ( util.isNotEmpty(type) ){
+						return type;
+					}	
 					else{
 						return "text";
 					}
@@ -475,7 +490,7 @@
 						return $(header).innerWidth();
 					}
 					
-					var cell = getCell( colIndex, getRow( 0 ) );
+					var cell = getCell( $currentRowIndex, colIndex );
 					if( util.isNotEmpty( cell ) ){
 						return $(cell).innerWidth();
 					}
@@ -637,6 +652,9 @@
 				};
 				
 				var inputUtil = {
+						
+						
+						
 						getValue : function( selector, colType){
 							
 						},
