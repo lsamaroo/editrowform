@@ -82,6 +82,8 @@
 				
 				base.show = function(rowIndex){
 					if( $formDiv != null ){
+						setPluginWidthHeightForRow( rowIndex );
+						
 						var row = getRow(rowIndex );
 
 						// position form
@@ -90,8 +92,7 @@
 						$formDiv.show();
 						setFormValues(rowIndex);
 						
-						var offset = getButtonBarOffset( $buttonBar );
-						$buttonBar.css({left: offset, position:'absolute'});
+						setButtonBarPosition();
 						
 						
 						// set plugin global
@@ -150,7 +151,8 @@
 				// ---------------------------------------
 		        var INPUT_OFFSET = 4;
 		        var PLUGIN_CSS_CLASS = "erf";
-		        var INPUT_CLASS_PREFIX = "col-";
+		        var INPUT_CLASS_PREFIX = "input-";
+		        var CELL_CLASS_PREFIX = "cell-";
 		        var $columnMap = {};
 		        var $rowCount = null;
 		        var $colCount = null;
@@ -265,8 +267,6 @@
 				
 				
 				function renderInput( colIndex  ){				
-					var width = getColumnWidth( colIndex ) - INPUT_OFFSET;
-					
 					var inputId = idGen.getInputId(colIndex);
 					var inputName = idGen.getInputName(colIndex);
 					var colType = getColumnType( colIndex );
@@ -280,7 +280,6 @@
 					}					
 					input.prop( "id", inputId );
 					input.prop( "name", inputName );
-					input.width( width );
 					
 					// Check if a function was passed into the option and execute that
 					var func = getOptions().renderInput;
@@ -332,8 +331,6 @@
 					div.prop( "id", idGen.getEditRowFormId() );
 					div.addClass( PLUGIN_CSS_CLASS );
 					div.addClass( getOptions().cssClass );
-					div.width( util.getWidth(base.el) );
-					div.height( getRowHeight(0) );
 					div.hide();
 					div.appendTo( document.body );		
 			
@@ -358,7 +355,6 @@
 				function buildFormRow(){
 					var div = $( template.div );
 					div.prop( "id", idGen.getFormRowId() );
-					div.height( getRowHeight(0) );
 					div.addClass( "row" );
 					
 					var cell = null;
@@ -371,12 +367,10 @@
 								
 				
 				function buildFormCell(colIndex){
-					var width = getColumnWidth(colIndex);
 					var div = $( template.div );
 					div.prop( "id", idGen.getFormCellId( colIndex ) );
-					div.addClass( "cell" );						
-					div.width(  width );
-							
+					div.addClass( "cell" );
+					div.addClass( CELL_CLASS_PREFIX + colIndex );						
 					var input = renderInput( colIndex );	
 					input.appendTo( div );			
 					return div;
@@ -407,12 +401,14 @@
 					return wrapper;
 				};
 				
-				function getButtonBarOffset( bar ){
-					var barWidth = $(bar).innerWidth();
+				
+				function setButtonBarPosition(){
+					var barWidth = $($buttonBar).innerWidth();
 					var width = base.$el.innerWidth();
-					var space = (width - barWidth)/2;
-					return space;
+					var offset = (width - barWidth)/2;
+					$buttonBar.css({left: offset, position:'absolute'});
 				};
+				
 				
 				function getColumnType(colIndex){
 					var type = $columnMap[colIndex].type;
@@ -449,6 +445,21 @@
 					}
 							
 					return 0;
+				};
+				
+				
+				function setPluginWidthHeightForRow( rowIndex ){
+					$formDiv.width( util.getWidth(base.el) );
+					$formDiv.height( getRowHeight(0) );
+					
+					$( ".row", $formDiv ).height( getRowHeight( rowIndex ) );
+					
+					for( var i = 0; i < getColumnCount(); i++ ){
+						var cell = $(  "." + CELL_CLASS_PREFIX + i, $formDiv );
+						var colWidth = getColumnWidth(i);
+						cell.width( colWidth );
+						$( "." + INPUT_CLASS_PREFIX + i, cell ).width( colWidth - INPUT_OFFSET );
+					}
 				};
 							
 				
