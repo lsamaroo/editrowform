@@ -202,8 +202,16 @@
 				
 				
 				function getCellValue( rowIndex, colIndex ){
+					var value;
 					var cell = getCell( rowIndex, colIndex );
-					var value = $(cell).html().trim();
+					var colType = getColumnType( colIndex );
+					
+					if( colType == "checkbox" ){
+					   value = util.getCheckboxValue( $( "input", cell ) );
+					}
+					else{
+					   value = $(cell).html().trim();
+					}
 			
 					var getCellValueFunc = getOptions().getCellValue;
 					if( util.functionExists(  getCellValueFunc ) ){
@@ -214,8 +222,16 @@
 				};
 				
 				function setCellValue( rowIndex, colIndex, value ){
+					var colType = getColumnType( colIndex );
 					var cell = getCell( rowIndex, colIndex );
-					$( cell ).html( value );
+
+					if( colType == "checkbox"){
+						util.setCheckboxValue( $( "input", cell ), value );
+					}
+					else{
+						$( cell ).html( value );
+					}
+					
 				};
 				
 				function getColumnCount(){
@@ -243,23 +259,38 @@
 				function setInputValue( rowIndex, colIndex, value){	
 					var inputId = idGen.getInputId( colIndex );
 					var row = getRow( rowIndex );	
+					var colType, input;
 					
 					var func = getOptions().setInputValue;
 					if( util.functionExists(  func ) ){
 						func( rowIndex, colIndex, value, inputId, $form, getRow( rowIndex ), getCell( rowIndex, colIndex ) );
 					}
 					else{
-						$( "." + INPUT_CLASS_PREFIX + colIndex, $form ).val( value );
+						colType = getColumnType( colIndex );
+						input = $( "." + INPUT_CLASS_PREFIX + colIndex, $form );
+						if( colType == "checkbox" ){
+							util.setCheckboxValue( input, value );
+						}
+						else{
+							input.val( value );
+						}
 					}
 				};
 				
 				
 				function getInputValue( colIndex ){
-					var value;
+					var value, colType;
 					
 					input = $( "." + INPUT_CLASS_PREFIX + colIndex , $form );
 					if( util.isNotEmpty( input ) ){
-						value = $(input).val();
+						colType = getColumnType( colIndex );
+						if( colType == "checkbox"){
+							value = util.getCheckboxValue( input );
+						}
+						else{
+							value = $(input).val();
+						}
+						
 					}
 					
 					return value;
@@ -313,7 +344,10 @@
 		            	for( i = 0; i < columns.length; i++ ){
 		            		col = columns[i];
 			            	if( util.isNotEmpty( col ) ){
-			            		index = col.colIndex || i;            		
+			            		index = col.colIndex;
+			            		if( util.isEmpty( index) ){
+			            			index = i;
+			            		}     		
 			            		columnMap[index] = col;
 			            	}
 		            	}
@@ -569,6 +603,33 @@
 						
 						position: function( obj, top, left ){
 							$( obj ).css({top: top, left: left, position:'absolute'});
+						},
+						
+						toBoolean: function( text ){
+							if( this.isEmpty(text ) ){
+								return false;
+							}
+							
+							if( text === true || text === false ){
+								return text;
+							}
+							
+							text = text.toLowerCase();
+							if( text == "y" || text == "true" || text == "yes" || text == "1"){
+								return true;
+							}
+							else{
+								return false;
+							}
+						},
+						
+						
+						getCheckboxValue: function( input ){
+							return $( input ).prop( "checked" )
+						},
+						
+						setCheckboxValue: function( input, value ){
+							$( input ).prop( "checked", this.toBoolean( value ) )
 						}
 				};
 				
@@ -594,6 +655,7 @@
 		    		saveText: "Save",
 		    		cancelText: "Cancel",
 		    		defaultColumn: {
+		    			colIndex: "",
 		    			id: "",
 		    			name: "",
 		    			type: "", /* defaults to text */

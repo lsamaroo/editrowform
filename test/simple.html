@@ -15,6 +15,7 @@
 		$(function() {
 			$( "#table").editrowform(
 				{
+					columns: [{ colIndex:0, id: "firstcolumn", name: "sendtoservername", type: "checkbox"  }],
 					click: true,  // for double clicking/clicking functionality
 					onSave: function(e, form){ 
 						console.log("I'm saving!!");
@@ -47,7 +48,7 @@
 		<tbody>
 			<tr>
 				<td>
-					r1c1
+					<input type="checkbox"  value="true" readonly="readonly" />
 				</td>
 				<td>
 					r1c2
@@ -58,7 +59,7 @@
 			</tr>
 			<tr>
 				<td>
-					r2c1
+					<input type="checkbox" checked="checked"  value="true" readonly="readonly" />
 				</td>
 				<td>
 					r2c2
