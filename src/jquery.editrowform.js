@@ -82,11 +82,21 @@
 				
 				base.show = function(rowIndex){
 					if( $formDiv != null ){
+						var row = getRow(rowIndex );
+
 						// position form
-						var positionOfRow = $(getRow(rowIndex )).position();
+						var positionOfRow = $( row ).position();
 						util.position( $formDiv, positionOfRow.top, positionOfRow.left );					
 						$formDiv.show();
 						setFormValues(rowIndex);
+						
+						var offset = getButtonBarOffset( $buttonBar );
+						$buttonBar.css({left: offset, position:'absolute'});
+						
+						
+						// set plugin global
+						$currentRow = row;	
+						$currentRowIndex = rowIndex;
 					}
 
 				};
@@ -99,20 +109,35 @@
 				
 				
 				base.save = function(e){	
-					var onSave = getOptions().onSave;
+					var i, inputValue;
+					var saved = true;
 					
+					var onSave = getOptions().onSave;			
 					if( util.functionExists( onSave ) ){
-						onSave(e, $form);	
+						saved = onSave(e, $form, $currentRow);	
+					}
+					
+					if( saved || util.isEmpty(saved) ){
+						for( i = 0; i < getColumnCount(); i++ ){
+							inputValue = getInputValue( i, $form );
+							setCellValue( $currentRowIndex, i, inputValue, $currentRow );
+						}
+						base.hide();
 					}
 				};
 					
 				base.cancel = function (e){
-					base.hide();
+					var hide = true;
 					
 					var onCancel = getOptions().onCancel;		
 					if( util.functionExists( onCancel ) ){
-						onCancel( e, $form);
-					}				
+						hide = onCancel( e, $form, $currentRow);
+					}			
+					
+					if( hide || util.isEmpty( hide ) ){
+						base.hide();
+					}
+					
 				};
 				 
 				base.destroy = function(){
@@ -128,6 +153,10 @@
 		        var $formDiv = null;
 		        var $form = null;
 		        var $columnMap = {};
+		        var $buttonBar = null;
+		        var $currentRow = null;
+		        var $currentRowIndex = null;
+		        var INPUT_OFFSET = 4;
 
 		        				
 				// private functions	
@@ -168,7 +197,8 @@
 				};
 				
 				
-				function getCellValue( cell, rowIndex, colIndex, row ){
+				function getCellValue( rowIndex, colIndex, row ){
+					var cell = getCell( colIndex, row );
 					var value = $(cell).html().trim();
 			
 					var getCellValueFunc = getOptions().getCellValue;
@@ -177,6 +207,11 @@
 					}
 
 					return value;
+				};
+				
+				function setCellValue( rowIndex, colIndex, value, row ){
+					var cell = getCell( colIndex, row );
+					$( cell ).html( value );
 				};
 				
 				function getColumnCount(){
@@ -199,29 +234,40 @@
 					var i, value, inputId, colType, cell;
 					
 					for( i = 0; i < getColumnCount(); i++ ){
-						cell = getCell( i, row );
-						value = getCellValue( cell, rowIndex, i, row );
+						value = getCellValue( rowIndex, i, row );
 						inputId = idGen.getInputId( i );
 						colType = getColumnType( i );
-						setInputValue( inputId, value, colType, rowIndex, i, row, cell );
+						setInputValue( inputId, value, $form, row  );
 					}
 				};
 				
 				
-				function setInputValue( inputId, value, colType, rowIndex, colIndex, row, cell ){	
+				function setInputValue( inputId, value, form, row ){	
 					var func = getOptions().setInputValue;
 					if( util.functionExists(  func ) ){
-						func( inputId, value, colType, rowIndex, colIndex, row );
+						func( inputId, value, form, row );
 					}
 					else{
-						$( "#" + inputId ).val( value );
+						$( "#" + inputId, form ).val( value );
 					}
+				};
+				
+				
+				function getInputValue( colIndex, form ){
+					var value;
+					
+					input = $( ".col-" + colIndex , form );
+					if( util.isNotEmpty( input ) ){
+						value = $(input).val();
+					}
+					
+					return value;
 				};
 				
 				
 				function renderInput( colIndex, width  ){
 					var inputId = idGen.getInputId(colIndex);
-					var inputName = "";
+					var inputName = idGen.getInputName(colIndex);
 					var colType = getColumnType( colIndex );
 					var input;
 					
@@ -231,7 +277,8 @@
 					else {
 						input = $( template.textfield );
 					}					
-					input.attr( "id", inputId );	
+					input.prop( "id", inputId );
+					input.prop( "name", inputName );
 					input.width( width );
 					
 					// Check if a function was passed into the option and execute that
@@ -239,10 +286,12 @@
 					if( util.functionExists(  func ) ){
 						input = $(func( input, colIndex, width ));
 						// input must have an id!!
-						if( util.isEmpty( input.attr("id")) ){
-							input.attr("id", inputId);
+						if( util.isEmpty( input.prop("id")) ){
+							input.prop("id", inputId);
 						}
 					}
+					
+					input.addClass( "col-" + colIndex );
 									
 					return input;
 				};
@@ -282,35 +331,37 @@
 				
 				function buildForm(){
 					var div = $( template.div );
-					div.attr( "id", idGen.getEditRowFormId() );
+					div.prop( "id", idGen.getEditRowFormId() );
 					div.addClass( "erf" );
 					div.addClass( getOptions().cssClass );
 					div.width( util.getWidth(base.el) );
+					div.height( getRowHeight() );
 					div.hide();
 					div.appendTo( document.body );		
 			
 					var form = $( template.form );
-					form.attr( "id", idGen.getFormId() );
+					form.prop( "id", idGen.getFormId() );
 					form.addClass( "form" );
 					form.appendTo( div );				
 							
 					var row = buildFormRow();
 					row.appendTo( form );	
 					
-					var wrapper = $( template.div );
-					var saveAndCancel = buildSaveAndCancelButton();
-					saveAndCancel.appendTo( wrapper );
-					wrapper.appendTo( div );
+					var buttonBar = buildButtonBar();
+					buttonBar.appendTo( div );
 					
 					// add to plugin global scope
+					$buttonBar = buttonBar;
 					$formDiv = div;
 					$form = form
+					
 				};
 								
 				
 				function buildFormRow(){
 					var div = $( template.div );
-					div.attr( "id", idGen.getFormRowId() );
+					div.prop( "id", idGen.getFormRowId() );
+					div.height( getRowHeight() );
 					div.addClass( "row" );
 					
 					var cell = null;
@@ -325,36 +376,47 @@
 				function buildFormCell(colIndex){
 					var width = getColumnWidth(colIndex);
 					var div = $( template.div );
-					div.attr( "id", idGen.getFormCellId( colIndex ) );
+					div.prop( "id", idGen.getFormCellId( colIndex ) );
 					div.addClass( "cell" );						
 					div.width(  width );
-					//div.height( getColumnHeight(colIndex) );
-								
-					var input = renderInput( colIndex, width );	
+							
+					// offset the size of the input
+					var offsetWidth = width - INPUT_OFFSET;
+					var input = renderInput( colIndex, offsetWidth );	
 					input.appendTo( div );			
 					return div;
 				};
 				
 				
-				function buildSaveAndCancelButton(){
+				function buildButtonBar(){
 					var div = $( template.div );
-					div.addClass( "save-and-cancel-bar" );	
-					
+
 					var save = $( template.button );
-					save.attr( "id", idGen.getSaveButtonId() );
+					save.prop( "id", idGen.getSaveButtonId() );
 					save.addClass( "save");
 					save.appendTo( div );
 					save.html( getOptions().saveText );
 					save.on( "click", base.save );
 					
 					var cancel = $( template.button );
-					cancel.attr( "id", idGen.getCancelButtonId() );
+					cancel.prop( "id", idGen.getCancelButtonId() );
 					cancel.addClass( "cancel");
 					cancel.appendTo( div );
 					cancel.html( getOptions().cancelText );
 					cancel.on( "click", base.cancel );
 					
-					return div;
+					var wrapper = $( template.div );
+					wrapper.addClass( "save-and-cancel-bar" );	
+					div.appendTo( wrapper );
+					
+					return wrapper;
+				};
+				
+				function getButtonBarOffset( bar ){
+					var barWidth = $(bar).innerWidth();
+					var width = base.$el.innerWidth();
+					var space = (width - barWidth)/2;
+					return space;
 				};
 				
 				function getColumnType(colIndex){
@@ -403,10 +465,19 @@
 							
 					return 0;
 				};
+				
+				function getRowHeight(){
+					var row = getRow( 0 );
+					if( util.isNotEmpty( row ) ){
+						return $(row).innerHeight();
+					}
+							
+					return 0;
+				};
 							
 				
 				var idGen = {
-						idPrefix: "erf-",
+						idSuffix: "-erf",
 						
 						getEditRowFormId: function( colIndex ){
 							var id = base.options.id;
@@ -415,12 +486,43 @@
 							}
 							
 							if( util.isEmpty( id ) ){
-								id = "defaultid";
+								id = "noid";
 							}			
-							return this.idPrefix + id;
+							return  id + this.idSuffix;
 						},
 						
 						getInputId: function( colIndex ){
+							var id = $columnMap[colIndex].id;
+							if( util.isNotEmpty( id ) ){
+								return id;
+							}
+							
+							// get header name
+							var header = getHeader( colIndex );
+							id = $(header).html().trim()
+							if( util.isNotEmpty( id ) ){
+								return this.getEditRowFormId() + "-" + id;
+							}
+							
+							// default to generating an id
+							return this.getEditRowFormId() + "-input" + colIndex;
+						},
+						
+						
+						getInputName: function( colIndex ){
+							var name = $columnMap[colIndex].name;
+							if( util.isNotEmpty( name ) ){
+								return name;
+							}
+							
+							// get header name
+							var header = getHeader( colIndex );
+							name = $(header).html().trim()
+							if( util.isNotEmpty( name ) ){
+								return name;
+							}
+							
+							// default to generating an id
 							return this.getEditRowFormId() + "-input" + colIndex;
 						},
 						
@@ -501,18 +603,23 @@
 		    		id: "",
 		    		cssClass: "",
 		    		columns: "",
+		    		click: true,
+		    		saveText: "Save",
+		    		cancelText: "Cancel",
 		    		defaultColumn: {
+		    			id: "",
 		    			name: "",
 		    			width: "",
 		    			height: "",
 		    			type: "text",
 		    			editable: true
 		    		},
-		    		click: true,
+	
+		    		/* function(event, form, row){} */
 		    		onSave: "",
+		    		
+		    		/* function(event, form, row){} */
 		    		onCancel: "",
-		    		saveText: "Save",
-		    		cancelText: "Cancel",
 
 		    		/* function(value, cell, rowIndex, colIndex, row){} */
 		    		getCellValue: "", 

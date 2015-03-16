@@ -1,17 +1,18 @@
 @CHARSET "ISO-8859-1";
 
 .erf {
-	background-color: gray;
 }
 
 .erf .row {
 	display: inline-block;
-	margin-top: 2px;
-	
+	background-color: lightgray;
 }
 
 .erf .row .cell {
 	display: inline-block;
+	text-align: center;
+	padding-top: 5px;
+	padding-bottom: 5px;
 }
 
 .erf .row .cell input {
@@ -21,5 +22,13 @@
 
 
 .erf .save-and-cancel-bar {
-	text-align: center;
+	display: inline;
+}
+
+.erf .save-and-cancel-bar div {
+	display: inline-block;
+	background-color: lightgray;
+	padding-left: 3px;
+	padding-right: 3px;
+	padding-bottom: 3px;
 }
