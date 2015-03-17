@@ -172,7 +172,7 @@
 						return header;
 					}
 					
-					return $( 'th', base.el ).parent;
+					return $( 'th', base.el ).parent();
 				};
 				
 				function getHeader( colIndex ){
@@ -206,11 +206,12 @@
 					var cell = getCell( rowIndex, colIndex );
 					var colType = getColumnType( colIndex );
 					
-					if( colType == "checkbox" ){
-					   value = inputUtil.getCheckboxValue( $( "input", cell ) );
+					var input = $( "input", cell );
+					if( !util.isEmptyArray( input) ){
+						value = inputUtil.getValue( input, colType  );
 					}
 					else{
-					   value = $(cell).html().trim();
+					   value = $(cell).text().trim();
 					}
 			
 					var getCellValueFunc = getOptions().getCellValue;
@@ -224,22 +225,22 @@
 				function setCellValue( rowIndex, colIndex, value ){
 					var colType = getColumnType( colIndex );
 					var cell = getCell( rowIndex, colIndex );
+					var input;
 
 					var func = getOptions().setCellValue;
 					if( util.functionExists(  func ) ){
 						func( rowIndex, colIndex, value, getRow( rowIndex ), cell );
 					}
 					else{
-						if( colType == "checkbox"){
-							inputUtil.setCheckboxValue( $( "input", cell ), value );
+						input = $( "input", cell );
+						if( !util.isEmptyArray( input) ){
+							inputUtil.setValue( input, colType, value);
 						}
 						else{
-							$( cell ).html( value );
-						}						
+							$( cell ).text( value );	
+						}
 					}
-					
 
-					
 				};
 				
 				function getColumnCount(){
@@ -276,28 +277,17 @@
 					else{
 						colType = getColumnType( colIndex );
 						input = $( "." + INPUT_CLASS_PREFIX + colIndex, $form );
-						if( colType == "checkbox" ){
-							inputUtil.setCheckboxValue( input, value );
-						}
-						else{
-							input.val( value );
-						}
+						inputUtil.setValue( input, colType, value );
 					}
 				};
 				
 				
 				function getInputValue( colIndex ){
-					var value, colType;
+					var value;
 					
 					input = $( "." + INPUT_CLASS_PREFIX + colIndex , $form );
-					if( util.isNotEmpty( input ) ){
-						colType = getColumnType( colIndex );
-						if( colType == "checkbox"){
-							value = inputUtil.getCheckboxValue( input );
-						}
-						else{
-							value = $(input).val();
-						}	
+					if( !util.isEmptyArray( input) ){
+						value = inputUtil.getValue( input, getColumnType( colIndex ) );
 					}
 					
 					var func = getOptions().getInputValue;
@@ -430,14 +420,14 @@
 					save.prop( "id", idGen.getSaveButtonId() );
 					save.addClass( "save");
 					save.appendTo( div );
-					save.html( getOptions().saveText );
+					save.text( getOptions().saveText );
 					save.on( "click", base.save );
 					
 					var cancel = $( template.button );
 					cancel.prop( "id", idGen.getCancelButtonId() );
 					cancel.addClass( "cancel");
 					cancel.appendTo( div );
-					cancel.html( getOptions().cancelText );
+					cancel.text( getOptions().cancelText );
 					cancel.on( "click", base.cancel );
 					
 					var wrapper = $( template.div );
@@ -467,7 +457,8 @@
 				};
 				
 				function getColumnTypeFromCell( colIndex ){
-					var cell = getCell(0, colIndex);
+					var rowIndex =  util.isEmpty( $currentRowIndex ) ? 0 : $currentRowIndex;
+					var cell = getCell(rowIndex, colIndex);
 					var type = $( "input, select, textarea", cell ).prop( "type" );
 					
 					if( util.isNotEmpty(type) && type.indexOf( "select" ) != -1 ){
@@ -511,7 +502,7 @@
 				
 				function setPluginWidthHeightForRow( rowIndex ){
 					$formDiv.width( util.getWidth(base.el) );
-					$formDiv.height( getRowHeight(0) );
+					$formDiv.height( getRowHeight( rowIndex ) );
 					
 					$( ".row", $formDiv ).height( getRowHeight( rowIndex ) );
 					
@@ -534,7 +525,7 @@
 							}
 							
 							if( util.isEmpty( id ) ){
-								id = "noid";
+								id = "no-id";
 							}			
 							return  id + this.idSuffix;
 						},
@@ -547,7 +538,7 @@
 							
 							// get header name
 							var header = getHeader( colIndex );
-							id = $(header).html().trim()
+							id = $(header).text().trim()
 							if( util.isNotEmpty( id ) ){
 								return this.getEditRowFormId() + "-" + id;
 							}
@@ -565,7 +556,7 @@
 							
 							// get header name
 							var header = getHeader( colIndex );
-							name = $(header).html().trim()
+							name = $(header).text().trim()
 							if( util.isNotEmpty( name ) ){
 								return name;
 							}
@@ -601,14 +592,24 @@
 							return typeof func !== 'undefined' && $.isFunction(func);
 						},
 						
+						isEmptyArray: function( obj ){
+							if( this.isEmpty(obj) ){
+								return true;
+							}
+							
+							if( typeof obj.length !== 'undefined' ){
+								return obj.length == 0;
+							}
+							
+							return true;
+						},
+						
 						isEmpty: function( obj ){
 							return ( 
 									obj == null || obj === null || 
-									obj === undefined ||  
 									typeof obj === 'undefined' ||
 									 $.trim(obj) == 'null' || 
-									 $.trim(obj) == '' ||
-									 ( $.isArray( obj ) && obj.length == 0 )
+									 $.trim(obj) == ''
 								   );							
 						},
 						
@@ -633,7 +634,7 @@
 						},
 						
 						toBoolean: function( text ){
-							if( this.isEmpty(text ) ){
+							if( this.isEmpty( text ) ){
 								return false;
 							}
 							
@@ -651,25 +652,32 @@
 						}
 				};
 				
-				var inputUtil = {
-						
-						
-						
-						getValue : function( selector, colType){
-							
+				var inputUtil = {	
+						getValue : function( input, colType){
+							if( colType == "checkbox" ){
+								return this.getCheckboxValue( input );
+							}
+							else{
+								return $(input).val();
+							}
 						},
 											
-						setValue : function( selector, colType, value){
-							
+						setValue : function( input, colType, value){
+							if( colType == "checkbox" ){
+								this.setCheckboxValue( input, value );
+							}
+							else{
+								$(input).val( value );
+							}
 						},
-								
 						
+													
 						getCheckboxValue: function( input ){
-							return $( input ).prop( "checked" )
+							return $( input ).prop( "checked" );
 						},
 						
 						setCheckboxValue: function( input, value ){
-							$( input ).prop( "checked", util.toBoolean( value ) )
+							$( input ).prop( "checked", util.toBoolean( value ) );
 						}
 				}
 				
