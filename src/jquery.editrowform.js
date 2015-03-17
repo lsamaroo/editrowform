@@ -559,13 +559,6 @@
 								return id;
 							}
 							
-							// get header name
-							var header = getHeader( colIndex );
-							id = $(header).text().trim()
-							if( util.isNotEmpty( id ) ){
-								return this.getEditRowFormId() + "-" + id;
-							}
-							
 							// default to generating an id
 							return this.getEditRowFormId() + "-input" + colIndex;
 						},

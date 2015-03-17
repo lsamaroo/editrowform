@@ -2,10 +2,15 @@
 <html>
 <head>
 	<meta charset="ISO-8859-1">
-	<title>Simple Test</title>
+	<title>Datepicker Test</title>
 	
 	<link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.6.0/pure-min.css">
 	<script src="lib/jquery-1.11.2.min.js"></script>
+	
+	<link rel="stylesheet" href="https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+	<script src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
+	
+	
 	
 	<link rel="stylesheet" href="../src/jquery.editrowform.css">
 	<script src="../src/jquery.editrowform.js"></script>
@@ -16,31 +21,16 @@
 			$( "#table").editrowform(
 				{
 					columns: [ 
-					           { colIndex:2, editable: false  }
+					           { colIndex:1, type: "datepicker"  }
 					          ],
 					click: true,  // for double clicking/clicking functionality
-					onSave: function(e, form){ 
-						console.log("I'm saving!!");
-					},
-					onCancel: function(e, form){
-						console.log("I'm cancelling.");
-					}
 				}		
 			);
-			
-			$( "#show").click( function(){			
-				// programmatically call the plugin's public function
-				$( "#table").editrowform( "show", 1 );
-			});
-
 		});
 	</script>	
 		
 </head>
 <body>
-	<br/>
-	<button id="show">Show dialog for second row</button>
-	<br/>
 	<br/>
 	<table id="table" class="pure-table pure-table-horizontal" style="margin-left: 100px;">
 		<thead>
@@ -52,7 +42,7 @@
 					h2
 				</th>
 				<th>
-					h3 (I'm not editable)
+					h3
 				</th>
 			</tr>
 		</thead>
@@ -62,7 +52,7 @@
 					<input type="checkbox"  value="true" readonly="readonly" disabled="disabled" />
 				</td>
 				<td>
-					r1c2
+					03/12/2015
 				</td>
 				<td>
 					r1c3
@@ -70,10 +60,10 @@
 			</tr>
 			<tr>
 				<td>
-					true
+					<input type="checkbox"  value="true" readonly="readonly" disabled="disabled" />
 				</td>
 				<td>
-					r2c2
+					04/15/2015
 				</td>
 				<td>
 					r2c3
