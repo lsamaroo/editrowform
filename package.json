@@ -1,0 +1,33 @@
+{
+  "name": "editrowform",
+  "version": "1.0.0",
+  "description": "A simple, lightweight jQuery plugin for editing a table row.",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lsamaroo/editrowform.git"
+  },
+  "keywords": [
+    "jquery-plugin",
+    "ecosystem:jquery",
+	"jquery",
+	"table",
+	"edit",
+	"editing",
+	"row",
+	"form",
+	"html"
+  ],
+  "author": "Leon Samaroo",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/lsamaroo/editrowform/issues"
+  },
+  "homepage": "https://github.com/lsamaroo/editrowform"
+}
