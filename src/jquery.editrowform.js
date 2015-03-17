@@ -532,7 +532,12 @@
 						var cell = $(  "." + CELL_CLASS_PREFIX + i, $formDiv );
 						var colWidth = getColumnWidth(i);
 						cell.width( colWidth );
-						$( "." + INPUT_CLASS_PREFIX + i, cell ).width( colWidth - INPUT_OFFSET );
+						
+						var colType = getColumnType( i );
+						if( colType !== "checkbox" ){
+							// set input width
+							$( "." + INPUT_CLASS_PREFIX + i, cell ).width( colWidth - INPUT_OFFSET );
+						}
 					}
 				};
 							
