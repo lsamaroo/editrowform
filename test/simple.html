@@ -16,7 +16,7 @@
 			$( "#table").editrowform(
 				{
 					columns: [ 
-					           { colIndex:2, editable: false  }
+					           { colIndex:2, disabled: true  }
 					          ],
 					click: true,  // for double clicking/clicking functionality
 					onSave: function(e, form){ 
@@ -52,7 +52,7 @@
 					h2
 				</th>
 				<th>
-					h3 (I'm not editable)
+					h3 (I'm disabled)
 				</th>
 			</tr>
 		</thead>

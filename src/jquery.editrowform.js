@@ -148,7 +148,7 @@
 					
 					if( saved || util.isEmpty(saved) ){
 						for( i = 0; i < getColumnCount(); i++ ){
-							if( isEditable( i ) ){
+							if( !isDisabled( i ) ){
 								inputValue = getInputValue( i );
 								setCellValue( $currentRowIndex, i, inputValue );
 							}
@@ -309,15 +309,14 @@
 				};
 				
 				
-				function renderInput( colIndex  ){		
-					if( !isEditable( colIndex ) ){
-						return $( template.div );
-					}
-					
+				function renderInput( colIndex  ){			
 					var inputId = idGen.getInputId(colIndex);
 					var inputName = idGen.getInputName(colIndex);
-					var colType = getColumnType( colIndex );
-					var input = inputUtil.createInput( inputId, inputName, colType );					
+					var input = inputUtil.createInput( inputId, inputName, getColumnType( colIndex ) );	
+					
+					if( isDisabled( colIndex ) ){
+						input.prop( "disabled", true );
+					}
 
 					// Check if a function was passed into the option and execute that
 					var func = getOptions().renderInput;
@@ -486,13 +485,13 @@
 					}
 				};
 				
-				function isEditable( colIndex ){
-					var editable = $columnMap[colIndex].editable;
-					if( util.isNotEmpty( editable ) ){
-						return util.toBoolean( editable );
+				function isDisabled( colIndex ){
+					var disabled = $columnMap[colIndex].disabled;
+					if( util.isNotEmpty( disabled ) ){
+						return util.toBoolean( disabled );
 					}
 					
-					return true;
+					return false;
 				};
 				
 				function getColumnWidth(colIndex){
@@ -749,7 +748,7 @@
 		    			id: "",
 		    			name: "",
 		    			type: "", 
-		    			editable: ""
+		    			disabled: ""
 		    		},
 	
 		    		/* function(event, form, rowIndex, row){} */

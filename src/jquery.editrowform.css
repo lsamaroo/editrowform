@@ -1,6 +1,7 @@
 @CHARSET "ISO-8859-1";
 
 .erf {
+	white-space: nowrap;
 }
 
 .erf .row {
