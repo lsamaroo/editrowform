@@ -62,6 +62,10 @@
 				// ---------------------------------------
 				
 				base.show = function(rowIndex){
+					if( rowIndex <= 0 || rowIndex > getRowCount() ){
+						return;
+					}
+					
 					if( $formDiv != null ){
 						setPluginWidthHeightForRow( rowIndex );
 						

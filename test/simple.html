@@ -46,7 +46,12 @@
 			
 			$( "#show").click( function(){			
 				// programmatically call the plugin's public function
-				$( "#table").editrowform( "show", 1 );
+				$( "#table").editrowform( "show", $( "#row").val() );
+			});
+			
+			$( "#hide").click( function(){			
+				// programmatically call the plugin's public function
+				$( "#table").editrowform( "hide" );
 			});
 
 		});
@@ -55,7 +60,9 @@
 </head>
 <body>
 	<br/>
-	<button id="show">Show dialog for second row</button>
+	<button id="show">Show dialog for </button> row # <input size="2" id="row" type="text" value="0" />
+	<br/>
+	<button id="hide">Hide dialog</button>	
 	<br/>
 	<br/>
 	<table id="table" class="simple-table" style="margin-left: 100px;">
