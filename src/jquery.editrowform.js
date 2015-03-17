@@ -148,8 +148,10 @@
 					
 					if( saved || util.isEmpty(saved) ){
 						for( i = 0; i < getColumnCount(); i++ ){
-							inputValue = getInputValue( i );
-							setCellValue( $currentRowIndex, i, inputValue );
+							if( isEditable( i ) ){
+								inputValue = getInputValue( i );
+								setCellValue( $currentRowIndex, i, inputValue );
+							}
 						}
 						base.hide();
 					}
@@ -307,7 +309,11 @@
 				};
 				
 				
-				function renderInput( colIndex  ){				
+				function renderInput( colIndex  ){		
+					if( !isEditable( colIndex ) ){
+						return $( template.div );
+					}
+					
 					var inputId = idGen.getInputId(colIndex);
 					var inputName = idGen.getInputName(colIndex);
 					var colType = getColumnType( colIndex );
@@ -478,6 +484,15 @@
 					else{
 						return DEFAULT_COL_TYPE;
 					}
+				};
+				
+				function isEditable( colIndex ){
+					var editable = $columnMap[colIndex].editable;
+					if( util.isNotEmpty( editable ) ){
+						return util.toBoolean( editable );
+					}
+					
+					return true;
 				};
 				
 				function getColumnWidth(colIndex){
@@ -740,8 +755,8 @@
 		    			colIndex: "",
 		    			id: "",
 		    			name: "",
-		    			type: "", /* defaults to text */
-		    			editable: true
+		    			type: "", 
+		    			editable: ""
 		    		},
 	
 		    		/* function(event, form, rowIndex, row){} */

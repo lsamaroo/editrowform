@@ -21,7 +21,8 @@
 			$( "#table").editrowform(
 				{
 					columns: [ 
-					           { colIndex:1, type: "datepicker"  }
+					           { colIndex:1, type: "datepicker"  },
+					           { colIndex:2, editable: false  }
 					          ],
 					click: true,  // for double clicking/clicking functionality
 					onSave: function(e, form){ 
