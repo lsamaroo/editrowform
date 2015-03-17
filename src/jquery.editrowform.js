@@ -34,10 +34,10 @@
 							}
 						}					
 					}
-					// a new plugin initialization
-					else {
+
+					// a new plug-in initialization because one does not exist
+					else if( !thisplugin ){
 						thisplugin = (new $.editrowform(el, options));
-						thisplugin.init();	            
 					}
 		        });
 		        
@@ -57,28 +57,9 @@
 		        base.el = el;
 		        
 		        
-		        base.init = function(){
-			        // Add a reverse reference to the DOM object
-			        base.$el.data("editrowform", base);
-		            base.options = $.extend({},$.editrowform.defaultOptions, options);
-
-		            build();
-		            
-		            // add listeners
-		            if( base.options.click ){
-		            	$( "tr", base.el ).dblclick( function(e){
-		            		base.show( $(this).index() );
-		            	});
-
-		            	$( "tr", base.el ).on( "click", function(e){
-		            		if( !util.isHidden( $formDiv ) ){
-		            			base.show( $(this).index() );
-		            		}	
-		            	});
-		            	
-		            }
-		        };
-		        
+		        // ---------------------------------------
+				// public functions
+				// ---------------------------------------
 				
 				base.show = function(rowIndex){
 					if( $formDiv != null ){
@@ -109,37 +90,6 @@
 				};
 				
 				
-				base.save = function(event){	
-					var i, inputValue;
-					var saved = true;
-					
-					var onSave = getOptions().onSave;			
-					if( util.functionExists( onSave ) ){
-						saved = onSave(event, $form, $currentRowIndex, $currentRow);	
-					}
-					
-					if( saved || util.isEmpty(saved) ){
-						for( i = 0; i < getColumnCount(); i++ ){
-							inputValue = getInputValue( i );
-							setCellValue( $currentRowIndex, i, inputValue );
-						}
-						base.hide();
-					}
-				};
-					
-				base.cancel = function (event){
-					var hide = true;
-					
-					var onCancel = getOptions().onCancel;		
-					if( util.functionExists( onCancel ) ){
-						hide = onCancel( event, $form, $currentRowIndex, $currentRow);
-					}			
-					
-					if( hide || util.isEmpty( hide ) ){
-						base.hide();
-					}
-					
-				};
 				 
 				base.destroy = function(){
 					 base.$el.removeData( "editrowform" );				 
@@ -162,6 +112,63 @@
 		        var $buttonBar = null;
 		        var $currentRow = null;
 		        var $currentRowIndex = null;
+		        
+		        	        
+		        function init(){
+			        // Add a reverse reference to the DOM object
+			        base.$el.data("editrowform", base);
+		            base.options = $.extend({},$.editrowform.defaultOptions, options);
+
+		            build();
+		            
+		            // add listeners
+		            if( base.options.click ){
+		            	$( "tr", base.el ).dblclick( function(e){
+		            		base.show( $(this).index() );
+		            	});
+
+		            	$( "tr", base.el ).on( "click", function(e){
+		            		if( !util.isHidden( $formDiv ) ){
+		            			base.show( $(this).index() );
+		            		}	
+		            	});
+		            	
+		            }
+		        };
+		        
+		        
+				function saveAction(event){	
+					var i, inputValue;
+					var saved = true;
+					
+					var onSave = getOptions().onSave;			
+					if( util.functionExists( onSave ) ){
+						saved = onSave(event, $form, $currentRowIndex, $currentRow);	
+					}
+					
+					if( saved || util.isEmpty(saved) ){
+						for( i = 0; i < getColumnCount(); i++ ){
+							inputValue = getInputValue( i );
+							setCellValue( $currentRowIndex, i, inputValue );
+						}
+						base.hide();
+					}
+				};
+					
+				
+				function cancelAction (event){
+					var hide = true;
+					
+					var onCancel = getOptions().onCancel;		
+					if( util.functionExists( onCancel ) ){
+						hide = onCancel( event, $form, $currentRowIndex, $currentRow);
+					}			
+					
+					if( hide || util.isEmpty( hide ) ){
+						base.hide();
+					}					
+				};		        
+		        
 
 				function getOptions(){
 					return base.options;
@@ -413,14 +420,14 @@
 					save.addClass( "save");
 					save.appendTo( div );
 					save.text( getOptions().saveText );
-					save.on( "click", base.save );
+					save.on( "click", saveAction );
 					
 					var cancel = $( template.button );
 					cancel.prop( "id", idGen.getCancelButtonId() );
 					cancel.addClass( "cancel");
 					cancel.appendTo( div );
 					cancel.text( getOptions().cancelText );
-					cancel.on( "click", base.cancel );
+					cancel.on( "click", cancelAction );
 					
 					var wrapper = $( template.div );
 					wrapper.addClass( "save-and-cancel-bar" );	
@@ -713,7 +720,10 @@
 						textfield: "<input type='text' />",
 						checkbox: "<input type='checkbox' />"
 				};
+				
 
+				// Run initializer
+				init();
 		    };
 		    
 		    
