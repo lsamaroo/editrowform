@@ -3,20 +3,36 @@
 <head>
 	<meta charset="ISO-8859-1">
 	<title>Datepicker Test</title>
+	<style>
+		.simple-table{
+			font-family: sans-serif;
+		    border: 1px solid #cbcbcb;
+		    border-collapse: collapse;
+		    border-spacing: 0;
+		}
+		
+		.simple-table thead {
+		  background-color: #e0e0e0;
+		  color: #000;
+		}
+		
+		.simple-table td,
+		.simple-table th{
+			text-align: center;
+			padding: 0.5em 1em;
+		}
+	</style>	
 	
-	<link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.6.0/pure-min.css">
 	<script src="lib/jquery-1.11.2.min.js"></script>
 	
 	<link rel="stylesheet" href="https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
 	<script src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
 	
 	
-	
 	<link rel="stylesheet" href="../src/jquery.editrowform.css">
 	<script src="../src/jquery.editrowform.js"></script>
 	
-	<script type="text/javascript">
-	
+	<script type="text/javascript">	
 		$(function() {
 			$( "#table").editrowform(
 				{
@@ -32,7 +48,7 @@
 </head>
 <body>
 	<br/>
-	<table id="table" class="pure-table pure-table-horizontal" style="margin-left: 100px;">
+	<table id="table" class="simple-table" style="margin-left: 100px;">
 		<thead>
 			<tr>
 				<th>
