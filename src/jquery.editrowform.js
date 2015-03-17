@@ -153,6 +153,7 @@
 		        var PLUGIN_CSS_CLASS = "erf";
 		        var INPUT_CLASS_PREFIX = "input-";
 		        var CELL_CLASS_PREFIX = "cell-";
+		        var DEFAULT_COL_TYPE = "text";
 		        var $columnMap = {};
 		        var $rowCount = null;
 		        var $colCount = null;
@@ -303,10 +304,8 @@
 					var inputId = idGen.getInputId(colIndex);
 					var inputName = idGen.getInputName(colIndex);
 					var colType = getColumnType( colIndex );
-					var input = inputUtil.createInput( colType );					
-					input.prop( "id", inputId );
-					input.prop( "name", inputName );
-					
+					var input = inputUtil.createInput( inputId, inputName, colType );					
+
 					// Check if a function was passed into the option and execute that
 					var func = getOptions().renderInput;
 					if( util.functionExists(  func ) ){
@@ -441,6 +440,11 @@
 				
 				function getColumnType(colIndex){
 					var type = $columnMap[colIndex].type;
+					if( type === "datepicker" && !$.datepicker ){
+						// if jquery ui datepicker is not available default to text
+						return DEFAULT_COL_TYPE;
+					}
+										
 					if( util.isNotEmpty(type) ){
 						return type;
 					}
@@ -450,6 +454,10 @@
 				};
 				
 				function getColumnTypeFromCell( colIndex ){
+					// May not need all of this logic since the table cell will 
+					// probably only have html or checkbox  and not other types 
+					// of input or select.
+					
 					//var rowIndex =  util.isEmpty( $currentRowIndex ) ? 0 : $currentRowIndex;
 					var cell = getCell(0, colIndex);
 					var type = $( "input, select, textarea", cell ).prop( "type" );
@@ -461,7 +469,7 @@
 						return type;
 					}	
 					else{
-						return "text";
+						return DEFAULT_COL_TYPE;
 					}
 				};
 				
@@ -646,14 +654,24 @@
 				};
 				
 				var inputUtil = {	
-						createInput: function( colType ){
+						createInput: function( id, name, colType ){
 							var input;
 							
 							if( colType == "checkbox" ){
 								input = $( template.checkbox );
+								input.prop( "id", id );
+								input.prop( "name", name );
+							}
+							else if( colType == "datepicker" ){
+								input = $( template.textfield );
+								input.prop( "id", id );
+								input.prop( "name", name );
+								$(input).datepicker();
 							}
 							else {
 								input = $( template.textfield );
+								input.prop( "id", id );
+								input.prop( "name", name );
 							}	
 							
 							return input;
