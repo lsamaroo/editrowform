@@ -62,7 +62,7 @@
 				// ---------------------------------------
 				
 				base.show = function(rowIndex){
-					if( rowIndex <= 0 || rowIndex > getRowCount() ){
+					if( rowIndex < 0 || rowIndex > getRowCount() ){
 						return;
 					}
 					
