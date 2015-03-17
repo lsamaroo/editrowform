@@ -303,14 +303,7 @@
 					var inputId = idGen.getInputId(colIndex);
 					var inputName = idGen.getInputName(colIndex);
 					var colType = getColumnType( colIndex );
-					var input;
-					
-					if( colType == "checkbox" ){
-						input = $( template.checkbox );
-					}
-					else {
-						input = $( template.textfield );
-					}					
+					var input = inputUtil.createInput( colType );					
 					input.prop( "id", inputId );
 					input.prop( "name", inputName );
 					
@@ -457,8 +450,8 @@
 				};
 				
 				function getColumnTypeFromCell( colIndex ){
-					var rowIndex =  util.isEmpty( $currentRowIndex ) ? 0 : $currentRowIndex;
-					var cell = getCell(rowIndex, colIndex);
+					//var rowIndex =  util.isEmpty( $currentRowIndex ) ? 0 : $currentRowIndex;
+					var cell = getCell(0, colIndex);
 					var type = $( "input, select, textarea", cell ).prop( "type" );
 					
 					if( util.isNotEmpty(type) && type.indexOf( "select" ) != -1 ){
@@ -653,6 +646,19 @@
 				};
 				
 				var inputUtil = {	
+						createInput: function( colType ){
+							var input;
+							
+							if( colType == "checkbox" ){
+								input = $( template.checkbox );
+							}
+							else {
+								input = $( template.textfield );
+							}	
+							
+							return input;
+						},
+								
 						getValue : function( input, colType){
 							if( colType == "checkbox" ){
 								return this.getCheckboxValue( input );
