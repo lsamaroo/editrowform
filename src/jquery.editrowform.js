@@ -152,7 +152,7 @@
 					
 					if( saved || util.isEmpty(saved) ){
 						for( i = 0; i < getColumnCount(); i++ ){
-							if( !isDisabled( i ) ){
+							if( !isDisabled( i ) && !ignoreColumn(i) ){
 								inputValue = getInputValue( i );
 								setCellValue( $currentRowIndex, i, inputValue );
 							}
@@ -313,7 +313,11 @@
 				};
 				
 				
-				function renderInput( colIndex  ){			
+				function renderInput( colIndex  ){	
+					if( ignoreColumn(colIndex) ){
+						return;
+					}
+					
 					var inputId = idGen.getInputId(colIndex);
 					var inputName = idGen.getInputName(colIndex);
 					var input = inputUtil.createInput( inputId, inputName, getColumnType( colIndex ) );	
@@ -496,6 +500,16 @@
 					var disabled = $columnMap[colIndex].disabled;
 					if( util.isNotEmpty( disabled ) ){
 						return util.toBoolean( disabled );
+					}
+					
+					return false;
+				};
+				
+				
+				function ignoreColumn( colIndex ){
+					var ignore = $columnMap[colIndex].ignore;
+					if( util.isNotEmpty( ignore ) ){
+						return util.toBoolean( ignore );
 					}
 					
 					return false;
@@ -749,24 +763,53 @@
 			
 			// Default options
 		    $.editrowform.defaultOptions = {
+		    		/* An id to use for the plugin, if empty one will be generated */
 		    		id: "",
+		    		
+		    		/* An optional css class to add to the plugin */
 		    		cssClass: "",
-		    		columns: "",
+		    		
+		    		/* 
+		    		 * A array of column object with properties overridden.  Look at the defaultColumn option below to see available options.
+		    		 * If colIndex is not specified it will use the index of the array as the colIndex.
+		    		 * e.g. [  {colIndex:0, type: "checkbox"}, { colIndex:1, disabled: true} ]
+		    		 * 
+		    		 * */
+		    		columns: "", 
+		    		
+		    		/* True or false to turn on or off the double click and single click feature */
 		    		click: true,
+		    		
+		    		/* The text of the save button */
 		    		saveText: "Save",
+		    		
+		    		/* The text of the cancel button */
 		    		cancelText: "Cancel",
+		    		
 		    		defaultColumn: {
+		    			/* The index of the column these options are for */
 		    			colIndex: "",
+		    			
+		    			/* Used as the id of the input, one is generated if left empty */
 		    			id: "",
-		    			name: "",
+		    			
+		    			/* Used as the name of the input, one is generated if left empty */
+		    			name: "", 
+		    			
+		    			/* Current supported options are: text, checkbox, datepicker */
 		    			type: "", 
-		    			disabled: ""
+		    			
+		    			/* Will render the input for that column as disabled */
+		    			disabled: "",
+		    			
+		    			/* Unlike disabled, ignore will simply not render any input for the column */
+		    			ignore: "", 
 		    		},
 	
-		    		/* function(event, form, rowIndex, row){} */
+		    		/* function(event, form, rowIndex, row){}. Return false to stop the save*/
 		    		onSave: "",
 		    		
-		    		/* function(event, form, rowIndex, row){} */
+		    		/* function(event, form, rowIndex, row){}. Return false to stop the cancel*/
 		    		onCancel: "",
 
 		    		/* function(rowIndex, colIndex, computedValue, row, cell){} */
