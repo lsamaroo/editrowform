@@ -60,7 +60,14 @@
 		        // ---------------------------------------
 				// public functions
 				// ---------------------------------------
+		        
+		        /* beta */
+		        base.showAddForm = function(rowIndex){
+					
+
+				};
 				
+				/* Shows the edit form for the specified row.  If the row index is not valid, it will not do nothing */
 				base.show = function(rowIndex){
 					if( rowIndex < 0 || rowIndex > getRowCount() ){
 						return;
@@ -87,6 +94,8 @@
 
 				};
 				
+				
+				/* Hide the edit form if it is currently visible */
 				base.hide = function(){
 					if( $formDiv != null ){
 						$formDiv.hide();
@@ -94,9 +103,13 @@
 				};
 				
 				
-				 
+				/* Remove the plugin from the DOM and cleanup */
 				base.destroy = function(){
-					 base.$el.removeData( "editrowform" );				 
+					 base.$el.removeData( "editrowform" );	
+					 if( $formDiv ){
+						 $formDiv.remove();
+						 $formDiv = null;
+					 }
 				};
 		
 				
