@@ -286,7 +286,7 @@
 					
 					var func = getOptions().setInputValue;
 					if( util.functionExists(  func ) ){
-						func( rowIndex, colIndex, value, inputId, $form, getRow( rowIndex ), getCell( rowIndex, colIndex ) );
+						func( rowIndex, colIndex, value, inputId, $form, getRow( rowIndex ), getCell( rowIndex, colIndex ), getHeader( colIndex) );
 					}
 					else{
 						colType = getColumnType( colIndex );
@@ -306,7 +306,7 @@
 					
 					var func = getOptions().getInputValue;
 					if( util.functionExists(  func ) ){
-						value = func( $currentRowIndex, colIndex, value, idGen.getInputId(colIndex), $form, getRow( rowIndex ), getCell( $currentRowIndex, colIndex ) );
+						value = func( $currentRowIndex, colIndex, value, idGen.getInputId(colIndex), $form, $currentRow, getCell( $currentRowIndex, colIndex ), getHeader( colIndex)  );
 					}
 				
 					return value;
@@ -325,10 +325,11 @@
 					// Check if a function was passed into the option and execute that
 					var func = getOptions().renderInput;
 					if( util.functionExists(  func ) ){
-						input = $(func( input, $currentRowIndex, colIndex ));
+						input = func( input, $currentRowIndex, colIndex, getHeader( colIndex ) );
 					}
-					
-					input.addClass( INPUT_CLASS_PREFIX + colIndex );				
+					if( input ){
+						$(input).addClass( INPUT_CLASS_PREFIX + colIndex );	
+					}
 					return input;
 				};
 
@@ -415,8 +416,10 @@
 					div.prop( "id", idGen.getFormCellId( colIndex ) );
 					div.addClass( "cell" );
 					div.addClass( CELL_CLASS_PREFIX + colIndex );						
-					var input = renderInput( colIndex );	
-					input.appendTo( div );			
+					var input = renderInput( colIndex );
+					if( input ){
+						input.appendTo( div );	
+					}
 					return div;
 				};
 				
@@ -772,13 +775,13 @@
 		    		/* function(rowIndex, colIndex, value, row, cell){} */   		
 		    		setCellValue: "",
 		    		
-		    		/* function(rowIndex, colIndex, computedValue, inputId, form, row, cell){} */   
+		    		/* function(rowIndex, colIndex, computedValue, inputId, form, row, cell, header){} */   
 		    		getInputValue: "",
 		    		
-		    		/* function( rowIndex, colIndex, value, inputId, form, row, cell ){} */
+		    		/* function( rowIndex, colIndex, value, inputId, form, row, cell, header ){} */
 		    		setInputValue: "", 
 		    		
-		    		/* function(input, rowIdex, colIndex){} */
+		    		/* function(input, rowIdex, colIndex, header ){} */
 		    		renderInput: "" 
 		    };
 		    

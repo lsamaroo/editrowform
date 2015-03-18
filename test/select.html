@@ -38,7 +38,7 @@
 					onCancel: function(e, form){
 						console.log("I'm cancelling.");
 					},
-					renderInput: function( input, rowIdex, colIndex ){
+					renderInput: function( input, rowIdex, colIndex, header ){
 						// ignore the generated input for this column and create my own
 						if( colIndex == 1){
 							var id = $(input).prop( "id" );
