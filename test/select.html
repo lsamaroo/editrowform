@@ -32,12 +32,6 @@
 			$( "#table").editrowform(
 				{
 					click: true,  // for double clicking/clicking functionality
-					onSave: function(e, form){ 
-						console.log("I'm saving!!");
-					},
-					onCancel: function(e, form){
-						console.log("I'm cancelling.");
-					},
 					renderInput: function( input, rowIdex, colIndex, header ){
 						// ignore the generated input for this column and create my own
 						if( colIndex == 1){

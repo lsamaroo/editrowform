@@ -72,12 +72,22 @@
 		        base.addRow = addRow;
 				
 				
-		        /* Remove the indicated row from the table.  This will remove it from the DOM 
+		        /* 
+		         * Remove the indicated row from the table.  This will remove it from the DOM 
 		         *
 		         *  function( rowIndex ){}
 		         *   
 		         */
 		        base.deleteRow = deleteRow;
+		        
+
+		        /* 
+		         * Set the value for the given row index.  Takes an array of values.
+		         *
+		         *  function( rowIndex, rowValues ){}
+		         *   
+		         */
+		        base.setRowValues = setRowValues; 
 				
 				
 				/* Shows the edit form for the specified row.  If the row index is not valid, it will not do nothing 
@@ -172,19 +182,20 @@
 				function save(event){	
 					var i, inputValue;
 					var saved = true;
+					var rowValues = [];
 					
+					for( i = 0; i < getColumnCount(); i++ ){
+						inputValue = getInputValue( i );
+						rowValues.push( inputValue );						
+					}	
+									
 					var onSave = getOptions().onSave;			
 					if( util.functionExists( onSave ) ){
-						saved = onSave(event, $form, $currentRowIndex, $currentRow);	
+						saved = onSave(event, $form, $currentRowIndex, $currentRow, rowValues);	
 					}
 					
-					if( saved || util.isEmpty(saved) ){
-						for( i = 0; i < getColumnCount(); i++ ){
-							if( !isDisabled( i ) && !ignoreColumn(i) ){
-								inputValue = getInputValue( i );
-								setCellValue( $currentRowIndex, i, inputValue );
-							}
-						}
+					if( saved || util.isEmpty(saved) ){					
+						setRowValues( $currentRowIndex, rowValues );				
 						hide();
 					}
 				};
@@ -264,6 +275,10 @@
 				
 				
 		        function deleteRow(rowIndex){
+					if( ! isValidRowIndex(rowIndex) ){
+						return;
+					}
+					
 		        	var deleted = true;
 		        	var row = getRow( rowIndex );
 		        	
@@ -279,8 +294,21 @@
 				};
 				
 				
+				function setRowValues( rowIndex, rowValues ){
+					if( !isValidRowIndex(rowIndex) ){
+						return;
+					}
+					
+					for( i = 0; i < getColumnCount(); i++ ){
+						if( !isDisabled( i ) && !ignoreColumn(i) ){
+							setCellValue( rowIndex, i, rowValues[i] );
+						}
+					}
+				};
+				
+				
 				function show(rowIndex){
-					if( util.isEmpty(rowIndex) || rowIndex < 0 || rowIndex > getRowCount() ){
+					if( ! isValidRowIndex(rowIndex) ){
 						return;
 					}
 					
@@ -418,6 +446,23 @@
 				
 				function getRowCount(){
 					return $( 'tbody tr', base.el ).length;			
+				};
+				
+				
+				function isValidRowIndex( rowIndex ){
+					if( util.isEmpty(rowIndex) ){
+						return false;
+					}
+					
+					if( isNaN( rowIndex ) ){
+						return false;
+					}
+					
+					if( rowIndex < 0 || rowIndex >= getRowCount() ) {
+						return false;
+					}
+					
+					return true;
 				};
 				
 				

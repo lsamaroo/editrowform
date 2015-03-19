@@ -1,3 +1,9 @@
+v1.2.2 (2015-03-19)
+-------------------
+- Add new function setRowValues which allows you to manually set the row values.  Takes an array of values.
+- Added check for valid row index on function that take in a row index as an argument.
+
+
 v1.1.2 (2015-03-18)
 -------------------
 - Add this changelog.txt to start tracking changes.
