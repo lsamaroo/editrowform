@@ -48,73 +48,81 @@
 		    
 		    // Plugin definition
 		    $.editrowform = function(el, options){	    	
-		        // To avoid scope issues, use 'base' instead of 'this'
-		        // to reference this class from internal events and functions.
 		        var base = this;
 		        
 		        // Access to jQuery and DOM versions of element
 		        base.$el = $(el);
 		        base.el = el;
 		        
-		        
+    
 		        // ---------------------------------------
-				// public functions
+				// Public API
 				// ---------------------------------------
 		        
-		        /* beta */
-		        base.showAddForm = function(rowIndex){
-					
-
-				};
-				
-				/* Shows the edit form for the specified row.  If the row index is not valid, it will not do nothing */
-				base.show = function(rowIndex){
-					if( rowIndex < 0 || rowIndex > getRowCount() ){
-						return;
-					}
-					
-					if( $formDiv != null ){
-						setPluginWidthHeightForRow( rowIndex );
-						
-						var row = getRow(rowIndex );
-
-						// position form
-						var positionOfRow = $( row ).position();
-						util.position( $formDiv, positionOfRow.top, positionOfRow.left );					
-						$formDiv.show();
-						setFormValues(rowIndex);
-						
-						setButtonBarPosition();
-						
-						
-						// set plugin global
-						$currentRow = row;	
-						$currentRowIndex = rowIndex;
-					}
-
-				};
+		        /* 
+		         * Add a row to the table. In order to create the new row, it clones the last row of the table. If none exists, it will 
+		         * create a brand new row.
+		         * 
+		         * Returns the rowIndex of the newly created row or false if the function call did not add the row.
+		         * 
+		         * function(){}
+		         * 
+		         * 
+		         */	        
+		        base.addRow = addRow;
 				
 				
-				/* Hide the edit form if it is currently visible */
-				base.hide = function(){
-					if( $formDiv != null ){
-						$formDiv.hide();
-					}
-				};
+		        /* Remove the indicated row from the table.  This will remove it from the DOM 
+		         *
+		         *  function( rowIndex ){}
+		         *   
+		         */
+		        base.deleteRow = deleteRow;
 				
 				
-				/* Remove the plugin from the DOM and cleanup */
-				base.destroy = function(){
-					 base.$el.removeData( "editrowform" );	
-					 if( $formDiv ){
-						 $formDiv.remove();
-						 $formDiv = null;
-					 }
-				};
+				/* Shows the edit form for the specified row.  If the row index is not valid, it will not do nothing 
+				 * 
+				 * function( rowIndex ){} 
+				 * 
+				 */
+				base.show = show;
+				
+				
+				/* Hide the edit form if it is currently visible 
+				 * 
+				 * function( rowIndex ){} 
+				 * 
+				 */
+				base.hide = hide;
+				
+				
+				/* Remove the plugin from the DOM and cleanup 
+				 * 
+				 * function( rowIndex ){} 
+				 * 
+				 */
+				base.destroy = destroy;
+				
+				
+				/* Get the number of rows in the table 
+				 * 
+				 * function(){} 
+				 * 
+				 */
+				base.getRowCount = getRowCount;
+				
+				
+				/* Get the number of columns in the table 
+				 * 
+				 * function(){} 
+				 * 
+				 */
+				base.getColumnCount = getColumnCount;
 		
 				
+				
 				// ---------------------------------------
-				// private variables and functions
+				// Private variables and functions
 				// ---------------------------------------
 		        var INPUT_OFFSET = 4;
 		        var PLUGIN_CSS_CLASS = "erf";
@@ -122,8 +130,6 @@
 		        var CELL_CLASS_PREFIX = "cell-";
 		        var DEFAULT_COL_TYPE = "text";
 		        var $columnMap = {};
-		        var $rowCount = null;
-		        var $colCount = null;
 		        var $formDiv = null;
 		        var $form = null;
 		        var $buttonBar = null;
@@ -141,20 +147,29 @@
 		            // add listeners
 		            if( base.options.click ){
 		            	$( "tr", base.el ).dblclick( function(e){
-		            		base.show( $(this).index() );
+		            		doubleClick( this );
 		            	});
 
 		            	$( "tr", base.el ).on( "click", function(e){
-		            		if( !util.isHidden( $formDiv ) ){
-		            			base.show( $(this).index() );
-		            		}	
+		            		singleClick( this );
 		            	});
 		            	
 		            }
 		        };
 		        
+		        function doubleClick( tr ){
+		        	show( $(tr).index() );
+		        };
 		        
-				function saveAction(event){	
+		        
+		        function singleClick( tr ){
+            		if( !util.isHidden( $formDiv ) ){
+            			show( $(tr).index() );
+            		}	        	
+		        };
+		        
+		      
+				function save(event){	
 					var i, inputValue;
 					var saved = true;
 					
@@ -170,37 +185,157 @@
 								setCellValue( $currentRowIndex, i, inputValue );
 							}
 						}
-						base.hide();
+						hide();
 					}
 				};
 					
 				
-				function cancelAction (event){
-					var hide = true;
+				function cancel (event){
+					var cancelled = true;
 					
 					var onCancel = getOptions().onCancel;		
 					if( util.functionExists( onCancel ) ){
-						hide = onCancel( event, $form, $currentRowIndex, $currentRow);
+						cancelled = onCancel( event, $form, $currentRowIndex, $currentRow);
 					}			
 					
-					if( hide || util.isEmpty( hide ) ){
-						base.hide();
+					if( cancelled || util.isEmpty( cancelled ) ){
+						hide();
 					}					
-				};		        
+				};	
+				
+				
+		        function addRow(){
+		        	var add = true;
+		        	var rowCount = getRowCount();     	
+		        	var newRow = rowCount == 0 ? createRow() : cloneLastRow();
+	
+					var onAddRow = getOptions().onAddRow;		
+					if( util.functionExists( onAddRow ) ){
+						add = onAddRow( event, rowCount, newRow);
+					}	
+
+					if( ( add || util.isEmpty( add ) ) && !util.isEmpty( newRow ) ){					
+						// add click listener if it's enabled
+						if( getOptions().click ){
+							newRow.dblclick( function( e){
+								doubleClick( this );
+							});
+							
+							newRow.click( function( e){
+								singleClick( this );
+							});
+						}
+						
+						// add the new row to the table
+						newRow.appendTo( base.$el );
+						return rowCount;
+					}
+					else {
+						return false;
+					}
+				};
+				
+				function cloneLastRow(){
+		        	var rowCount = getRowCount();
+		        	var row = getRow( getRowCount() - 1 );
+		        	var newRow = $(row).clone();
+		        	
+		        	// blank out any id and data
+		        	newRow.prop( "id", "");
+		        	$( "td", newRow ).html( "&nbsp;" );
+		        	
+		        	return newRow;
+				};
+				
+				
+				function createRow(){
+					var columnCount = getColumnCount();
+					var row = $( template.tr );
+					var cell;
+					
+					for( var i = 0; i < columnCount; i++ ){
+						cell = $( template.td );
+						cell.appendTo( row );
+						cell.html( "&nbsp;" );
+					}
+					
+					return row;
+				}
+				
+				
+		        function deleteRow(rowIndex){
+		        	var deleted = true;
+		        	var row = getRow( rowIndex );
+		        	
+					var onDeleteRow = getOptions().onDeleteRow;		
+					if( util.functionExists( onDeleteRow ) ){
+						deleted = onDeleteRow( event, rowIndex, row);
+					}	
+
+					if( (deleted || util.isEmpty( deleted ) ) && !util.isEmptyArray(row) ){
+						// remove the row from the DOM.
+						row.remove();
+					}
+				};
+				
+				
+				function show(rowIndex){
+					if( util.isEmpty(rowIndex) || rowIndex < 0 || rowIndex > getRowCount() ){
+						return;
+					}
+					
+					if( $formDiv != null ){
+						setPluginWidthHeightForRow( rowIndex );
+						
+						var row = getRow(rowIndex );
+
+						// position form
+						var positionOfRow = $( row ).position();
+						util.position( $formDiv, positionOfRow.top, positionOfRow.left );					
+						$formDiv.show();
+						setFormValues(rowIndex);
+						
+						setButtonBarPosition();
+						
+						// set plugin global
+						$currentRow = row;	
+						$currentRowIndex = rowIndex;
+					}
+
+				};
+				
+				
+				/* Hide the edit form if it is currently visible */
+				function hide(){
+					if( $formDiv != null ){
+						$formDiv.hide();
+					}
+				};
+				
+				
+				/* Remove the plugin from the DOM and cleanup */
+				function destroy(){
+					 base.$el.removeData( "editrowform" );	
+					 if( $formDiv ){
+						 $formDiv.remove();
+						 $formDiv = null;
+					 }
+				};				
 		        
 
 				function getOptions(){
 					return base.options;
 				};
 				
+				
 				function getHeaderRow(){
 					var header = $( 'thead tr', base.el );
 					if( util.isNotEmpty( header ) ){
 						return header;
-					}
-					
+					}					
 					return $( 'th', base.el ).parent();
 				};
+				
 				
 				function getHeader( colIndex ){
 					var headerRow = getHeaderRow();
@@ -245,9 +380,9 @@
 					if( util.functionExists(  getCellValueFunc ) ){
 						value = getCellValueFunc( rowIndex, colIndex, value, getRow(rowIndex), cell );
 					}
-
 					return value;
 				};
+				
 				
 				function setCellValue( rowIndex, colIndex, value ){
 					var colType = getColumnType( colIndex );
@@ -267,21 +402,22 @@
 							$( cell ).text( value );	
 						}
 					}
-
 				};
+				
 				
 				function getColumnCount(){
-					if( util.isEmpty($colCount) ){
-						$colCount = $( 'td', getRow(0) ).length;
+					var headerRow = getHeaderRow();
+					if( !util.isEmptyArray( headerRow ) ){
+						return $( 'th', headerRow ).length;
 					}
-					return $colCount;
+					else{
+						return $( 'td', getRow(0) ).length;
+					}
 				};
 				
+				
 				function getRowCount(){
-					if( util.isEmpty($rowCount) ){
-						$rowCount = $( 'tbody tr', base.el ).length;
-					}				
-					return $rowCount;			
+					return $( 'tbody tr', base.el ).length;			
 				};
 				
 				
@@ -380,8 +516,7 @@
 			            	}
 		            	}
 		            }
-		            
-		            
+		            	            
 		            // set plugin global
 		            $columnMap = columnMap;
 		        };
@@ -410,7 +545,7 @@
 					// add to plugin global scope
 					$buttonBar = buttonBar;
 					$formDiv = div;
-					$form = form					
+					$form = form;				
 				};
 								
 				
@@ -444,19 +579,19 @@
 				function buildButtonBar(){
 					var div = $( template.div );
 
-					var save = $( template.button );
-					save.prop( "id", idGen.getSaveButtonId() );
-					save.addClass( "save");
-					save.appendTo( div );
-					save.text( getOptions().saveText );
-					save.on( "click", saveAction );
+					var saveButton = $( template.button );
+					saveButton.prop( "id", idGen.getSaveButtonId() );
+					saveButton.addClass( "save");
+					saveButton.appendTo( div );
+					saveButton.text( getOptions().saveText );
+					saveButton.on( "click", save );
 					
-					var cancel = $( template.button );
-					cancel.prop( "id", idGen.getCancelButtonId() );
-					cancel.addClass( "cancel");
-					cancel.appendTo( div );
-					cancel.text( getOptions().cancelText );
-					cancel.on( "click", cancelAction );
+					var cancelButton = $( template.button );
+					cancelButton.prop( "id", idGen.getCancelButtonId() );
+					cancelButton.addClass( "cancel");
+					cancelButton.appendTo( div );
+					cancelButton.text( getOptions().cancelText );
+					cancelButton.on( "click", cancel );
 					
 					var wrapper = $( template.div );
 					wrapper.addClass( "save-and-cancel-bar" );	
@@ -513,8 +648,7 @@
 					var disabled = $columnMap[colIndex].disabled;
 					if( util.isNotEmpty( disabled ) ){
 						return util.toBoolean( disabled );
-					}
-					
+					}					
 					return false;
 				};
 				
@@ -523,10 +657,10 @@
 					var ignore = $columnMap[colIndex].ignore;
 					if( util.isNotEmpty( ignore ) ){
 						return util.toBoolean( ignore );
-					}
-					
+					}					
 					return false;
 				};
+				
 				
 				function getColumnWidth(colIndex){
 					// check for header
@@ -550,8 +684,7 @@
 					var row = getRow( rowIndex );
 					if( util.isNotEmpty( row ) ){
 						return $(row).innerHeight();
-					}
-							
+					}						
 					return 0;
 				};
 				
@@ -760,6 +893,8 @@
 				
 				
 				var template = {
+						td: "<td />",
+						tr: "<tr />",
 						div: "<div />",
 						form: "<form />",
 						button: "<button />",
@@ -824,6 +959,12 @@
 		    		
 		    		/* function(event, form, rowIndex, row){}. Return false to stop the cancel*/
 		    		onCancel: "",
+		    		
+		    		/* function(event, rowIndex, row){}. Return false to stop the delete*/
+		    		onDeleteRow: "",
+		    		
+		    		/* function(event, rowIndex, row){}. Return false to stop the adding of the row to the table*/
+		    		onAddRow: "",
 
 		    		/* function(rowIndex, colIndex, computedValue, row, cell){} */
 		    		getCellValue: "", 

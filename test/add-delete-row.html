@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="ISO-8859-1">
+	<title>Add and delete a row</title>
+	<style>
+		.simple-table{
+			font-family: sans-serif;
+		    border: 1px solid #cbcbcb;
+		    border-collapse: collapse;
+		    border-spacing: 0;
+		}
+		
+		.simple-table thead {
+		  background-color: #e0e0e0;
+		  color: #000;
+		}
+		
+		.simple-table td,
+		.simple-table th{
+			text-align: center;
+			padding: 0.5em 1em;
+		}
+	</style>
+	
+	<script src="https://code.jquery.com/jquery-1.11.2.min.js"></script>
+	<link rel="stylesheet" href="../src/jquery.editrowform.css">
+	<script src="../src/jquery.editrowform.js"></script>
+	
+	<script type="text/javascript">
+		$(function() {
+			$( "#table").editrowform();
+			
+			$( "#delete").click( function(){			
+				$( "#table").editrowform( "deleteRow", $( "#row").val() );
+			});
+			
+			$( "#add").click( function(){			
+				$( "#table").editrowform( "addRow" );
+			});
+
+		});
+	</script>	
+		
+</head>
+<body>
+	<br/>
+	<button id="add">Add a new row</button>	
+	<br/>
+	<br/>
+	<button id="delete">Delete</button> row # <input size="2" id="row" type="text" value="0" />
+
+
+	<br/>
+	<br/>
+
+	<table id="table" class="simple-table" style="margin-left: 100px;">
+		<thead>
+			<tr>
+				<th>
+					h1
+				</th>
+				<th>
+					h2
+				</th>
+				<th>
+					h3 
+				</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<td>
+					r1c1
+				</td>
+				<td>
+					r1c2
+				</td>
+				<td>
+					r1c3
+				</td>
+			</tr>
+			<tr>
+				<td>
+					r2c1
+				</td>
+				<td>
+					r2c2
+				</td>
+				<td>
+					r2c3
+				</td>
+			</tr>						
+		</tbody>
+	</table>
+</body>
+</html>

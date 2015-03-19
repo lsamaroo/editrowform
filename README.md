@@ -1,5 +1,5 @@
 # editrowform
-"A jquery plugin which allows you to edit each row of a table inline as a comprehensive form complete with a save and cancel button."
+"A jquery plugin which allows you to edit each row of a table inline as a comprehensive form complete with a save and cancel button.  You can also use it to add or delete rows."
 
 Usage:
 Include the javascript and css file in your page.
