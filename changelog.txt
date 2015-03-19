@@ -1,0 +1,16 @@
+v1.1.2 (2015-03-18)
+-------------------
+- Add this changelog.txt to start tracking changes.
+
+
+v1.1.1 (2015-03-18)
+-------------------
+- Add a new "ignore" option.  Unlike the disable option ignore when true will simply not render the input.
+- Add new functions addRow and deleteRow to add and delete rows from the table.
+- Fixed the destroy function.  It wasn't correctly cleaning up the DOM.
+
+
+v1.0.1 (2015-03-17)
+-------------------
+- Add a header argument to all the callback handlers.
+
