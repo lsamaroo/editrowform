@@ -17,19 +17,18 @@
 }
 
 .erf .row .cell input {
-	padding: 0px;
-	margin: 0px;
+	padding-right: 0px;
 }
 
 
-.erf .save-and-cancel-bar {
+.erf .button-bar {
 	display: inline;
 }
 
-.erf .save-and-cancel-bar div {
+.erf .button-bar div {
 	display: inline-block;
 	background-color: lightgray;
-	padding-left: 3px;
-	padding-right: 3px;
+	padding-left: 4px;
+	padding-right: 4px;
 	padding-bottom: 3px;
 }

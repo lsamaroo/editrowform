@@ -20,6 +20,7 @@ Take a look at the test directory for examples.  The following are currently ava
 	<li>A datepicker example</li>
 	<li>A select dropdown example by overriding renderInput</li>
 	<li>Saving with a ajax call</li>
+	<li>Hiding the save and cancel button and saving last row when clicking on other rows.</li>
 </ul>
 
 Below are a couple of screen shots.
@@ -167,6 +168,21 @@ Below are a couple of screen shots.
 	    		 *
 	    		 */
 
+
+	onHide
+		    	/* 
+	    		 * Triggered when the plugin form is hidden.  For example calling the hide function will trigger 
+	    		 * this callback if the form is not already hidden.
+	    		 * 
+	    		 * @example
+	    		 * function(form, rowIndex, row){}. 
+	    		 * 
+	    		 * @param form is the form element.
+	    		 * @param rowIndex is the index of the row being edited.
+	    		 * @param row is the row element being edited.
+	    		 *  
+	    		 */
+  		
 	    		
 	    		
 	onDeleteRow    		
@@ -301,7 +317,7 @@ Below are a couple of screen shots.
 
 
 
-
+<br/>
 <h5>Public Methods</h5>
 
 	save

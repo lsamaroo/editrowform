@@ -195,11 +195,16 @@
 		            
 		            // add listeners
 		            if( base.options.click ){
-		            	$( "tr", base.el ).dblclick( function(e){
+		            	$( "th", base.el ).parent().click( function(e){
+		            		hide();
+		            	});
+		            	
+		            	var tr = $( "tr td", base.el ).parent();
+		            	tr.dblclick( function(e){
 		            		doubleClick( this );
 		            	});
 
-		            	$( "tr", base.el ).on( "click", function(e){
+		            	tr.click( function(e){
 		            		singleClick( this );
 		            	});
 		            	
@@ -363,6 +368,9 @@
 						return;
 					}
 					
+					// hide any previous
+					hide();
+					
 					if( $formDiv != null ){
 						setPluginWidthHeightForRow( rowIndex );
 						
@@ -386,8 +394,12 @@
 				
 				/* Hide the edit form if it is currently visible */
 				function hide(){
-					if( $formDiv != null ){
+					if( $formDiv != null && !util.isHidden($formDiv) ){
 						$formDiv.hide();
+						var onHide = getOptions().onHide;		
+						if( util.functionExists( onHide ) ){
+							onHide( $form, $currentRowIndex, $currentRow);
+						}	
 					}
 				};
 				
@@ -630,6 +642,7 @@
 			
 					var form = $( template.form );
 					form.prop( "id", idGen.getFormId() );
+					form.prop( "tabindex", 0 );
 					form.addClass( "form" );
 					form.appendTo( div );				
 							
@@ -692,6 +705,7 @@
 					
 					var wrapper = $( template.div );
 					wrapper.addClass( "save-and-cancel-bar" );	
+					wrapper.addClass( "button-bar" );
 					div.appendTo( wrapper );
 					
 					return wrapper;
@@ -1148,12 +1162,27 @@
 	    		 * 
 	    		 * @param form is the form element displayed by the plugin.
 	    		 * @param rowIndex is the index of the row being edited.
-	    		 * @param row is the row element being edited
+	    		 * @param row is the row element being edited.
 	    		 *  
 	    		 * @return false to stop the save.  True to continue as normal.
 	    		 * 
 	    		 */
 	    		onCancel: "",
+	    		
+	
+	    		/* 
+	    		 * Triggered when the plugin form is hidden.  For example calling the hide function will trigger
+	    		 * this callback if the form is not alread hidden.
+	    		 * 
+	    		 * @example
+	    		 * function(form, rowIndex, row){}. 
+	    		 * 
+	    		 * @param form is the form element.
+	    		 * @param rowIndex is the index of the row being edited.
+	    		 * @param row is the row element being edited. 
+	    		 * 
+	    		 */
+	    		onHide: "",
 	    		
 	    		
 	    		

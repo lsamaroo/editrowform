@@ -1,5 +1,6 @@
 v1.2.5 (2015-03-20)
 -------------------
+-- Add a onHide callback handler and an example demonstrating it.
 - Expose the save function as public function.  This will allow you to programmatically call
 save.  For instance you can hide the plugin's button bar using css and create your own save and cancel buttons.
 - Removed the event object from onSave and onCancel.  If you are overriding this function, this will break your code.
