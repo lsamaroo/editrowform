@@ -17,9 +17,10 @@ Take a look at the test directory for examples.  The following examples are curr
 	<li>Saving with a ajax call</li>
 </ul>
 
+Below are a couple of screen shots.
+
 <br/>
 
-Below are a couple of screen shots.
 ![alt tag](test/images/simple.png)
 
 ![alt tag](test/images/datepicker.png)
