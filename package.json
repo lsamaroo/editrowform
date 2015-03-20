@@ -1,7 +1,8 @@
 {
   "name": "editrowform",
-  "version": "1.2.3",
-  "description": "A simple, lightweight jQuery plugin for editing a table row.",
+  "title": "JQuery Edit Row From",
+  "description": "A simple, lightweight jQuery plugin for editing a table row.  ",
+   "version": "1.2.4",
   "main": "index.js",
   "directories": {
     "test": "test"

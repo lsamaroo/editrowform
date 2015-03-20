@@ -1,5 +1,5 @@
 /*!
- * Edit Row Form v1.2.3
+ * Edit Row Form v1.2.4
  * Docs & License: https://github.com/lsamaroo/editrowform
  * (c) 2015 Leon Samaroo
  */
@@ -194,6 +194,10 @@
 		        
 		      
 				function save(event){	
+					var timeout = getOptions().saveButtonTimeout;
+					if( util.isNotEmpty( timeout ) ){
+						util.timeoutButton( idGen.getSaveButtonId(), timeout );
+					}
 					var i, inputValue;
 					var saved = true;
 					var rowValues = [];
@@ -216,6 +220,11 @@
 					
 				
 				function cancel (event){
+					var timeout = getOptions().cancelButtonTimeout;
+					if( util.isNotEmpty( timeout ) ){
+						util.timeoutButton( idGen.getCancelButtonId(), timeout );
+					}
+					
 					var cancelled = true;
 					
 					var onCancel = getOptions().onCancel;		
@@ -834,6 +843,18 @@
 				
 
 				var util = {
+						timeoutButton: function( id, time ){
+							if( !time ){	
+								time = 1000; // default one second
+							}
+							var itemId = "#" + id ;
+							$( itemId ).prop( "disabled", true );
+							
+							setTimeout(function(){
+								$( itemId ).prop( "disabled", false );
+							}, time );
+						},
+						
 						functionExists: function( func ){
 							return typeof func !== 'undefined' && $.isFunction(func);
 						},
@@ -976,10 +997,12 @@
 		    		 */
 		    		id: "",
 		    		
+		    		
 		    		/* 
 		    		 * An optional css class to add to the plugin 
 		    		 */
 		    		cssClass: "",
+		    		
 		    		
 		    		/* 
 		    		 * A array of column object.  Look at the defaultColumn optiond below to see available properties to set.
@@ -990,20 +1013,36 @@
 		    		 */
 		    		columns: "", 
 		    		
+		    		
 		    		/* 
 		    		 * True or false to turn on or off the double click and single click feature.  Defaults to true.
 		    		 */
 		    		click: true,
+		    		
 		    		
 		    		/* 
 		    		 * The text of the save button 
 		    		 */
 		    		saveText: "Save",
 		    		
+		    		
 		    		/* 
 		    		 * The text of the cancel button 
 		    		 */
 		    		cancelText: "Cancel",
+		    		
+		    		
+		    		/* 
+		    		 * A time in millis to disable the save button when it's clicked
+		    		 */
+		    		saveButtonTimeout: "",
+		    		
+		    		 		
+		    		/* 
+		    		 * A time in millis to disable the save button when it's clicked
+		    		 */
+		    		cancelButtonTimeout: "",
+		    		
 		    		
 		    		defaultColumn: {
 		    			/* 

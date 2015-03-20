@@ -2,8 +2,12 @@
 <html>
 <head>
 	<meta charset="ISO-8859-1">
-	<title>Demo save via ajaxt</title>
+	<title>Demonstrate saving via ajax</title>
 	<style>
+		body{
+			margin-left: 50px;
+		}
+		
 		.simple-table{
 			font-family: sans-serif;
 		    border: 1px solid #cbcbcb;
@@ -21,6 +25,14 @@
 			text-align: center;
 			padding: 0.5em 1em;
 		}
+		
+		.loading {
+			display: inline-block;
+			width: 16px;
+			height: 16px;
+			background-image:url('images/loading.gif');
+			background-repeat:no-repeat;
+		}
 	</style>
 	
 	<script src="https://code.jquery.com/jquery-1.11.2.min.js"></script>
@@ -32,15 +44,22 @@
 			$( "#table").editrowform(
 				{
 					click: true,  // for double clicking/clicking functionality
+					saveButtonTimeout: 2000, // 2 seconds
 					onSave: function(even, form, rowIndex, row, rowValues){ 
-						var url = "fake-ajax-response.html";
+						var url = "ajax-save-response.html";
 						$.ajax({
 							  url: url,
 							  method: "POST",
 							  data: $(form).serialize(),
 							  success: function( data ) { 
-								  $( "#table").editrowform( "setRowValues", rowIndex, rowValues ); 
-								  $( "#table").editrowform( "hide" ); 
+								  $( '#loading').addClass( "loading");
+								  // simulate a lag with set timeout
+								  setTimeout( function(){
+									  $( '#loading').removeClass( "loading");
+									  $( "#table").editrowform( "setRowValues", rowIndex, rowValues ); 
+									  $( "#table").editrowform( "hide" );  
+								  },
+								  2000 );
 							  },
 							  dataType: "json"
 						}).fail(function() {
@@ -65,8 +84,8 @@
 <body>
 	<br/>
 
-	Double click to edit.
-	<table id="table" class="simple-table" style="margin-left: 100px;">
+	Double click to edit. &nbsp; <div id="loading"></div>
+	<table id="table" class="simple-table">
 		<thead>
 			<tr>
 				<th>

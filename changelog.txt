@@ -1,3 +1,17 @@
+v1.2.4 (2015-03-20)
+-------------------
+- add optional "cloneExisting" argument to addRow function.  Defaults to true.  
+  Set to false to have the plugin create a brand new row instead of cloning from the table.
+- add new option "saveButtonTimeout" to allow you to specify if you want the save button to disable for a period of time
+  when the button is clicked.  E.g. to prevent multiple clicks.
+- add new option "cancelButtonTimeout.  Same as saveButtonTimeout but for the cancel button.
+- updated the ajax example in the test directory to use the new option.
+
+v1.2.3 (2015-03-19)
+-------------------
+- onAddRow and onDelete were incorrectly receiving a event object.  Remove the argument.
+- Updated the documentation in the source code.
+
 v1.2.2 (2015-03-19)
 -------------------
 - Add new function setRowValues which allows you to manually set the row values.  Takes an array of values.
