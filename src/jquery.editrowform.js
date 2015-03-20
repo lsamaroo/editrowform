@@ -1,5 +1,5 @@
 /*!
- * Edit Row Form v1.2.2
+ * Edit Row Form v1.2.3
  * Docs & License: https://github.com/lsamaroo/editrowform
  * (c) 2015 Leon Samaroo
  */
@@ -73,9 +73,11 @@
 				
 				
 		        /* 
-		         * Remove the indicated row from the table.  This will remove it from the DOM 
+		         * Remove the indicated row from the table.  This will remove it from the table DOM. 
 		         *
-		         *  function( rowIndex ){}
+		         * function( rowIndex ){}
+		         *  
+		         * @param rowIndex is the row index to perform the operation on.
 		         *   
 		         */
 		        base.deleteRow = deleteRow;
@@ -84,37 +86,48 @@
 		        /* 
 		         * Set the value for the given row index.  Takes an array of values.
 		         *
-		         *  function( rowIndex, rowValues ){}
+		         * function( rowIndex, rowValues ){}
+		         *  
+		         * @param rowIndex is the row index to set the values for.
+		         *  
+		         * @param rowValues is an array of values to set for the row.  The index of the array corresponds to the column.
 		         *   
 		         */
 		        base.setRowValues = setRowValues; 
 				
 				
-				/* Shows the edit form for the specified row.  If the row index is not valid, it will not do nothing 
+				/* 
 				 * 
-				 * function( rowIndex ){} 
+				 * Shows the edit form for the specified row.  If the row index is not valid, it will not do nothing.
+				 * 
+				 * function( rowIndex ){}
+				 * 
+				 * @param rowIndex is the row index to set the values for.
 				 * 
 				 */
 				base.show = show;
 				
 				
-				/* Hide the edit form if it is currently visible 
+				/* 
+				 * Hide the edit form if it is currently visible. 
 				 * 
-				 * function( rowIndex ){} 
+				 * function(){} 
 				 * 
 				 */
 				base.hide = hide;
 				
 				
-				/* Remove the plugin from the DOM and cleanup 
+				/* 
+				 * Remove the plugin from the DOM and cleanup.
 				 * 
-				 * function( rowIndex ){} 
+				 * function(){} 
 				 * 
 				 */
 				base.destroy = destroy;
 				
 				
-				/* Get the number of rows in the table 
+				/* 
+				 * Get the number of rows in the table.
 				 * 
 				 * function(){} 
 				 * 
@@ -122,7 +135,8 @@
 				base.getRowCount = getRowCount;
 				
 				
-				/* Get the number of columns in the table 
+				/* 
+				 * Get the number of columns in the table.
 				 * 
 				 * function(){} 
 				 * 
@@ -222,7 +236,7 @@
 	
 					var onAddRow = getOptions().onAddRow;		
 					if( util.functionExists( onAddRow ) ){
-						add = onAddRow( event, rowCount, newRow);
+						add = onAddRow( rowCount, newRow);
 					}	
 
 					if( ( add || util.isEmpty( add ) ) && !util.isEmpty( newRow ) ){					
@@ -284,7 +298,7 @@
 		        	
 					var onDeleteRow = getOptions().onDeleteRow;		
 					if( util.functionExists( onDeleteRow ) ){
-						deleted = onDeleteRow( event, rowIndex, row);
+						deleted = onDeleteRow( rowIndex, row);
 					}	
 
 					if( (deleted || util.isEmpty( deleted ) ) && !util.isEmptyArray(row) ){
@@ -956,74 +970,216 @@
 			
 			// Default options
 		    $.editrowform.defaultOptions = {
-		    		/* An id to use for the plugin, if empty one will be generated */
+		    		/* 
+		    		 * An id to use for the plugin, if empty one will be generated 
+		    		 * 
+		    		 */
 		    		id: "",
 		    		
-		    		/* An optional css class to add to the plugin */
+		    		/* 
+		    		 * An optional css class to add to the plugin 
+		    		 */
 		    		cssClass: "",
 		    		
 		    		/* 
-		    		 * A array of column object with properties overridden.  Look at the defaultColumn option below to see available options.
-		    		 * If colIndex is not specified it will use the index of the array as the colIndex.
-		    		 * e.g. [  {colIndex:0, type: "checkbox"}, { colIndex:1, disabled: true} ]
+		    		 * A array of column object.  Look at the defaultColumn optiond below to see available properties to set.
+		    		 * If colIndex is not specified as a property, it will use the index of the array as the colIndex.
 		    		 * 
-		    		 * */
+		    		 * Usage e.g. [  {colIndex:0, type: "checkbox"}, { colIndex:1, disabled: true} ]
+		    		 *
+		    		 */
 		    		columns: "", 
 		    		
-		    		/* True or false to turn on or off the double click and single click feature */
+		    		/* 
+		    		 * True or false to turn on or off the double click and single click feature.  Defaults to true.
+		    		 */
 		    		click: true,
 		    		
-		    		/* The text of the save button */
+		    		/* 
+		    		 * The text of the save button 
+		    		 */
 		    		saveText: "Save",
 		    		
-		    		/* The text of the cancel button */
+		    		/* 
+		    		 * The text of the cancel button 
+		    		 */
 		    		cancelText: "Cancel",
 		    		
 		    		defaultColumn: {
-		    			/* The index of the column these options are for */
+		    			/* 
+		    			 * The index of the column you want to set these properties for.
+		    			 */
 		    			colIndex: "",
 		    			
-		    			/* Used as the id of the input, one is generated if left empty */
+		    			
+		    			/* 
+		    			 * If set, it is used as the id for input element for that column. An id is generated if  empty. 
+		    			 */
 		    			id: "",
 		    			
-		    			/* Used as the name of the input, one is generated if left empty */
+		    			
+		    			/* 
+		    			 * If set, it is used as the name of the input element for that column.
+		    			 * If empty, it will use the header text.  If that is not available, then it generates a name.
+		    			 */
 		    			name: "", 
 		    			
-		    			/* Current supported options are: text, checkbox, datepicker */
+		    			
+		    			/* 
+		    			 * The type of input to display on the form.
+		    			 * Current supported options are: text, checkbox, datepicker.
+		    			 * 
+		    			 */
 		    			type: "", 
 		    			
-		    			/* Will render the input for that column as disabled */
+		    			
+		    			/* 
+		    			 * If true, it will render the input for that column as disabled 
+		    			 */
 		    			disabled: "",
 		    			
-		    			/* Unlike disabled, ignore will simply not render any input for the column */
+		    			
+		    			/* 
+		    			 * Unlike disabled, ignore will simply not render any input for the column when set to true.
+		    			 */
 		    			ignore: "", 
 		    		},
+		    		
+		    		
 	
-		    		/* function(event, form, rowIndex, row){}. Return false to stop the save*/
+		    		/* 
+		    		 * Called when the save button is clicked.  Can be overriden to perform your own save 
+		    		 * action.  Return false to stop the plugin from updating the row values and hiding the dialog.
+		    		 * E.g. you may want to do that yourself from an ajax callback after succesfully saving on the server.
+		    		 * 
+		    		 * function(event, form, rowIndex, row, rowValues){}. Return false to stop the save 
+		    		 * 
+		    		 * @param event is the eventObject.
+		    		 * 
+		    		 * @param form is the form element displayed by the plugin.
+		    		 * 
+		    		 * @param rowIndex is the index of the row being edited.
+		    		 * 
+		    		 * @param row is the row element being edited
+		    		 * 
+		    		 * @param rowValues is an array of values entered into the form.  It's the values of all the input elements in the form.
+		    		 * 
+		    		 */
 		    		onSave: "",
 		    		
-		    		/* function(event, form, rowIndex, row){}. Return false to stop the cancel*/
+		    		
+		    		
+		    		/* 
+		    		 * Called when the cancel button is clicked.
+		    		 * 
+		    		 * function(event, form, rowIndex, row){}. Return false to stop the cancel
+		    		 * 
+		    		 * @param event is the eventObject.
+		    		 * 
+		    		 * @param form is the form element displayed by the plugin.
+		    		 * 
+		    		 * @param rowIndex is the index of the row being edited.
+		    		 * 
+		    		 * @param row is the row element being edited
+		    		 *  
+		    		 */
 		    		onCancel: "",
 		    		
-		    		/* function(event, rowIndex, row){}. Return false to stop the delete*/
+		    		
+		    		
+		    		/* 
+		    		 * 
+		    		 * Called when deleteRow is called.  Can be used to perform additional task associated with deletion of a row.
+		    		 * 
+		    		 * function(rowIndex, row){}. 
+		    		 * 
+		    		 * @param rowIndex is the index of the row being deleted.
+		    		 * 
+		    		 * @param row is the row element being deleted.
+		    		 * 
+		    		 * @return false to stop the plugin from removing the row from the table.  True or empty to remove the row.
+		    		 * 
+		    		 */
 		    		onDeleteRow: "",
 		    		
-		    		/* function(event, rowIndex, row){}. Return false to stop the adding of the row to the table*/
+		    		
+		    		
+		    		/* 
+		    		 * Called when addRow is called.  Can be used to perform additional task associated with adding the row.
+		    		 * For example you can add a css class to the row.
+		    		 * 
+		    		 * function(rowIndex, row){}. 
+		    		 * 
+		    		 * @param rowIndex is the index of the new row created.
+		    		 * 
+		    		 * @param row is the row element of the newly created row.
+		    		 * 
+		    		 * @return false to stop the plugin from adding the row to the table.  True or empty to continue with the add.
+		    		 * 
+		    		 */
 		    		onAddRow: "",
 
-		    		/* function(rowIndex, colIndex, computedValue, row, cell){} */
+		    		
+		    			
+		    		/* 
+		    		 * 
+		    		 * Overriden to return your own interpretation of what the cell value should be.  By default it will read the text
+		    		 * in the td element.
+		    		 * 
+		    		 * function(rowIndex, colIndex, computedValue, row, cell){} 
+		    		 * 
+		    		 * @param rowIndex is the row index of the cell.
+		    		 * 
+		    		 * @param colIndex is the column index of the cell.
+		    		 * 
+		    		 * @param computedValue is what the value the plugin extracted from the cell.
+		    		 * 
+		    		 * @param row is the row element the cell is in.
+		    		 * 
+		    		 * @param cell is the cell element.
+		    		 * 
+		    		 */
 		    		getCellValue: "", 
 		    		
-		    		/* function(rowIndex, colIndex, value, row, cell){} */   		
+		    		
+		    				    		
+		    		/* 
+		    		 * Override this to get complete control of how the cell value should be set on the table.
+		    		 * 
+		    		 * function(rowIndex, colIndex, value, row, cell){} 
+		    		 * 
+		    		 */   		
 		    		setCellValue: "",
 		    		
-		    		/* function(rowIndex, colIndex, computedValue, inputId, form, row, cell, header){} */   
+		    		
+		    			    		
+		    		/* 
+		    		 * Override this to control how the plugin gets the value from the input elements in the form.
+		    		 * 
+		    		 * function(rowIndex, colIndex, computedValue, inputId, form, row, cell, header){} 
+		    		 */   
 		    		getInputValue: "",
 		    		
-		    		/* function( rowIndex, colIndex, value, inputId, form, row, cell, header ){} */
+		    		
+		    				    		
+		    		/* 
+		    		 * Override to determine how the plugin sets the value of the plugin.
+		    		 * 
+		    		 * function( rowIndex, colIndex, value, inputId, form, row, cell, header ){} 
+		    		 * 
+		    		 */
 		    		setInputValue: "", 
 		    		
-		    		/* function(input, rowIdex, colIndex, header ){} */
+		    		
+		    				    		
+		    		/* 
+		    		 * Override to render your own custom input.  For example you can override this to return a
+		    		 * select element for a specific column.
+		    		 * 
+		    		 * function(input, rowIdex, colIndex, header ){} 
+		    		 * 
+		    		 * @return a form element to display on the edit form.
+		    		 */
 		    		renderInput: "" 
 		    };
 		    
