@@ -34,16 +34,19 @@ Below are a couple of screen shots.
 <h3>API</h3>
 <h5>Options</h5>
 
+
+
 <h5>Public Methods</h5>
 
-		        /**
-		         * Saves the input to the table and hides the dialog.
-		         * 
-		         * @example
-		         * .editrowform( "save" )
-		         * 
-		         */
-		        base.save = save;
+	 Save
+    /**
+     * Saves the input to the table and hides the dialog.
+     * 
+     * @example
+     * .editrowform( "save" )
+     * 
+     */
+
 		        
 		   
 		        /* 
