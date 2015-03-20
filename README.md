@@ -72,7 +72,7 @@ Below are a couple of screen shots.
 	    		
 	    		 		
 	    		/* 
-	    		 * A time in millis to disable the save button when it's clicked
+	    		 * A time in millis to disable the cancel button when it's clicked
 	    		 */
 	    		cancelButtonTimeout: "",
 	    				    		
