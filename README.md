@@ -38,7 +38,7 @@ Below are a couple of screen shots.
 
 <h5>Public Methods</h5>
 
-	Save
+	save
 		        /**
 		         * Saves the input to the table and hides the dialog.
 		         * 
