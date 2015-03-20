@@ -8,12 +8,12 @@ Check the changelog.txt for all the changes in each version.
 Include the javascript and css file in your page.  The stylesheet is pretty simple so overide it to fit your needs.
 
 <h3>Examples:</h3>
-Take a look at the test directory for examples.  The following examples are currently available:
+Take a look at the test directory for examples.  The following are currently available:
 
 <ul>
 	<li>A simple example showing checkboxes and disabling a column</li>
 	<li>A datepicker example</li>
-	<li>A select dropdown example</li>
+	<li>A select dropdown example by overriding renderInput</li>
 	<li>Saving with a ajax call</li>
 </ul>
 
