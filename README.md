@@ -40,100 +40,100 @@ Below are a couple of screen shots.
 <h3>API</h3>
 <h5>Options</h5>
 
+	/* 
+	 * An id to use for the plugin, if empty one will be generated 
+	 */
+	id: "",
+	
+	
+	/* 
+	 * An optional css class to add to the plugin 
+	 */
+	cssClass: "",
+
+		    		
+	/* 
+	 * True or false to turn on or off the double click and single click feature.  Defaults to true.
+	 */
+	click: true,
+	
+	
+	/* 
+	 * The text of the save button 
+	 */
+	saveText: "Save",
+	
+	
+	/* 
+	 * The text of the cancel button 
+	 */
+	cancelText: "Cancel",
+	
+	
+	/* 
+	 * A time in milliseconds to disable the save button when it's clicked
+	 */
+	saveButtonTimeout: "",
+	
+	 		
+	/* 
+	 * A time in milliseconds to disable the cancel button when it's clicked
+	 */
+	cancelButtonTimeout: "",
+			    		
+	
+	/* 
+	 * A array of column objects.  The column object has the same set of properties as defined in 
+	 * the defaultColumn option below.  The defaultColumn option list all the available properties
+	 * that can be set on the column. 
+	 * 
+	 * Note: If colIndex is not specified as a property, it will use the index of this array as the colIndex.
+	 * 
+	 * Usage e.g. [  {id: "myid", colIndex:0, type: "checkbox"}, { colIndex:1, disabled: true} ]
+	 *
+	 */
+	columns: "", 
+	
+	
+	defaultColumn: {
 		/* 
-		 * An id to use for the plugin, if empty one will be generated 
+		 * The index of the column you want to set these properties for.
+		 */
+		colIndex: "",
+		
+		
+		/* 
+		 * If set, it is used as the id for input element for that column. An id is generated if  empty. 
 		 */
 		id: "",
 		
 		
 		/* 
-		 * An optional css class to add to the plugin 
+		 * If set, it is used as the name of the input element for that column.
+		 * If empty, it will use the header text.  If that is not available, then it generates a name.
 		 */
-		cssClass: "",
-
-			    		
-		/* 
-		 * True or false to turn on or off the double click and single click feature.  Defaults to true.
-		 */
-		click: true,
+		name: "", 
 		
 		
 		/* 
-		 * The text of the save button 
-		 */
-		saveText: "Save",
-		
-		
-		/* 
-		 * The text of the cancel button 
-		 */
-		cancelText: "Cancel",
-		
-		
-		/* 
-		 * A time in milliseconds to disable the save button when it's clicked
-		 */
-		saveButtonTimeout: "",
-		
-		 		
-		/* 
-		 * A time in milliseconds to disable the cancel button when it's clicked
-		 */
-		cancelButtonTimeout: "",
-				    		
-		
-		/* 
-		 * A array of column objects.  The column object has the same set of properties as defined in 
-		 * the defaultColumn option below.  The defaultColumn option list all the available properties
-		 * that can be set on the column. 
+		 * The type of input to display on the form.
+		 * Current supported options are: text, checkbox, datepicker.
 		 * 
-		 * Note: If colIndex is not specified as a property, it will use the index of this array as the colIndex.
-		 * 
-		 * Usage e.g. [  {id: "myid", colIndex:0, type: "checkbox"}, { colIndex:1, disabled: true} ]
-		 *
 		 */
-		columns: "", 
+		type: "", 
 		
 		
-		defaultColumn: {
-			/* 
-			 * The index of the column you want to set these properties for.
-			 */
-			colIndex: "",
-			
-			
-			/* 
-			 * If set, it is used as the id for input element for that column. An id is generated if  empty. 
-			 */
-			id: "",
-			
-			
-			/* 
-			 * If set, it is used as the name of the input element for that column.
-			 * If empty, it will use the header text.  If that is not available, then it generates a name.
-			 */
-			name: "", 
-			
-			
-			/* 
-			 * The type of input to display on the form.
-			 * Current supported options are: text, checkbox, datepicker.
-			 * 
-			 */
-			type: "", 
-			
-			
-			/* 
-			 * If true, it will render the input for that column as disabled 
-			 */
-			disabled: "",
-			
-			
-			/* 
-			 * Unlike disabled, ignore will simply not render any input for the column when set to true.
-			 */
-			ignore: "", 
-		}
+		/* 
+		 * If true, it will render the input for that column as disabled 
+		 */
+		disabled: "",
+		
+		
+		/* 
+		 * Unlike disabled, ignore will simply not render any input for the column when set to true.
+		 */
+		ignore: "", 
+	}
     		
     		
 	onSave
