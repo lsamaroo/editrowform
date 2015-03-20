@@ -45,7 +45,7 @@
 				{
 					click: true,  // for double clicking/clicking functionality
 					saveButtonTimeout: 2000, // 2 seconds
-					onSave: function(even, form, rowIndex, row, rowValues){ 
+					onSave: function(form, rowIndex, row, rowValues){ 
 						var url = "ajax-save-response.html";
 						$.ajax({
 							  url: url,
@@ -71,7 +71,7 @@
 						// calling setRowValues and hide.  We will call it programmatically from our ajax callback
 						return false;
 					},
-					onCancel: function(e, form){
+					onCancel: function(form, rowIndex, row){
 						console.log("I'm cancelling.");
 					}
 				}		

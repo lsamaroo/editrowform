@@ -39,10 +39,10 @@
 					           { colIndex:2, disabled: true  }
 					          ],
 					click: true,  // for double clicking/clicking functionality
-					onSave: function(even, form, rowIndex, row, rowValues){ 
+					onSave: function(form, rowIndex, row, rowValues){ 
 						console.log("I'm saving!!");
 					},
-					onCancel: function(e, form){
+					onCancel: function(form, rowIndex, row){
 						console.log("I'm cancelling.");
 					}
 				}		

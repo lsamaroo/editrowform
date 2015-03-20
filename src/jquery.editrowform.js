@@ -1,5 +1,5 @@
 /*!
- * Edit Row Form v1.2.4
+ * Edit Row Form v1.2.5
  * Docs & License: https://github.com/lsamaroo/editrowform
  * (c) 2015 Leon Samaroo
  */
@@ -59,17 +59,28 @@
 				// Public API
 				// ---------------------------------------
 		        
+		        /**
+		         * Saves the input to the table and hides the dialog.
+		         * 
+		         * @example
+		         * .editrowform( "save" )
+		         * 
+		         */
+		        base.save = save;
+		        
+		   
 		        /* 
 		         * Add a row to the table. In order to create the new row, it clones the last row of the table. If none exists, it will 
 		         * create a brand new row.
+		         *  
+		         * @example
+		         * .editrowform( "addRow", cloneExisting )
 		         * 
-		         * Returns the rowIndex of the newly created row or false if the function call did not add the row.
-		         * 
-		         * function( cloneExisting ){}
-		         * 
-		         * @param cloneExisting an optional argument which default to true.  It will clone an existing row from the 
+		         * @param cloneExisting is an optional argument which default to true.  It will clone an existing row from the 
 		         * table (the last one) to create a new row.  If false, it will create a brand new row.
 		         * 
+		         * @return the rowIndex of the newly created row or false if the function call did not add the row.
+		         *
 		         * 
 		         */	        
 		        base.addRow = addRow;
@@ -78,7 +89,8 @@
 		        /* 
 		         * Remove the indicated row from the table.  This will remove it from the table DOM. 
 		         *
-		         * function( rowIndex ){}
+		         * @example
+		         * .editrowform( "deleteRow", rowIndex )
 		         *  
 		         * @param rowIndex is the row index to perform the operation on.
 		         *   
@@ -89,11 +101,12 @@
 		        /* 
 		         * Set the value for the given row index.  Takes an array of values.
 		         *
-		         * function( rowIndex, rowValues ){}
+		         * @example
+		         * .editrowform( "setRowValues", rowIndex, rowValues )
 		         *  
 		         * @param rowIndex is the row index to set the values for.
 		         *  
-		         * @param rowValues is an array of values to set for the row.  The index of the array corresponds to the column.
+		         * @param rowValues is an array of values to set for the row.  The index of the array corresponds to the column index.
 		         *   
 		         */
 		        base.setRowValues = setRowValues; 
@@ -103,18 +116,20 @@
 				 * 
 				 * Shows the edit form for the specified row.  If the row index is not valid, it will not do nothing.
 				 * 
-				 * function( rowIndex ){}
+		         * @example
+		         * .editrowform( "show", rowIndex )
 				 * 
-				 * @param rowIndex is the row index to set the values for.
+				 * @param rowIndex is the row index to show the form for.
 				 * 
 				 */
 				base.show = show;
 				
 				
 				/* 
-				 * Hide the edit form if it is currently visible. 
+				 * Hides the edit form if it is currently visible. 
 				 * 
-				 * function(){} 
+		         * @example
+		         * .editrowform( "hide" )
 				 * 
 				 */
 				base.hide = hide;
@@ -123,7 +138,8 @@
 				/* 
 				 * Remove the plugin from the DOM and cleanup.
 				 * 
-				 * function(){} 
+		         * @example
+		         * .editrowform( "destroy")
 				 * 
 				 */
 				base.destroy = destroy;
@@ -132,7 +148,10 @@
 				/* 
 				 * Get the number of rows in the table.
 				 * 
-				 * function(){} 
+		         * @example
+		         * .editrowform( "getRowCount" )
+		         * 
+		         * @return the number of rows in the table associated with this plugin
 				 * 
 				 */
 				base.getRowCount = getRowCount;
@@ -141,7 +160,10 @@
 				/* 
 				 * Get the number of columns in the table.
 				 * 
-				 * function(){} 
+		         * @example
+		         * .editrowform( "getColumnCount" )
+		         * 
+		         * @return the number of columns in the table associated with this plugin
 				 * 
 				 */
 				base.getColumnCount = getColumnCount;
@@ -196,7 +218,7 @@
 		        };
 		        
 		      
-				function save(event){	
+				function save(){	
 					var timeout = getOptions().saveButtonTimeout;
 					if( util.isNotEmpty( timeout ) ){
 						util.timeoutButton( idGen.getSaveButtonId(), timeout );
@@ -212,7 +234,7 @@
 									
 					var onSave = getOptions().onSave;			
 					if( util.functionExists( onSave ) ){
-						saved = onSave(event, $form, $currentRowIndex, $currentRow, rowValues);	
+						saved = onSave($form, $currentRowIndex, $currentRow, rowValues);	
 					}
 					
 					if( saved || util.isEmpty(saved) ){					
@@ -222,7 +244,7 @@
 				};
 					
 				
-				function cancel (event){
+				function cancel (){
 					var timeout = getOptions().cancelButtonTimeout;
 					if( util.isNotEmpty( timeout ) ){
 						util.timeoutButton( idGen.getCancelButtonId(), timeout );
@@ -232,7 +254,7 @@
 					
 					var onCancel = getOptions().onCancel;		
 					if( util.functionExists( onCancel ) ){
-						cancelled = onCancel( event, $form, $currentRowIndex, $currentRow);
+						cancelled = onCancel( $form, $currentRowIndex, $currentRow);
 					}			
 					
 					if( cancelled || util.isEmpty( cancelled ) ){
@@ -529,7 +551,8 @@
 					
 					var func = getOptions().getInputValue;
 					if( util.functionExists(  func ) ){
-						value = func( $currentRowIndex, colIndex, value, idGen.getInputId(colIndex), $form, $currentRow, getCell( $currentRowIndex, colIndex ), getHeader( colIndex)  );
+						value = func( $currentRowIndex, colIndex, value, idGen.getInputId(colIndex), 
+								$form, $currentRow, getCell( $currentRowIndex, colIndex ), getHeader( colIndex)  );
 					}
 				
 					return value;
@@ -995,237 +1018,268 @@
 		    
 		    
 			
-			// Default options
+	        // ---------------------------------------
+			// Options
+			// ---------------------------------------
 		    $.editrowform.defaultOptions = {
-		    		/* 
-		    		 * An id to use for the plugin, if empty one will be generated 
-		    		 * 
-		    		 */
-		    		id: "",
-		    		
-		    		
-		    		/* 
-		    		 * An optional css class to add to the plugin 
-		    		 */
-		    		cssClass: "",
-		    		
-		    		
-		    		/* 
-		    		 * A array of column object.  Look at the defaultColumn optiond below to see available properties to set.
-		    		 * If colIndex is not specified as a property, it will use the index of the array as the colIndex.
-		    		 * 
-		    		 * Usage e.g. [  {colIndex:0, type: "checkbox"}, { colIndex:1, disabled: true} ]
-		    		 *
-		    		 */
-		    		columns: "", 
-		    		
-		    		
-		    		/* 
-		    		 * True or false to turn on or off the double click and single click feature.  Defaults to true.
-		    		 */
-		    		click: true,
-		    		
-		    		
-		    		/* 
-		    		 * The text of the save button 
-		    		 */
-		    		saveText: "Save",
-		    		
-		    		
-		    		/* 
-		    		 * The text of the cancel button 
-		    		 */
-		    		cancelText: "Cancel",
-		    		
-		    		
-		    		/* 
-		    		 * A time in millis to disable the save button when it's clicked
-		    		 */
-		    		saveButtonTimeout: "",
-		    		
-		    		 		
-		    		/* 
-		    		 * A time in millis to disable the save button when it's clicked
-		    		 */
-		    		cancelButtonTimeout: "",
-		    		
-		    		
-		    		defaultColumn: {
-		    			/* 
-		    			 * The index of the column you want to set these properties for.
-		    			 */
-		    			colIndex: "",
-		    			
-		    			
-		    			/* 
-		    			 * If set, it is used as the id for input element for that column. An id is generated if  empty. 
-		    			 */
-		    			id: "",
-		    			
-		    			
-		    			/* 
-		    			 * If set, it is used as the name of the input element for that column.
-		    			 * If empty, it will use the header text.  If that is not available, then it generates a name.
-		    			 */
-		    			name: "", 
-		    			
-		    			
-		    			/* 
-		    			 * The type of input to display on the form.
-		    			 * Current supported options are: text, checkbox, datepicker.
-		    			 * 
-		    			 */
-		    			type: "", 
-		    			
-		    			
-		    			/* 
-		    			 * If true, it will render the input for that column as disabled 
-		    			 */
-		    			disabled: "",
-		    			
-		    			
-		    			/* 
-		    			 * Unlike disabled, ignore will simply not render any input for the column when set to true.
-		    			 */
-		    			ignore: "", 
-		    		},
-		    		
-		    		
-	
-		    		/* 
-		    		 * Called when the save button is clicked.  Can be overriden to perform your own save 
-		    		 * action.  Return false to stop the plugin from updating the row values and hiding the dialog.
-		    		 * E.g. you may want to do that yourself from an ajax callback after succesfully saving on the server.
-		    		 * 
-		    		 * function(event, form, rowIndex, row, rowValues){}. Return false to stop the save 
-		    		 * 
-		    		 * @param event is the eventObject.
-		    		 * 
-		    		 * @param form is the form element displayed by the plugin.
-		    		 * 
-		    		 * @param rowIndex is the index of the row being edited.
-		    		 * 
-		    		 * @param row is the row element being edited
-		    		 * 
-		    		 * @param rowValues is an array of values entered into the form.  It's the values of all the input elements in the form.
-		    		 * 
-		    		 */
-		    		onSave: "",
-		    		
-		    		
-		    		
-		    		/* 
-		    		 * Called when the cancel button is clicked.
-		    		 * 
-		    		 * function(event, form, rowIndex, row){}. Return false to stop the cancel
-		    		 * 
-		    		 * @param event is the eventObject.
-		    		 * 
-		    		 * @param form is the form element displayed by the plugin.
-		    		 * 
-		    		 * @param rowIndex is the index of the row being edited.
-		    		 * 
-		    		 * @param row is the row element being edited
-		    		 *  
-		    		 */
-		    		onCancel: "",
-		    		
-		    		
-		    		
-		    		/* 
-		    		 * 
-		    		 * Called when deleteRow is called.  Can be used to perform additional task associated with deletion of a row.
-		    		 * 
-		    		 * function(rowIndex, row){}. 
-		    		 * 
-		    		 * @param rowIndex is the index of the row being deleted.
-		    		 * 
-		    		 * @param row is the row element being deleted.
-		    		 * 
-		    		 * @return false to stop the plugin from removing the row from the table.  True or empty to remove the row.
-		    		 * 
-		    		 */
-		    		onDeleteRow: "",
-		    		
-		    		
-		    		
-		    		/* 
-		    		 * Called when addRow is called.  Can be used to perform additional task associated with adding the row.
-		    		 * For example you can add a css class to the row.
-		    		 * 
-		    		 * function(rowIndex, row){}. 
-		    		 * 
-		    		 * @param rowIndex is the index of the new row created.
-		    		 * 
-		    		 * @param row is the row element of the newly created row.
-		    		 * 
-		    		 * @return false to stop the plugin from adding the row to the table.  True or empty to continue with the add.
-		    		 * 
-		    		 */
-		    		onAddRow: "",
+	    		/* 
+	    		 * An id to use for the plugin, if empty one will be generated 
+	    		 */
+	    		id: "",
+	    		
+	    		
+	    		/* 
+	    		 * An optional css class to add to the plugin 
+	    		 */
+	    		cssClass: "",
 
-		    		
-		    			
-		    		/* 
-		    		 * 
-		    		 * Overriden to return your own interpretation of what the cell value should be.  By default it will read the text
-		    		 * in the td element.
-		    		 * 
-		    		 * function(rowIndex, colIndex, computedValue, row, cell){} 
-		    		 * 
-		    		 * @param rowIndex is the row index of the cell.
-		    		 * 
-		    		 * @param colIndex is the column index of the cell.
-		    		 * 
-		    		 * @param computedValue is what the value the plugin extracted from the cell.
-		    		 * 
-		    		 * @param row is the row element the cell is in.
-		    		 * 
-		    		 * @param cell is the cell element.
-		    		 * 
-		    		 */
-		    		getCellValue: "", 
-		    		
-		    		
-		    				    		
-		    		/* 
-		    		 * Override this to get complete control of how the cell value should be set on the table.
-		    		 * 
-		    		 * function(rowIndex, colIndex, value, row, cell){} 
-		    		 * 
-		    		 */   		
-		    		setCellValue: "",
-		    		
-		    		
-		    			    		
-		    		/* 
-		    		 * Override this to control how the plugin gets the value from the input elements in the form.
-		    		 * 
-		    		 * function(rowIndex, colIndex, computedValue, inputId, form, row, cell, header){} 
-		    		 */   
-		    		getInputValue: "",
-		    		
-		    		
-		    				    		
-		    		/* 
-		    		 * Override to determine how the plugin sets the value of the plugin.
-		    		 * 
-		    		 * function( rowIndex, colIndex, value, inputId, form, row, cell, header ){} 
-		    		 * 
-		    		 */
-		    		setInputValue: "", 
-		    		
-		    		
-		    				    		
-		    		/* 
-		    		 * Override to render your own custom input.  For example you can override this to return a
-		    		 * select element for a specific column.
-		    		 * 
-		    		 * function(input, rowIdex, colIndex, header ){} 
-		    		 * 
-		    		 * @return a form element to display on the edit form.
-		    		 */
-		    		renderInput: "" 
+	    			    		
+	    		/* 
+	    		 * True or false to turn on or off the double click and single click feature.  Defaults to true.
+	    		 */
+	    		click: true,
+	    		
+	    		
+	    		/* 
+	    		 * The text of the save button 
+	    		 */
+	    		saveText: "Save",
+	    		
+	    		
+	    		/* 
+	    		 * The text of the cancel button 
+	    		 */
+	    		cancelText: "Cancel",
+	    		
+	    		
+	    		/* 
+	    		 * A time in millis to disable the save button when it's clicked
+	    		 */
+	    		saveButtonTimeout: "",
+	    		
+	    		 		
+	    		/* 
+	    		 * A time in millis to disable the save button when it's clicked
+	    		 */
+	    		cancelButtonTimeout: "",
+	    				    		
+	    		
+	    		/* 
+	    		 * A array of column objects.  The column object has the same set of properties as defined in 
+	    		 * the defaultColumn option below.  The defaultColumn option list all the available properties
+	    		 * that can be set on the column. 
+	    		 * 
+	    		 * Note: If colIndex is not specified as a property, it will use the index of this array as the colIndex.
+	    		 * 
+	    		 * Usage e.g. [  {id: "myid", colIndex:0, type: "checkbox"}, { colIndex:1, disabled: true} ]
+	    		 *
+	    		 */
+	    		columns: "", 
+	    		
+	    		
+	    		defaultColumn: {
+	    			/* 
+	    			 * The index of the column you want to set these properties for.
+	    			 */
+	    			colIndex: "",
+	    			
+	    			
+	    			/* 
+	    			 * If set, it is used as the id for input element for that column. An id is generated if  empty. 
+	    			 */
+	    			id: "",
+	    			
+	    			
+	    			/* 
+	    			 * If set, it is used as the name of the input element for that column.
+	    			 * If empty, it will use the header text.  If that is not available, then it generates a name.
+	    			 */
+	    			name: "", 
+	    			
+	    			
+	    			/* 
+	    			 * The type of input to display on the form.
+	    			 * Current supported options are: text, checkbox, datepicker.
+	    			 * 
+	    			 */
+	    			type: "", 
+	    			
+	    			
+	    			/* 
+	    			 * If true, it will render the input for that column as disabled 
+	    			 */
+	    			disabled: "",
+	    			
+	    			
+	    			/* 
+	    			 * Unlike disabled, ignore will simply not render any input for the column when set to true.
+	    			 */
+	    			ignore: "", 
+	    		},
+	    		
+	    		
+
+	    		/* 
+	    		 * Called when the save button is clicked.  Can be overriden to perform your own save 
+	    		 * action.  Return false to stop the plugin from updating the row values and hiding the dialog.
+	    		 * E.g. you may want to do that yourself from an ajax callback after succesfully saving on the server.
+	    		 * 
+	    		 * @example
+	    		 * function(form, rowIndex, row, rowValues){}. Return false to stop the save 
+	    		 * 
+	    		 * @param form is the form element displayed by the plugin.
+	    		 * @param rowIndex is the index of the row being edited.
+	    		 * @param row is the row element being edited
+	    		 * @param rowValues is an array of values entered into the form.  It's the values of all the input elements in the form.
+	    		 * 
+	    		 */
+	    		onSave: "",
+	    		
+	    		
+	    		
+	    		/* 
+	    		 * Called when the cancel button is clicked.
+	    		 * 
+	    		 * @example
+	    		 * function(form, rowIndex, row){}. Return false to stop the cancel
+	    		 * 
+	    		 * @param form is the form element displayed by the plugin.
+	    		 * @param rowIndex is the index of the row being edited.
+	    		 * @param row is the row element being edited
+	    		 *  
+	    		 */
+	    		onCancel: "",
+	    		
+	    		
+	    		
+	    		/* 
+	    		 * 
+	    		 * Called when deleteRow is called.  Can be used to perform additional task associated with deletion of a row.
+	    		 * For example you can gray out the row instead of removing it from the table when delete is called.
+	    		 * 
+	    		 * @example
+	    		 * function(rowIndex, row){}. 
+	    		 * 
+	    		 * @param rowIndex is the index of the row being deleted.
+	    		 * @param row is the row element being deleted.
+	    		 * 
+	    		 * @return false to stop the plugin from removing the row from the table.  True or empty to remove the row.
+	    		 * 
+	    		 */
+	    		onDeleteRow: "",
+	    		
+	    		
+	    		
+	    		/* 
+	    		 * Called when addRow is called.  Can be used to perform additional task associated with adding the row.
+	    		 * For example you can add a css class to the row.
+	    		 * 
+	    		 * @example
+	    		 * function(rowIndex, row){}. 
+	    		 * 
+	    		 * @param rowIndex is the index of the newly created row.
+	    		 * @param row is the row element of the newly created row.
+	    		 * 
+	    		 * @return false to stop the plugin from adding the row to the table.  True or empty to continue with the add.
+	    		 * 
+	    		 */
+	    		onAddRow: "",
+
+	    		
+	    			
+	    		/* 
+	    		 * 
+	    		 * Overriden to return your own interpretation of what the cell value should be.  By default it will read the text
+	    		 * from the td element (cell).
+	    		 * 
+	    		 * @example
+	    		 * function(rowIndex, colIndex, computedValue, row, cell){} 
+	    		 * 
+	    		 * @param rowIndex is the row index of the row.
+	    		 * @param colIndex is the column index of the column.
+	    		 * @param computedValue is what the value the plugin extracted from the cell.
+	    		 * @param row is the row element the cell is in.
+	    		 * @param cell is the cell element.
+	    		 * 
+	    		 */
+	    		getCellValue: "", 
+	    		
+	    		
+	    				    		
+	    		/* 
+	    		 * Override this to get complete control of how the cell value should be set on the table.
+	    		 * 
+	    		 * @example
+	    		 * function(rowIndex, colIndex, value, row, cell){} 
+	    		 * 
+	    		 * @param rowIndex is the row index of the row.
+	    		 * @param colIndex is the column index of the column.
+	    		 * @param value is the value being set to the cell.
+	    		 * @param row is the row element the cell is in.
+	    		 * @param cell is the cell element.
+	    		 * 
+	    		 */   		
+	    		setCellValue: "",
+	    		
+	    		
+	    			    		
+	    		/* 
+	    		 * Override this to control how the plugin gets the value from the input elements in the form.
+	    		 * 
+	    		 * @example
+	    		 * function(rowIndex, colIndex, computedValue, inputId, form, row, cell, header){} 
+	    		 * 
+	    		 * @param rowIndex is the row index of the row.
+	    		 * @param colIndex is the column index of the column.
+	    		 * @param computedValue is the value the plugin extracted from the input.
+	    		 * @param inputId is the id of the input.
+	    		 * @param is the form element.
+	    		 * @param row is the row element.
+	    		 * @param cell is the cell element.
+	    		 * @param header is the header element.
+	    		 * 
+	    		 * @return a value from the input.
+	    		 * 
+	    		 */   
+	    		getInputValue: "",
+	    		
+	    		
+	    				    		
+	    		/* 
+	    		 * Override to determine how the plugin sets the value of the plugin.
+	    		 * 
+	    		 * @example
+	    		 * function( rowIndex, colIndex, value, inputId, form, row, cell, header ){} 
+	    		 * 
+	    		 * @param rowIndex is the row index of the row.
+	    		 * @param colIndex is the column index of the column.
+	    		 * @param value is the value being set.
+	    		 * @param inputId is the id of the input.
+	    		 * @param is the form element.
+	    		 * @param row is the row element.
+	    		 * @param cell is the cell element.
+	    		 * @param header is the header element.
+	    		 * 
+	    		 */
+	    		setInputValue: "", 
+	    		
+	    		
+	    				    		
+	    		/* 
+	    		 * Override to render your own custom input.  For example you can override this to return a
+	    		 * select element for a specific column.
+	    		 * 
+	    		 * @example
+	    		 * function(input, rowIdex, colIndex, header ){} 
+	    		 * 
+	    		 * @param input is the input element the plugin created to add to the form.
+	    		 * @param rowIndex is the index of the row.
+	    		 * @param colIndex is the index of the column.
+	    		 * @param header is the header element
+	    		 * 
+	    		 * @return a form element to display on the edit form.
+	    		 */
+	    		renderInput: "" 
 		    };
 		    
 		    

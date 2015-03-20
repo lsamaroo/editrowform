@@ -1,9 +1,17 @@
+v1.2.5 (2015-03-20)
+-------------------
+- Expose the save function as public function.  This will allow you to programmatically call
+save.  For instance you can hide the plugin's button bar using css and create your own save and cancel buttons.
+- Removed the event object from onSave and onCancel.  If you are overriding this function, this will break your code.
+This was done to allow exposing save as a public function.
+
+
 v1.2.4 (2015-03-20)
 -------------------
 - add optional "cloneExisting" argument to addRow function.  Defaults to true.  
-  Set to false to have the plugin create a brand new row instead of cloning from the table.
+Set to false to have the plugin create a brand new row instead of cloning from the table.
 - add new option "saveButtonTimeout" to allow you to specify if you want the save button to disable for a period of time
-  when the button is clicked.  E.g. to prevent multiple clicks.
+when the button is clicked.  E.g. to prevent multiple clicks.
 - add new option "cancelButtonTimeout.  Same as saveButtonTimeout but for the cancel button.
 - updated the ajax example in the test directory to use the new option.
 
