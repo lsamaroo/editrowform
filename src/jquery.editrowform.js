@@ -1120,9 +1120,8 @@
 	    		
 
 	    		/* 
-	    		 * Called when the save button is clicked.  Can be overriden to perform your own save 
-	    		 * action.  Return false to stop the plugin from updating the row values and hiding the dialog.
-	    		 * E.g. you may want to do that yourself from an ajax callback after succesfully saving on the server.
+	    		 * Called when the save button is clicked.  Can be overridden to perform your own save 
+	    		 * action.  
 	    		 * 
 	    		 * @example
 	    		 * function(form, rowIndex, row, rowValues){}. 
@@ -1132,7 +1131,9 @@
 	    		 * @param row is the row element being edited
 	    		 * @param rowValues is an array of values entered into the form.  It's the values of all the input elements in the form.
 	    		 * 
-	    		 * @return false to stop the save.  True to continue as normal.
+				 * @return false to stop the plugin from updating the row values and hiding the dialog.
+	    		 * For example you may want to wait untill after a ajax callback and manually update the row 
+	    		 * instead of having the plugin do it.
 	    		 * 
 	    		 */
 	    		onSave: "",
@@ -1193,7 +1194,7 @@
 	    			
 	    		/* 
 	    		 * 
-	    		 * Overriden to return your own interpretation of what the cell value should be.  By default it will read the text
+	    		 * Override to return your own interpretation of what the cell value should be.  By default it will read the text
 	    		 * from the td element (cell).
 	    		 * 
 	    		 * @example
