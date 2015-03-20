@@ -38,17 +38,17 @@ Below are a couple of screen shots.
 
 <h5>Public Methods</h5>
 
-	 Save
-    /**
-     * Saves the input to the table and hides the dialog.
-     * 
-     * @example
-     * .editrowform( "save" )
-     * 
-     */
+	Save
+		        /**
+		         * Saves the input to the table and hides the dialog.
+		         * 
+		         * @example
+		         * .editrowform( "save" )
+		         * 
+		         */
 
 		        
-		   
+	addRow
 		        /* 
 		         * Add a row to the table. In order to create the new row, it clones the last row of the table. If none exists, it will 
 		         * create a brand new row.
@@ -63,9 +63,9 @@ Below are a couple of screen shots.
 		         *
 		         * 
 		         */	        
-		        base.addRow = addRow;
+
 				
-				
+	deleteRow			
 		        /* 
 		         * Remove the indicated row from the table.  This will remove it from the table DOM. 
 		         *
@@ -75,9 +75,9 @@ Below are a couple of screen shots.
 		         * @param rowIndex is the row index to perform the operation on.
 		         *   
 		         */
-		        base.deleteRow = deleteRow;
-		        
 
+		        
+	setRowValues
 		        /* 
 		         * Set the value for the given row index.  Takes an array of values.
 		         *
@@ -89,9 +89,9 @@ Below are a couple of screen shots.
 		         * @param rowValues is an array of values to set for the row.  The index of the array corresponds to the column index.
 		         *   
 		         */
-		        base.setRowValues = setRowValues; 
+
 				
-				
+	show				
 				/* 
 				 * 
 				 * Shows the edit form for the specified row.  If the row index is not valid, it will not do nothing.
@@ -102,9 +102,9 @@ Below are a couple of screen shots.
 				 * @param rowIndex is the row index to show the form for.
 				 * 
 				 */
-				base.show = show;
+
 				
-				
+	hide			
 				/* 
 				 * Hides the edit form if it is currently visible. 
 				 * 
@@ -112,9 +112,9 @@ Below are a couple of screen shots.
 		         * .editrowform( "hide" )
 				 * 
 				 */
-				base.hide = hide;
+
 				
-				
+	destroy			
 				/* 
 				 * Remove the plugin from the DOM and cleanup.
 				 * 
@@ -122,9 +122,9 @@ Below are a couple of screen shots.
 		         * .editrowform( "destroy")
 				 * 
 				 */
-				base.destroy = destroy;
 				
 				
+	getRowCount			
 				/* 
 				 * Get the number of rows in the table.
 				 * 
@@ -134,9 +134,9 @@ Below are a couple of screen shots.
 		         * @return the number of rows in the table associated with this plugin
 				 * 
 				 */
-				base.getRowCount = getRowCount;
+
 				
-				
+	getColumnCount				
 				/* 
 				 * Get the number of columns in the table.
 				 * 
@@ -146,5 +146,3 @@ Below are a couple of screen shots.
 		         * @return the number of columns in the table associated with this plugin
 				 * 
 				 */
-				base.getColumnCount = getColumnCount;
-
