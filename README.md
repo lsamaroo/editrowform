@@ -33,6 +33,9 @@ Below are a couple of screen shots.
 
 ![alt tag](test/images/select.png)
 
+![alt tag](test/images/ajax-save.png)
+
+<br/>
 
 <h3>API</h3>
 <h5>Options</h5>
