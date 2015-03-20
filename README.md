@@ -66,13 +66,13 @@ Below are a couple of screen shots.
 	    		
 	    		
 	    		/* 
-	    		 * A time in millis to disable the save button when it's clicked
+	    		 * A time in milliseconds to disable the save button when it's clicked
 	    		 */
 	    		saveButtonTimeout: "",
 	    		
 	    		 		
 	    		/* 
-	    		 * A time in millis to disable the cancel button when it's clicked
+	    		 * A time in milliseconds to disable the cancel button when it's clicked
 	    		 */
 	    		cancelButtonTimeout: "",
 	    				    		
@@ -138,13 +138,15 @@ Below are a couple of screen shots.
 	    		 * E.g. you may want to do that yourself from an ajax callback after succesfully saving on the server.
 	    		 * 
 	    		 * @example
-	    		 * function(form, rowIndex, row, rowValues){}. Return false to stop the save 
+	    		 * function(form, rowIndex, row, rowValues){}. 
 	    		 * 
 	    		 * @param form is the form element displayed by the plugin.
 	    		 * @param rowIndex is the index of the row being edited.
 	    		 * @param row is the row element being edited
 	    		 * @param rowValues is an array of values entered into the form.  It's the values of all the input elements in the form.
 	    		 * 
+	    		 * @return false to stop the save.  True to continue as normal.
+	    		 *
 	    		 */
 
 	    		
@@ -160,6 +162,8 @@ Below are a couple of screen shots.
 	    		 * @param rowIndex is the index of the row being edited.
 	    		 * @param row is the row element being edited
 	    		 *  
+	    		 * @return false to stop the save.  True to continue as normal.
+	    		 *
 	    		 */
 
 	    		
