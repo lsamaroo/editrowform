@@ -65,7 +65,10 @@
 		         * 
 		         * Returns the rowIndex of the newly created row or false if the function call did not add the row.
 		         * 
-		         * function(){}
+		         * function( cloneExisting ){}
+		         * 
+		         * @param cloneExisting an optional argument which default to true.  It will clone an existing row from the 
+		         * table (the last one) to create a new row.  If false, it will create a brand new row.
 		         * 
 		         * 
 		         */	        
@@ -238,10 +241,13 @@
 				};	
 				
 				
-		        function addRow(){
+		        function addRow( cloneExisting /* optional */){
+		        	if( util.isEmpty( cloneExisting ) ){
+		        		cloneExisting = true;
+		        	}
 		        	var add = true;
 		        	var rowCount = getRowCount();     	
-		        	var newRow = rowCount == 0 ? createRow() : cloneLastRow();
+		        	var newRow = (rowCount != 0 && cloneExisting) ? cloneLastRow() : createRow();
 	
 					var onAddRow = getOptions().onAddRow;		
 					if( util.functionExists( onAddRow ) ){
