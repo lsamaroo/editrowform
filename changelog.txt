@@ -1,3 +1,8 @@
+v1.2.6 (2015-03-20)
+-------------------
+- Figuring out the position to display the form based on the document instead of the parent element.
+- Made some minor css changes.
+
 v1.2.5 (2015-03-20)
 -------------------
 -- Add a onHide callback handler and an example demonstrating it.

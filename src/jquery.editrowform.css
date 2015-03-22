@@ -5,19 +5,17 @@
 }
 
 .erf .row {
-	display: inline-block;
 	background-color: lightgray;
 }
 
 .erf .row .cell {
-	display: inline-block;
+	display: table-cell;
 	text-align: center;
-	padding-top: 5px;
-	padding-bottom: 5px;
+	vertical-align: middle;
 }
 
 .erf .row .cell input {
-	padding-right: 0px;
+	padding-left: 0px;
 }
 
 
@@ -28,7 +26,4 @@
 .erf .button-bar div {
 	display: inline-block;
 	background-color: lightgray;
-	padding-left: 4px;
-	padding-right: 4px;
-	padding-bottom: 3px;
 }

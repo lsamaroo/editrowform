@@ -366,16 +366,11 @@ function($){
 			hide();
 			
 			if( $formDiv != null ){
-				setPluginWidthHeightForRow( rowIndex );
-				
+				setPluginWidthHeightForRow( rowIndex );			
 				var row = getRow(rowIndex );
-
-				// position form
-				var positionOfRow = $( row ).position();
-				util.position( $formDiv, positionOfRow.top, positionOfRow.left );					
-				$formDiv.show();
-				setFormValues(rowIndex);
-				
+				setFormPosition( row );	
+				setFormValues(rowIndex);						
+				$formDiv.show();	
 				setButtonBarPosition();
 				
 				// set plugin global
@@ -706,6 +701,12 @@ function($){
 		};
 		
 		
+		function setFormPosition(row){
+			var positionOfRow = $( row ).offset();
+			util.position( $formDiv, positionOfRow.top, positionOfRow.left );
+		};
+
+		
 		function setButtonBarPosition(){
 			var barWidth = $($buttonBar).innerWidth();
 			var width = base.$el.innerWidth();
@@ -788,17 +789,15 @@ function($){
 		function getRowHeight(rowIndex){
 			var row = getRow( rowIndex );
 			if( util.isNotEmpty( row ) ){
-				return $(row).innerHeight();
+				return $(row).outerHeight();
 			}						
 			return 0;
 		};
 		
 		
 		function setPluginWidthHeightForRow( rowIndex ){
-			$formDiv.width( util.getWidth(base.el) );
-			$formDiv.height( getRowHeight( rowIndex ) );
-			
-			$( ".row", $formDiv ).height( getRowHeight( rowIndex ) );
+			$formDiv.width( util.getWidth(base.el) );		
+			$( ".row .cell", $formDiv ).height( getRowHeight( rowIndex ) );
 			
 			for( var i = 0; i < getColumnCount(); i++ ){
 				var cell = $(  "." + CELL_CLASS_PREFIX + i, $formDiv );
