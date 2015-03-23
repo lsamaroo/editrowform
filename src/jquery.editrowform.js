@@ -1,5 +1,5 @@
 /*!
- * Edit Row Form v1.2.5
+ * Edit Row Form v1.2.7
  * Docs & License: https://github.com/lsamaroo/editrowform
  * (c) 2015 Leon Samaroo
  */
@@ -189,10 +189,6 @@ function($){
             
             // add listeners
             if( base.options.click ){
-            	$( "th", base.el ).parent().click( function(e){
-            		hide();
-            	});
-            	
             	var tr = $( "tr td", base.el ).parent();
             	tr.dblclick( function(e){
             		doubleClick( this );
@@ -201,7 +197,17 @@ function($){
             	tr.click( function(e){
             		singleClick( this );
             	});
-            	
+            }
+            
+            if( base.options.hideOnBlur ){
+				$(document).click( function(e) {
+					var isClickOnForm = $(e.target).closest( $formDiv ).length;
+					var isClickOnTable = $(e.target).closest( base.el ).length;
+					
+					if ( !(isClickOnForm || isClickOnTable )) {
+						hide();
+					}										
+				});
             }
         };
         
@@ -1042,33 +1048,41 @@ function($){
 
 			    		
 		/* 
-		 * True or false to turn on or off the double click and single click feature.  Defaults to true.
+		 * True or false to turn on or off the double click and single click feature.  
+		 * Defaults to true.
 		 */
 		click: true,
 		
 		
 		/* 
-		 * The text of the save button 
+		 * The text of the save button.
 		 */
 		saveText: "Save",
 		
 		
 		/* 
-		 * The text of the cancel button 
+		 * The text of the cancel button.
 		 */
 		cancelText: "Cancel",
 		
 		
 		/* 
-		 * A time in millis to disable the save button when it's clicked
+		 * A time in millis to disable the save button when it's clicked.
 		 */
 		saveButtonTimeout: "",
 		
 		 		
 		/* 
-		 * A time in millis to disable the cancel button when it's clicked
+		 * A time in millis to disable the cancel button when it's clicked.
 		 */
 		cancelButtonTimeout: "",
+		
+	
+		/* 
+		 * Hides the form when you click outside of the form or table.
+		 * Defaults to true.
+		 */
+		hideOnBlur: true,
 				    		
 		
 		/* 
@@ -1125,7 +1139,7 @@ function($){
 			 * Unlike disabled, ignore will simply not render any input 
 			 * for the column when set to true.
 			 */
-			ignore: "", 
+			ignore: ""
 		},
 		
 		

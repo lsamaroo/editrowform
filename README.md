@@ -81,6 +81,13 @@ Below are a couple of screen shots.
 	 */
 	cancelButtonTimeout: "",
 			    		
+
+	/* 
+	 * Hides the form when you click outside of the form or table.
+	 * Defaults to true.
+	 */
+	hideOnBlur: true,
+	
 	
 	/* 
 	 * A array of column objects.  The column object has the same set of properties 
