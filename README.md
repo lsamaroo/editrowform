@@ -2,25 +2,29 @@
 "A jquery plugin which allows you to edit each row of a table inline as a comprehensive form complete with a save and cancel button.  You can also use it to add or delete rows."
 
 <h3>What's new?</h3>
-Check the changelog.txt for all the changes in each version.
+Check the changelog.txt for a complete listing of changes in each version.
 
 <br/>
-<b>
 Important!!! v1.2.5 has a change to the onSave and onCancel options that's not backwards compatible.  The first argument to these callback functions (the event object) has been removed.  This was to facilitate making the "save" function public.
-</b>
 
 <h3>Usage:</h3>
-Include the javascript and css file in your page.  The stylesheet is pretty simple so overide it to fit your needs.
+Include the javascript and css file in your page.  Theoretically it's AMD compatible but I haven't
+tested it yet.  The style sheet is pretty simple so override it to fit your needs.
+
+<h3>Where can I get it?</h3>
+GitHub - https://github.com/lsamaroo/editrowform
+NPM - https://www.npmjs.com/package/editrowform
+
 
 <h3>Examples:</h3>
 Take a look at the test directory for examples.  The following are currently available:
 
 <ul>
-	<li>A simple example showing checkboxes and disabling a column</li>
+	<li>A simple example showing check boxes and disabling a column</li>
 	<li>A datepicker example</li>
 	<li>A select dropdown example by overriding renderInput</li>
 	<li>Saving with a ajax call</li>
-	<li>Hiding the save and cancel button and saving on hide.</li>
+	<li>Removing the save and cancel button and saving when the form gets hidden.</li>
 </ul>
 
 Below are a couple of screen shots.

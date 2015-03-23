@@ -1,4 +1,12 @@
-v1.2.7 (2015-03-20)
+v1.2.8 (2015-03-23)
+-------------------
+- Add new test to demostrate using with require.js
+- Add bower.json to publish to bower.
+- Add .npmignore to ignore unnecessary files in download.
+- Add .gitignore
+
+
+v1.2.7 (2015-03-22)
 -------------------
 - Add new option hideOnBlur
 

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="ISO-8859-1">
+	<title>AMD example</title>
+	<style>
+		body{
+			margin-left: 50px;
+		}
+		
+		.simple-table{
+			font-family: sans-serif;
+		    border: 1px solid #cbcbcb;
+		    border-collapse: collapse;
+		    border-spacing: 0;
+		}
+		
+		.simple-table thead {
+		  background-color: #e0e0e0;
+		  color: #000;
+		}
+		
+		.simple-table td,
+		.simple-table th{
+			text-align: center;
+			padding: 0.5em 1em;
+		}
+
+		
+	</style>
+	
+	<link rel="stylesheet" href="../../src/jquery.editrowform.css">	
+	<script data-main="js/app" src="js/lib/require.js"></script>
+
+		
+</head>
+<body>
+	<br/>
+	
+	Double click to edit.
+	<table id="table" class="simple-table">
+		<thead>
+			<tr>
+				<th>
+					h1
+				</th>
+				<th>
+					h2
+				</th>
+				<th>
+					h3
+				</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<td>
+					r1c1
+				</td>
+				<td>
+					r1c2
+				</td>
+				<td>
+					r1c3
+				</td>
+			</tr>
+			<tr>
+				<td>
+					r2c1
+				</td>
+				<td>
+					r2c2
+				</td>
+				<td>
+					r2c3
+				</td>
+			</tr>						
+		</tbody>
+	</table>
+	
+</body>
+</html>

@@ -1,0 +1,19 @@
+{
+  "name": "editrowform",
+  "version": "1.2.8",
+  "main": "src/jquery.editrowform.js",
+  "ignore": [
+  		".settings",
+        "test",
+        ".gitignore", 
+        ".npmignore",       
+        ".project",
+        "bower.json",
+        "changelog.txt",
+        "package.json",
+        "README.md"
+    ],
+    "dependencies": {
+        "jquery": ">=1.11.2"
+    } 
+}

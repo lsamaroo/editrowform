@@ -1,5 +1,5 @@
 /*!
- * Edit Row Form v1.2.7
+ * Edit Row Form v1.2.8
  * Docs & License: https://github.com/lsamaroo/editrowform
  * (c) 2015 Leon Samaroo
  */
@@ -274,7 +274,7 @@ function($){
         	}
         	var add = true;
         	var rowCount = getRowCount();     	
-        	var newRow = (rowCount != 0 && cloneExisting) ? cloneLastRow() : createRow();
+        	var newRow = (rowCount !== 0 && cloneExisting) ? cloneLastRow() : createRow();
 
 			var onAddRow = getOptions().onAddRow;		
 			if( util.functionExists( onAddRow ) ){
@@ -355,7 +355,7 @@ function($){
 				return;
 			}
 			
-			for( i = 0; i < getColumnCount(); i++ ){
+			for( var i = 0; i < getColumnCount(); i++ ){
 				if( !isDisabled( i ) && !ignoreColumn(i) ){
 					setCellValue( rowIndex, i, rowValues[i] );
 				}
@@ -371,7 +371,7 @@ function($){
 			// hide any previous
 			hide();
 			
-			if( $formDiv != null ){
+			if( $formDiv !== null ){
 				setPluginWidthHeightForRow( rowIndex );			
 				var row = getRow(rowIndex );
 				setFormPosition( row );	
@@ -389,7 +389,7 @@ function($){
 		
 		/* Hide the edit form if it is currently visible */
 		function hide(){
-			if( $formDiv != null && !util.isHidden($formDiv) ){
+			if( $formDiv !== null && !util.isHidden($formDiv) ){
 				$formDiv.hide();
 				var onHide = getOptions().onHide;		
 				if( util.functionExists( onHide ) ){
@@ -853,7 +853,7 @@ function($){
 					
 					// get header name
 					var header = getHeader( colIndex );
-					name = $(header).text().trim()
+					name = $(header).text().trim();
 					if( util.isNotEmpty( name ) ){
 						return name;
 					}

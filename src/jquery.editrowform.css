@@ -26,4 +26,7 @@
 .erf .button-bar div {
 	display: inline-block;
 	background-color: lightgray;
+	padding-bottom: 1px;
+    padding-left: 2px;
+    padding-right: 2px;
 }
