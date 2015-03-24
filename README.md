@@ -5,8 +5,7 @@
 Check the changelog.txt for a complete listing of changes in each version.
 
 <h3>Usage:</h3>
-Include the javascript and css file in your page.  Theoretically it's AMD compatible but I haven't
-tested it yet.  The style sheet is pretty simple so override it to fit your needs.
+Include the javascript and css file in your page.  The style sheet is pretty simple so override it to fit your needs.
 
 <h3>Where can I get it?</h3>
 <ul>
