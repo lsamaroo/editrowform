@@ -33,7 +33,7 @@
     "url": "https://github.com/lsamaroo/editrowform/issues"
   },
   "homepage": "https://github.com/lsamaroo/editrowform",
-   "dependencies": {
-    	"jquery": ">=1.11.2",
-	}
+  "dependencies": {
+    	"jquery": ">=1.11.2"
+  }
 }
