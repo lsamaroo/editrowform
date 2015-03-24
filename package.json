@@ -25,7 +25,9 @@
 	"editing",
 	"row",
 	"form",
-	"html"
+	"html",
+	"AMD",
+	"requirejs"
   ],
   "author": "Leon Samaroo",
   "license": "MIT",

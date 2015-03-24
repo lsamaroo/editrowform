@@ -4,16 +4,15 @@
 <h3>What's new?</h3>
 Check the changelog.txt for a complete listing of changes in each version.
 
-<br/>
-Important!!! v1.2.5 has a change to the onSave and onCancel options that's not backwards compatible.  The first argument to these callback functions (the event object) has been removed.  This was to facilitate making the "save" function public.
-
 <h3>Usage:</h3>
 Include the javascript and css file in your page.  Theoretically it's AMD compatible but I haven't
 tested it yet.  The style sheet is pretty simple so override it to fit your needs.
 
 <h3>Where can I get it?</h3>
-GitHub - https://github.com/lsamaroo/editrowform
-NPM - https://www.npmjs.com/package/editrowform
+<ul>
+	<li>GitHub - https://github.com/lsamaroo/editrowform</li>
+	<li>NPM - https://www.npmjs.com/package/editrowform</li>
+</ul>
 
 
 <h3>Examples:</h3>
@@ -25,6 +24,7 @@ Take a look at the test directory for examples.  The following are currently ava
 	<li>A select dropdown example by overriding renderInput</li>
 	<li>Saving with a ajax call</li>
 	<li>Removing the save and cancel button and saving when the form gets hidden.</li>
+	<li>An AMD example using require.js</li>
 </ul>
 
 Below are a couple of screen shots.
