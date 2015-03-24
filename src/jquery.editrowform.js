@@ -1,5 +1,5 @@
 /*!
- * Edit Row Form v1.2.8
+ * Edit Row Form v1.2.7
  * Docs & License: https://github.com/lsamaroo/editrowform
  * (c) 2015 Leon Samaroo
  */
@@ -178,6 +178,7 @@ function($){
         var $buttonBar = null;
         var $currentRow = null;
         var $currentRowIndex = null;
+        var $public_show_called;
         
         	        
         function init(){
@@ -204,23 +205,27 @@ function($){
 					var isClickOnForm = $(e.target).closest( $formDiv ).length;
 					var isClickOnTable = $(e.target).closest( base.el ).length;
 					
-					if ( !(isClickOnForm || isClickOnTable )) {
-						hide();
-					}										
+					if ( !(isClickOnForm || isClickOnTable )  && !$public_show_called ) {
+						hide();		
+					}	
+					
+					// reset
+					$public_show_called = false;	
 				});
             }
-        };
+        }
+        
         
         function doubleClick( tr ){
-        	show( $(tr).index() );
-        };
+        	interal_show( $(tr).index() );
+        }
         
         
         function singleClick( tr ){
     		if( !util.isHidden( $formDiv ) ){
-    			show( $(tr).index() );
+    			interal_show( $(tr).index() );
     		}	        	
-        };
+        }
         
       
 		function save(){	
@@ -246,7 +251,7 @@ function($){
 				setRowValues( $currentRowIndex, rowValues );				
 				hide();
 			}
-		};
+		}
 			
 		
 		function cancel (){
@@ -265,7 +270,7 @@ function($){
 			if( cancelled || util.isEmpty( cancelled ) ){
 				hide();
 			}					
-		};	
+		}
 		
 		
         function addRow( cloneExisting /* optional */){
@@ -274,7 +279,7 @@ function($){
         	}
         	var add = true;
         	var rowCount = getRowCount();     	
-        	var newRow = (rowCount !== 0 && cloneExisting) ? cloneLastRow() : createRow();
+        	var newRow = (rowCount != 0 && cloneExisting) ? cloneLastRow() : createRow();
 
 			var onAddRow = getOptions().onAddRow;		
 			if( util.functionExists( onAddRow ) ){
@@ -300,7 +305,8 @@ function($){
 			else {
 				return false;
 			}
-		};
+		}
+        
 		
 		function cloneLastRow(){
         	var rowCount = getRowCount();
@@ -312,7 +318,7 @@ function($){
         	$( "td", newRow ).html( "&nbsp;" );
         	
         	return newRow;
-		};
+		}
 		
 		
 		function createRow(){
@@ -347,7 +353,7 @@ function($){
 				// remove the row from the DOM.
 				row.remove();
 			}
-		};
+		}
 		
 		
 		function setRowValues( rowIndex, rowValues ){
@@ -355,48 +361,50 @@ function($){
 				return;
 			}
 			
-			for( var i = 0; i < getColumnCount(); i++ ){
+			for( i = 0; i < getColumnCount(); i++ ){
 				if( !isDisabled( i ) && !ignoreColumn(i) ){
 					setCellValue( rowIndex, i, rowValues[i] );
 				}
 			}
-		};
+		}
 		
 		
-		function show(rowIndex){
+		function show( rowIndex ){
+			$public_show_called = true;
+			interal_show( rowIndex );
+		}
+		
+		
+		function interal_show(rowIndex){
 			if( ! isValidRowIndex(rowIndex) ){
 				return;
 			}
-			
-			// hide any previous
-			hide();
-			
-			if( $formDiv !== null ){
+
+			if( $formDiv != null ){
 				setPluginWidthHeightForRow( rowIndex );			
 				var row = getRow(rowIndex );
 				setFormPosition( row );	
 				setFormValues(rowIndex);						
-				$formDiv.show();	
+				$formDiv.show();
 				setButtonBarPosition();
 				
 				// set plugin global
 				$currentRow = row;	
 				$currentRowIndex = rowIndex;
 			}
-
-		};
+		}
 		
 		
 		/* Hide the edit form if it is currently visible */
 		function hide(){
-			if( $formDiv !== null && !util.isHidden($formDiv) ){
+			if( $formDiv != null && !util.isHidden($formDiv) ){
 				$formDiv.hide();
 				var onHide = getOptions().onHide;		
 				if( util.functionExists( onHide ) ){
 					onHide( $form, $currentRowIndex, $currentRow);
 				}	
 			}
-		};
+		}
 		
 		
 		/* Remove the plugin from the DOM and cleanup */
@@ -406,12 +414,12 @@ function($){
 				 $formDiv.remove();
 				 $formDiv = null;
 			 }
-		};				
+		}			
         
 
 		function getOptions(){
 			return base.options;
-		};
+		}
 		
 		
 		function getHeaderRow(){
@@ -420,7 +428,7 @@ function($){
 				return header;
 			}					
 			return $( 'th', base.el ).parent();
-		};
+		}
 		
 		
 		function getHeader( colIndex ){
@@ -431,12 +439,12 @@ function($){
 				header = $( "th", headerRow )[colIndex];
 			}					
 			return header;
-		};
+		}
 		
 					
 		function getRow( rowIndex ){
 			return $( 'tbody tr', base.el ).eq( rowIndex );
-		};
+		}
 		
 		
 		function getCell( rowIndex, colIndex ){
@@ -446,7 +454,7 @@ function($){
 				cell = $( 'td', row )[colIndex];;
 			}
 			return cell;
-		};
+		}
 		
 		
 		function getCellValue( rowIndex, colIndex ){
@@ -467,7 +475,7 @@ function($){
 				value = getCellValueFunc( rowIndex, colIndex, value, getRow(rowIndex), cell );
 			}
 			return value;
-		};
+		}
 		
 		
 		function setCellValue( rowIndex, colIndex, value ){
@@ -488,7 +496,7 @@ function($){
 					$( cell ).text( value );	
 				}
 			}
-		};
+		}
 		
 		
 		function getColumnCount(){
@@ -499,12 +507,12 @@ function($){
 			else{
 				return $( 'td', getRow(0) ).length;
 			}
-		};
+		}
 		
 		
 		function getRowCount(){
 			return $( 'tbody tr', base.el ).length;			
-		};
+		}
 		
 		
 		function isValidRowIndex( rowIndex ){
@@ -518,17 +526,16 @@ function($){
 			
 			if( rowIndex < 0 || rowIndex >= getRowCount() ) {
 				return false;
-			}
-			
+			}		
 			return true;
-		};
+		}
 		
 		
 		function setFormValues(rowIndex){		
 			for( var i = 0; i < getColumnCount(); i++ ){
 				setInputValue( rowIndex, i, getCellValue( rowIndex, i ) );
 			}
-		};
+		}
 		
 		
 		function setInputValue( rowIndex, colIndex, value){	
@@ -545,7 +552,7 @@ function($){
 				input = $( "." + INPUT_CLASS_PREFIX + colIndex, $form );
 				inputUtil.setValue( input, colType, value );
 			}
-		};
+		}
 		
 		
 		function getInputValue( colIndex ){
@@ -563,7 +570,7 @@ function($){
 			}
 		
 			return value;
-		};
+		}
 		
 		
 		function renderInput( colIndex  ){	
@@ -588,13 +595,13 @@ function($){
 				$(input).addClass( INPUT_CLASS_PREFIX + colIndex );	
 			}
 			return input;
-		};
+		}
 
 		
 		function build(){
 			buildColumnMap();
 			buildForm();				
-		};
+		}
 		
 
         function buildColumnMap(){
@@ -623,7 +630,7 @@ function($){
             	            
             // set plugin global
             $columnMap = columnMap;
-        };
+        }
         
 		
 		
@@ -651,7 +658,7 @@ function($){
 			$buttonBar = buttonBar;
 			$formDiv = div;
 			$form = form;				
-		};
+		}
 						
 		
 		function buildFormRow(){
@@ -665,7 +672,7 @@ function($){
 				cell.appendTo( div );
 			}				
 			return div;
-		};
+		}
 						
 		
 		function buildFormCell(colIndex){
@@ -678,7 +685,7 @@ function($){
 				input.appendTo( div );	
 			}
 			return div;
-		};
+		}
 		
 		
 		function buildButtonBar(){
@@ -704,13 +711,13 @@ function($){
 			div.appendTo( wrapper );
 			
 			return wrapper;
-		};
+		}
 		
 		
 		function setFormPosition(row){
 			var positionOfRow = $( row ).offset();
 			util.position( $formDiv, positionOfRow.top, positionOfRow.left );
-		};
+		}
 
 		
 		function setButtonBarPosition(){
@@ -718,7 +725,7 @@ function($){
 			var width = base.$el.innerWidth();
 			var offset = (width - barWidth)/2;
 			$buttonBar.css({left: offset, position:'absolute'});
-		};
+		}
 		
 		
 		function getColumnType(colIndex){
@@ -734,7 +741,8 @@ function($){
 			
 			// try to auto-detect type
 			return getColumnTypeFromCell( colIndex );
-		};
+		}
+		
 		
 		function getColumnTypeFromCell( colIndex ){
 			// May not need all of this logic since the table cell will 
@@ -754,7 +762,8 @@ function($){
 			else{
 				return DEFAULT_COL_TYPE;
 			}
-		};
+		}
+		
 		
 		function isDisabled( colIndex ){
 			var disabled = $columnMap[colIndex].disabled;
@@ -762,7 +771,7 @@ function($){
 				return util.toBoolean( disabled );
 			}					
 			return false;
-		};
+		}
 		
 		
 		function ignoreColumn( colIndex ){
@@ -771,7 +780,7 @@ function($){
 				return util.toBoolean( ignore );
 			}					
 			return false;
-		};
+		}
 		
 		
 		function getColumnWidth(colIndex){
@@ -789,7 +798,7 @@ function($){
 			}
 			
 			return 0;
-		};
+		}
 		
 		
 		function getRowHeight(rowIndex){
@@ -798,7 +807,7 @@ function($){
 				return $(row).outerHeight();
 			}						
 			return 0;
-		};
+		}
 		
 		
 		function setPluginWidthHeightForRow( rowIndex ){
@@ -816,7 +825,7 @@ function($){
 					$( "." + INPUT_CLASS_PREFIX + i, cell ).width( colWidth - INPUT_OFFSET );
 				}
 			}
-		};
+		}
 					
 		
 		var idGen = {
@@ -853,7 +862,7 @@ function($){
 					
 					// get header name
 					var header = getHeader( colIndex );
-					name = $(header).text().trim();
+					name = $(header).text().trim()
 					if( util.isNotEmpty( name ) ){
 						return name;
 					}
@@ -881,7 +890,7 @@ function($){
 				getCancelButtonId: function( ){
 					return this.getEditRowFormId() + "-cancel";
 				}	
-		};
+		}
 		
 
 		var util = {
@@ -959,7 +968,8 @@ function($){
 						return false;
 					}
 				}
-		};
+		}
+		
 		
 		var inputUtil = {	
 				createInput: function( id, name, colType ){
@@ -1002,8 +1012,7 @@ function($){
 						$(input).val( value );
 					}
 				},
-				
-											
+															
 				getCheckboxValue: function( input ){
 					return $( input ).prop( "checked" );
 				},
@@ -1022,7 +1031,7 @@ function($){
 				button: "<button />",
 				textfield: "<input type='text' />",
 				checkbox: "<input type='checkbox' />"
-		};
+		}
 		
 
 		// Run initializer

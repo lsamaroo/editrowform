@@ -1,9 +1,11 @@
 v1.2.8 (2015-03-23)
 -------------------
-- Add new test to demostrate using with require.js
+- AMD compatible and add  test to demonstrate using with require.js
 - Add bower.json to publish to bower.
 - Add .npmignore to ignore unnecessary files in download.
 - Add .gitignore
+- Fixed a bug introduced by adding the hideOnBlur feature.  Clicking on an external element
+which called show would not work because hideOnBlur would immediatly hide the form.
 
 
 v1.2.7 (2015-03-22)
