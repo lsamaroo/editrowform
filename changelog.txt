@@ -1,3 +1,13 @@
+v1.2.9 (2015-03-24)
+-------------------
+- new property added "focusOnInput".
+- Originally when cloning a row via addRow it would blank out the cell values 
+including those with ignore set to true.  In this version ignored columns will be respected 
+and cloned as is.
+- updated to generate a somewhat unique-ish id if none is given to the plugin and table doesn't
+have an id either.
+
+
 v1.2.8 (2015-03-23)
 -------------------
 - AMD compatible and add  test to demonstrate using with require.js

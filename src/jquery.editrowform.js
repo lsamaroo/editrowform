@@ -1,5 +1,5 @@
 /*!
- * Edit Row Form v1.2.7
+ * Edit Row Form v1.2.9
  * Docs & License: https://github.com/lsamaroo/editrowform
  * (c) 2015 Leon Samaroo
  */
@@ -14,7 +14,6 @@
 }( this, 
 
 function($){
-
     // Add plugin to JQuery
     $.fn.editrowform = function(options){
     	var args = Array.prototype.slice.call(arguments, 1); // for a possible method call
@@ -179,8 +178,7 @@ function($){
         var $currentRow = null;
         var $currentRowIndex = null;
         var $public_show_called;
-        
-        	        
+ 
         function init(){
 	        // Add a reverse reference to the DOM object
 	        base.$el.data("editrowform", base);
@@ -313,10 +311,16 @@ function($){
         	var row = getRow( getRowCount() - 1 );
         	var newRow = $(row).clone();
         	
-        	// blank out any id and data
+        	// blank out any id 
         	newRow.prop( "id", "");
-        	$( "td", newRow ).html( "&nbsp;" );
         	
+        	// blank out the row
+        	$( "td", newRow ).each( function(index, cell){
+        		var column = $columnMap[index];
+        		if( !column.ignore ){
+        			$(this).html( "&nbsp;" );
+        		}
+        	});
         	return newRow;
 		}
 		
@@ -387,11 +391,25 @@ function($){
 				setFormValues(rowIndex);						
 				$formDiv.show();
 				setButtonBarPosition();
+				if( getOptions().focusOnInput ){
+					focusFirstInput();
+				}
 				
 				// set plugin global
 				$currentRow = row;	
 				$currentRowIndex = rowIndex;
 			}
+		}
+		
+		
+		function focusFirstInput(){
+			$( "input", $formDiv ).each( function(index, input){
+				var disabled = $(input).prop( "disabled" );
+				if( !disabled ){
+					$(input).focus();
+					return false;
+				}
+			});
 		}
 		
 		
@@ -708,8 +726,7 @@ function($){
 			var wrapper = $( template.div );
 			wrapper.addClass( "save-and-cancel-bar" );	
 			wrapper.addClass( "button-bar" );
-			div.appendTo( wrapper );
-			
+			div.appendTo( wrapper );		
 			return wrapper;
 		}
 		
@@ -838,7 +855,7 @@ function($){
 					}
 					
 					if( util.isEmpty( id ) ){
-						id = "no-id";
+						id = "no-id-" + new Date().getTime();
 					}			
 					return  id + this.idSuffix;
 				},
@@ -1092,6 +1109,13 @@ function($){
 		 * Defaults to true.
 		 */
 		hideOnBlur: true,
+		
+		
+		/* 
+		 * True to focus on the first input when the form is shown.
+		 * Defaults to false.
+		 */
+		focusOnInput: false,
 				    		
 		
 		/* 
@@ -1276,8 +1300,8 @@ function($){
 		
 			    		
 		/* 
-		 * Override this to control how the plugin gets the value from 
-		 * the input elements in the form.
+		 * Override this to determine the value the plugin gets from 
+		 * the form input.
 		 * 
 		 * @example
 		 * function(rowIndex, colIndex, computedValue, inputId, form, row, cell, header){} 
@@ -1332,8 +1356,5 @@ function($){
 		 */
 		renderInput: "" 
     };
-    
-    
-}
-
-);
+  
+});

@@ -93,6 +93,13 @@ Below are a couple of screen shots.
 	
 	
 	/* 
+	 * True to focus on the first input when the form is shown.
+	 * Defaults to false.
+	 */
+	focusOnInput: false,
+		
+			
+	/* 
 	 * A array of column objects.  The column object has the same set of properties 
 	 * as defined in the defaultColumn option below.  The defaultColumn option 
 	 * list all the available properties that can be set. 
@@ -101,7 +108,6 @@ Below are a couple of screen shots.
 	 * of this array as the colIndex.
 	 * 
 	 * Usage e.g. [  {id: "myid", colIndex:0, type: "checkbox"}, { colIndex:1, disabled: true} ]
-	 *
 	 */
 	columns: "", 
 	
@@ -273,8 +279,8 @@ Below are a couple of screen shots.
     		
 	getInputValue    			    		
 		/* 
-		 * Override this to control how the plugin gets the value from 
-		 * the input elements in the form.
+		 * Override this to determine the value the plugin gets from 
+		 * the form input.                    
 		 * 
 		 * @example
 		 * function(rowIndex, colIndex, computedValue, inputId, form, row, cell, header){} 

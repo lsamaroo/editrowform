@@ -36,6 +36,14 @@
 			$( "#table").editrowform(
 				{
 					click: true,  // for double clicking/clicking functionality
+					columns: [{colIndex:0, type:"checkbox"}],
+					getInputValue: function( rowIndex, colIndex, value ){
+						if( colIndex === 0 ){
+							return value ? "Yes": "No";
+						}
+						return value;
+					},
+					
 					renderInput: function( input, rowIdex, colIndex, header ){
 						// ignore the generated input for this column and create my own
 						if( colIndex == 1){
@@ -71,6 +79,7 @@
 </head>
 <body>
 	<br/>
+	Double click to edit.
 	<table id="table" class="simple-table" >
 		<thead>
 			<tr>
@@ -88,7 +97,7 @@
 		<tbody>
 			<tr>
 				<td>
-					<input type="checkbox"  value="true" readonly="readonly" disabled="disabled" />
+					Yes
 				</td>
 				<td>
 					apple
@@ -99,7 +108,7 @@
 			</tr>
 			<tr>
 				<td>
-					true
+					No
 				</td>
 				<td>
 					orange
