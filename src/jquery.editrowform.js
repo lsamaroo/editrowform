@@ -1,5 +1,5 @@
 /*!
- * Edit Row Form v1.2.9
+ * Edit Row Form v1.2.10
  * Docs & License: https://github.com/lsamaroo/editrowform
  * (c) 2015 Leon Samaroo
  */
