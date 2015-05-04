@@ -41,8 +41,8 @@ Below are a couple of screen shots.
 
 <br/>
 
-<h3>Like it?  If your in the mood for giving, donate to the Lupus Research institute</h3>
-Donating to the Lupus Research Institute (LRI) makes a real difference in the fight against lupus. Your generous contributions help advance new science and high-impact studies to prevent, treat and cure this devastating disease.
+<h3>Like it?  Donate to the Lupus Research institute.</h3>
+Donating to the Lupus Research Institute (LRI) makes a real difference in the fight against lupus. Help cure this devastating disease.
 <br/>
 https://secure.lupusresearchinstitute.org/donate
 
