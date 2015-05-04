@@ -11,6 +11,7 @@ Include the javascript and css file in your page.  The style sheet is pretty sim
 <ul>
 	<li>GitHub - https://github.com/lsamaroo/editrowform</li>
 	<li>NPM - https://www.npmjs.com/package/editrowform</li>
+	<li>Bower</li>
 </ul>
 
 
@@ -40,6 +41,11 @@ Below are a couple of screen shots.
 
 <br/>
 
+<h3>Like it?  If your in the mood for giving, donate to the Lupus Research institute</h3>
+Donating to the Lupus Research Institute (LRI) makes a real difference in the fight against lupus. Your generous contributions help advance new science and high-impact studies to prevent, treat and cure this devastating disease.
+<br/>
+https://secure.lupusresearchinstitute.org/donate
+
 <h3>API</h3>
 <h5>Options</h5>
 
@@ -56,7 +62,8 @@ Below are a couple of screen shots.
 
 		    		
 	/* 
-	 * True or false to turn on or off the double click and single click feature.  Defaults to true.
+	 * True or false to turn on or off the double click and single click feature.  
+	 * Defaults to true.
 	 */
 	click: true,
 	
@@ -157,8 +164,8 @@ Below are a couple of screen shots.
     		
 	onSave
 		/* 
-		 * Called when the save button is clicked.  Can be overridden to perform your own save 
-		 * action.  
+		 * Called when the save button is clicked.  Can be overridden to perform 
+		 * your own save action.  
 		 * 
 		 * @example
 		 * function(form, rowIndex, row, rowValues){}. 
@@ -289,7 +296,7 @@ Below are a couple of screen shots.
 		 * @param colIndex is the column index of the column.
 		 * @param computedValue is the value the plugin extracted from the input.
 		 * @param inputId is the id of the input.
-		 * @param is the form element.
+		 * @param form is the form element.
 		 * @param row is the row element.
 		 * @param cell is the cell element.
 		 * @param header is the header element.
@@ -310,7 +317,7 @@ Below are a couple of screen shots.
 		 * @param colIndex is the column index of the column.
 		 * @param value is the value being set.
 		 * @param inputId is the id of the input.
-		 * @param is the form element.
+		 * @param form is the form element.
 		 * @param row is the row element.
 		 * @param cell is the cell element.
 		 * @param header is the header element.
@@ -352,23 +359,25 @@ Below are a couple of screen shots.
 	addRow
         /* 
          * Add a row to the table. 
-         * If cloneExisting is true which by default it is, it will try to clone the last row.  Otherwise
-         * it will create a new row.
+         * If cloneExisting is true which by default it is, it will try 
+         * to clone the last row.  Otherwise it will create a new row.
          *  
          * @example
          * .editrowform( "addRow", cloneExisting )
          * 
-         * @param cloneExisting is an optional argument which default to true.  It will clone
-         *  an existing row from the table (the last one) to create a new row.  
-         *  If false, it will create a brand new row.
+         * @param cloneExisting is an optional argument which default to true.  
+         * It will clone an existing row from the table (the last one) to 
+         * create a new row.  If false, it will create a brand new row.
          * 
-         * @return the rowIndex of the newly created row or false if the function call did not add the row.
+         * @return the rowIndex of the newly created row or false if the 
+         * function call did not add the row.
          */	 	   	        
 
 			
 	deleteRow			
         /* 
-         * Remove the indicated row from the table.  This will remove it from the table DOM. 
+         * Remove the indicated row from the table.  This will remove it 
+         * from the table DOM. 
          *
          * @example
          * .editrowform( "deleteRow", rowIndex )
@@ -386,8 +395,8 @@ Below are a couple of screen shots.
          *  
          * @param rowIndex is the row index to set the values for.
          *  
-         * @param rowValues is an array of values to set for the row.  The index of the array 
-         * corresponds to the column index.   
+         * @param rowValues is an array of values to set for the row.  The index 
+         * of the array corresponds to the column index.   
          */
 
 			
