@@ -14,6 +14,16 @@ Include the javascript and css file in your page.  The style sheet is pretty sim
 	<li>Bower</li>
 </ul>
 
+<h3>Want to build it?</h3>
+You can use either the minified or source file as is however if you want to make tweaks 
+and build it you do the following.
+1.  If you don't have it already install gulp.
+	$ npm install --global gulp
+2.  Run npm install
+	$ npm install
+3.  Run gulp
+	$ gulp
+
 
 <h3>Examples:</h3>
 Take a look at the test directory for examples.  The following are currently available:
@@ -30,21 +40,17 @@ Take a look at the test directory for examples.  The following are currently ava
 Below are a couple of screen shots.
 
 <br/>
-
 ![alt tag](test/images/simple.png)
-
 ![alt tag](test/images/datepicker.png)
-
 ![alt tag](test/images/select.png)
-
 ![alt tag](test/images/ajax-save.png)
-
 <br/>
+
 
 <h3>Like it?  Donate to the Lupus Research institute.</h3>
 Donating to the Lupus Research Institute (LRI) makes a real difference in the fight against lupus. Help cure this devastating disease.
-<br/>
 https://secure.lupusresearchinstitute.org/donate
+
 
 <h3>API</h3>
 <h5>Options</h5>
@@ -451,3 +457,16 @@ https://secure.lupusresearchinstitute.org/donate
         * 
         * @return the number of columns in the table associated with this plugin
 		 */
+		 
+		 
+	getForm	 
+		/* 
+		 * Get the form created by this plugin.
+		 * 
+        * @example
+        * .editrowform( "getForm" )
+        * 
+        * @return the form object created by this plugin
+        * 
+		 */
+	 

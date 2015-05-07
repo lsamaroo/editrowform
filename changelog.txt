@@ -1,3 +1,13 @@
+v1.3.0 (2015-05-06)
+-------------------
+- I realized I was using the semver incorrectly.  I was not resetting the patch level version
+when upgrading the minor version.  Going forward the versions will be numbered correctly.
+- Add a hook to allow validating the input for a column by specifying a validate function.
+- Fix issue with undefined variable "input" in the getInputValue function.
+- Integrated gulp into the project in order to run common task.
+- Going forward there will be a minified version of the js and css files available.
+- expose the form object created by this plugin via getForm
+
 v1.2.10 (2015-03-25)
 -------------------
 - Add to bower.

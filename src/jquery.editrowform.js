@@ -1,5 +1,5 @@
 /*!
- * Edit Row Form v1.2.10
+ * Edit Row Form v1.3.0
  * Docs & License: https://github.com/lsamaroo/editrowform
  * (c) 2015 Leon Samaroo
  */
@@ -14,6 +14,8 @@
 }( this, 
 
 function($){
+	"use strict";
+	
     // Add plugin to JQuery
     $.fn.editrowform = function(options){
     	var args = Array.prototype.slice.call(arguments, 1); // for a possible method call
@@ -69,23 +71,25 @@ function($){
    
         /* 
          * Add a row to the table. 
-         * If cloneExisting is true which by default it is, it will try to clone the last row.  Otherwise
-         * it will create a new row.
+         * If cloneExisting is true which by default it is, it will try 
+         * to clone the last row.  Otherwise it will create a new row.
          *  
          * @example
          * .editrowform( "addRow", cloneExisting )
          * 
-         * @param cloneExisting is an optional argument which default to true.  It will clone
-         *  an existing row from the table (the last one) to create a new row.  
-         *  If false, it will create a brand new row.
+         * @param cloneExisting is an optional argument which default to true.  
+         * It will clone an existing row from the table (the last one) to 
+         * create a new row.  If false, it will create a brand new row.
          * 
-         * @return the rowIndex of the newly created row or false if the function call did not add the row.
+         * @return the rowIndex of the newly created row or false if the 
+         * function call did not add the row.
          */	        
         base.addRow = addRow;
 		
 		
         /* 
-         * Remove the indicated row from the table.  This will remove it from the table DOM. 
+         * Remove the indicated row from the table.  This will remove it 
+         * from the table DOM. 
          *
          * @example
          * .editrowform( "deleteRow", rowIndex )
@@ -103,8 +107,8 @@ function($){
          *  
          * @param rowIndex is the row index to set the values for.
          *  
-         * @param rowValues is an array of values to set for the row.  The index of the array 
-         * corresponds to the column index.   
+         * @param rowValues is an array of values to set for the row.  The index 
+         * of the array corresponds to the column index.   
          */
         base.setRowValues = setRowValues; 
 		
@@ -160,6 +164,20 @@ function($){
          * @return the number of columns in the table associated with this plugin
 		 */
 		base.getColumnCount = getColumnCount;
+		
+		
+
+		/* 
+		 * Get the form created by this plugin.
+		 * 
+         * @example
+         * .editrowform( "getForm" )
+         * 
+         * @return the form object created by this plugin
+         * 
+		 */
+		base.getForm = getForm;
+		
 
 		
 		
@@ -171,13 +189,13 @@ function($){
         var INPUT_CLASS_PREFIX = "input-";
         var CELL_CLASS_PREFIX = "cell-";
         var DEFAULT_COL_TYPE = "text";
-        var $columnMap = {};
-        var $formDiv = null;
-        var $form = null;
-        var $buttonBar = null;
-        var $currentRow = null;
-        var $currentRowIndex = null;
-        var $public_show_called;
+        var _columnMap = {};
+        var _formDiv = null;
+        var _form = null;
+        var _buttonBar = null;
+        var _currentRow = null;
+        var _currentRowIndex = null;
+        var _public_show_called;
  
         function init(){
 	        // Add a reverse reference to the DOM object
@@ -200,15 +218,15 @@ function($){
             
             if( base.options.hideOnBlur ){
 				$(document).click( function(e) {
-					var isClickOnForm = $(e.target).closest( $formDiv ).length;
+					var isClickOnForm = $(e.target).closest( _formDiv ).length;
 					var isClickOnTable = $(e.target).closest( base.el ).length;
 					
-					if ( !(isClickOnForm || isClickOnTable )  && !$public_show_called ) {
+					if ( !(isClickOnForm || isClickOnTable )  && !_public_show_called ) {
 						hide();		
 					}	
 					
 					// reset
-					$public_show_called = false;	
+					_public_show_called = false;	
 				});
             }
         }
@@ -220,10 +238,15 @@ function($){
         
         
         function singleClick( tr ){
-    		if( !util.isHidden( $formDiv ) ){
+    		if( !util.isHidden( _formDiv ) ){
     			interal_show( $(tr).index() );
     		}	        	
         }
+        
+        
+		function getForm(){
+			return _form;			
+		}
         
       
 		function save(){	
@@ -231,22 +254,22 @@ function($){
 			if( util.isNotEmpty( timeout ) ){
 				util.timeoutButton( idGen.getSaveButtonId(), timeout );
 			}
-			var i, inputValue;
+			var inputValue;
 			var saved = true;
 			var rowValues = [];
 			
-			for( i = 0; i < getColumnCount(); i++ ){
+			for( var i = 0; i < getColumnCount(); i++ ){
 				inputValue = getInputValue( i );
 				rowValues.push( inputValue );						
 			}	
 							
 			var onSave = getOptions().onSave;			
 			if( util.functionExists( onSave ) ){
-				saved = onSave($form, $currentRowIndex, $currentRow, rowValues);	
+				saved = onSave(_form, _currentRowIndex, _currentRow, rowValues);	
 			}
 			
 			if( saved || util.isEmpty(saved) ){					
-				setRowValues( $currentRowIndex, rowValues );				
+				setRowValues( _currentRowIndex, rowValues );				
 				hide();
 			}
 		}
@@ -262,7 +285,7 @@ function($){
 			
 			var onCancel = getOptions().onCancel;		
 			if( util.functionExists( onCancel ) ){
-				cancelled = onCancel( $form, $currentRowIndex, $currentRow);
+				cancelled = onCancel( _form, _currentRowIndex, _currentRow);
 			}			
 			
 			if( cancelled || util.isEmpty( cancelled ) ){
@@ -277,7 +300,7 @@ function($){
         	}
         	var add = true;
         	var rowCount = getRowCount();     	
-        	var newRow = (rowCount != 0 && cloneExisting) ? cloneLastRow() : createRow();
+        	var newRow = (rowCount !== 0 && cloneExisting) ? cloneLastRow() : createRow();
 
 			var onAddRow = getOptions().onAddRow;		
 			if( util.functionExists( onAddRow ) ){
@@ -316,7 +339,7 @@ function($){
         	
         	// blank out the row
         	$( "td", newRow ).each( function(index, cell){
-        		var column = $columnMap[index];
+        		var column = _columnMap[index];
         		if( !column.ignore ){
         			$(this).html( "&nbsp;" );
         		}
@@ -365,7 +388,7 @@ function($){
 				return;
 			}
 			
-			for( i = 0; i < getColumnCount(); i++ ){
+			for( var i = 0; i < getColumnCount(); i++ ){
 				if( !isDisabled( i ) && !ignoreColumn(i) ){
 					setCellValue( rowIndex, i, rowValues[i] );
 				}
@@ -374,7 +397,7 @@ function($){
 		
 		
 		function show( rowIndex ){
-			$public_show_called = true;
+			_public_show_called = true;
 			interal_show( rowIndex );
 		}
 		
@@ -384,26 +407,26 @@ function($){
 				return;
 			}
 
-			if( $formDiv != null ){
+			if( _formDiv !== null ){
 				setPluginWidthHeightForRow( rowIndex );			
 				var row = getRow(rowIndex );
 				setFormPosition( row );	
 				setFormValues(rowIndex);						
-				$formDiv.show();
+				_formDiv.show();
 				setButtonBarPosition();
 				if( getOptions().focusOnInput ){
 					focusFirstInput();
 				}
 				
 				// set plugin global
-				$currentRow = row;	
-				$currentRowIndex = rowIndex;
+				_currentRow = row;	
+				_currentRowIndex = rowIndex;
 			}
 		}
 		
 		
 		function focusFirstInput(){
-			$( "input", $formDiv ).each( function(index, input){
+			$( "input", _formDiv ).each( function(index, input){
 				var disabled = $(input).prop( "disabled" );
 				if( !disabled ){
 					$(input).focus();
@@ -415,11 +438,11 @@ function($){
 		
 		/* Hide the edit form if it is currently visible */
 		function hide(){
-			if( $formDiv != null && !util.isHidden($formDiv) ){
-				$formDiv.hide();
+			if( _formDiv !== null && !util.isHidden(_formDiv) ){
+				_formDiv.hide();
 				var onHide = getOptions().onHide;		
 				if( util.functionExists( onHide ) ){
-					onHide( $form, $currentRowIndex, $currentRow);
+					onHide( _form, _currentRowIndex, _currentRow);
 				}	
 			}
 		}
@@ -428,9 +451,9 @@ function($){
 		/* Remove the plugin from the DOM and cleanup */
 		function destroy(){
 			 base.$el.removeData( "editrowform" );	
-			 if( $formDiv ){
-				 $formDiv.remove();
-				 $formDiv = null;
+			 if( _formDiv ){
+				 _formDiv.remove();
+				 _formDiv = null;
 			 }
 		}			
         
@@ -469,7 +492,7 @@ function($){
 			var row = getRow( rowIndex );
 			var cell;
 			if( util.isNotEmpty( row ) ){
-				cell = $( 'td', row )[colIndex];;
+				cell = $( 'td', row )[colIndex];
 			}
 			return cell;
 		}
@@ -563,11 +586,11 @@ function($){
 			
 			var func = getOptions().setInputValue;
 			if( util.functionExists(  func ) ){
-				func( rowIndex, colIndex, value, inputId, $form, getRow( rowIndex ), getCell( rowIndex, colIndex ), getHeader( colIndex) );
+				func( rowIndex, colIndex, value, inputId, _form, getRow( rowIndex ), getCell( rowIndex, colIndex ), getHeader( colIndex) );
 			}
 			else{
 				colType = getColumnType( colIndex );
-				input = $( "." + INPUT_CLASS_PREFIX + colIndex, $form );
+				input = $( "." + INPUT_CLASS_PREFIX + colIndex, _form );
 				inputUtil.setValue( input, colType, value );
 			}
 		}
@@ -576,15 +599,15 @@ function($){
 		function getInputValue( colIndex ){
 			var value;
 			
-			input = $( "." + INPUT_CLASS_PREFIX + colIndex , $form );
+			var input = $( "." + INPUT_CLASS_PREFIX + colIndex , _form );
 			if( !util.isEmptyArray( input) ){
 				value = inputUtil.getValue( input, getColumnType( colIndex ) );
 			}
 			
 			var func = getOptions().getInputValue;
 			if( util.functionExists(  func ) ){
-				value = func( $currentRowIndex, colIndex, value, idGen.getInputId(colIndex), 
-						$form, $currentRow, getCell( $currentRowIndex, colIndex ), getHeader( colIndex)  );
+				value = func( _currentRowIndex, colIndex, value, idGen.getInputId(colIndex), 
+						_form, _currentRow, getCell( _currentRowIndex, colIndex ), getHeader( colIndex)  );
 			}
 		
 			return value;
@@ -607,7 +630,7 @@ function($){
 			// Check if a function was passed into the option and execute that
 			var func = getOptions().renderInput;
 			if( util.functionExists(  func ) ){
-				input = func( input, $currentRowIndex, colIndex, getHeader( colIndex ) );
+				input = func( input, _currentRowIndex, colIndex, getHeader( colIndex ) );
 			}
 			if( input ){
 				$(input).addClass( INPUT_CLASS_PREFIX + colIndex );	
@@ -647,7 +670,7 @@ function($){
             }
             	            
             // set plugin global
-            $columnMap = columnMap;
+            _columnMap = columnMap;
         }
         
 		
@@ -673,9 +696,9 @@ function($){
 			buttonBar.appendTo( div );
 			
 			// add to plugin global scope
-			$buttonBar = buttonBar;
-			$formDiv = div;
-			$form = form;				
+			_buttonBar = buttonBar;
+			_formDiv = div;
+			_form = form;				
 		}
 						
 		
@@ -733,20 +756,20 @@ function($){
 		
 		function setFormPosition(row){
 			var positionOfRow = $( row ).offset();
-			util.position( $formDiv, positionOfRow.top, positionOfRow.left );
+			util.position( _formDiv, positionOfRow.top, positionOfRow.left );
 		}
 
 		
 		function setButtonBarPosition(){
-			var barWidth = $($buttonBar).innerWidth();
+			var barWidth = $(_buttonBar).innerWidth();
 			var width = base.$el.innerWidth();
 			var offset = (width - barWidth)/2;
-			$buttonBar.css({left: offset, position:'absolute'});
+			_buttonBar.css({left: offset, position:'absolute'});
 		}
 		
 		
 		function getColumnType(colIndex){
-			var type = $columnMap[colIndex].type;
+			var type = _columnMap[colIndex].type;
 			if( type === "datepicker" && !$.datepicker ){
 				// if jquery ui datepicker is not available default to text
 				return DEFAULT_COL_TYPE;
@@ -766,7 +789,7 @@ function($){
 			// probably only have html or checkbox  and not other types 
 			// of input or select.
 			
-			//var rowIndex =  util.isEmpty( $currentRowIndex ) ? 0 : $currentRowIndex;
+			//var rowIndex =  util.isEmpty( _currentRowIndex ) ? 0 : _currentRowIndex;
 			var cell = getCell(0, colIndex);
 			var type = $( "input, select, textarea", cell ).prop( "type" );
 			
@@ -783,7 +806,7 @@ function($){
 		
 		
 		function isDisabled( colIndex ){
-			var disabled = $columnMap[colIndex].disabled;
+			var disabled = _columnMap[colIndex].disabled;
 			if( util.isNotEmpty( disabled ) ){
 				return util.toBoolean( disabled );
 			}					
@@ -792,7 +815,7 @@ function($){
 		
 		
 		function ignoreColumn( colIndex ){
-			var ignore = $columnMap[colIndex].ignore;
+			var ignore = _columnMap[colIndex].ignore;
 			if( util.isNotEmpty( ignore ) ){
 				return util.toBoolean( ignore );
 			}					
@@ -809,7 +832,7 @@ function($){
 				return $(header).innerWidth();
 			}
 			
-			var cell = getCell( $currentRowIndex, colIndex );
+			var cell = getCell( _currentRowIndex, colIndex );
 			if( util.isNotEmpty( cell ) ){
 				return $(cell).innerWidth();
 			}
@@ -828,11 +851,11 @@ function($){
 		
 		
 		function setPluginWidthHeightForRow( rowIndex ){
-			$formDiv.width( util.getWidth(base.el) );		
-			$( ".row .cell", $formDiv ).height( getRowHeight( rowIndex ) );
+			_formDiv.width( util.getWidth(base.el) );		
+			$( ".row .cell", _formDiv ).height( getRowHeight( rowIndex ) );
 			
 			for( var i = 0; i < getColumnCount(); i++ ){
-				var cell = $(  "." + CELL_CLASS_PREFIX + i, $formDiv );
+				var cell = $(  "." + CELL_CLASS_PREFIX + i, _formDiv );
 				var colWidth = getColumnWidth(i);
 				cell.width( colWidth );
 				
@@ -861,7 +884,7 @@ function($){
 				},
 				
 				getInputId: function( colIndex ){
-					var id = $columnMap[colIndex].id;
+					var id = _columnMap[colIndex].id;
 					if( util.isNotEmpty( id ) ){
 						return id;
 					}
@@ -872,14 +895,14 @@ function($){
 				
 				
 				getInputName: function( colIndex ){
-					var name = $columnMap[colIndex].name;
+					var name = _columnMap[colIndex].name;
 					if( util.isNotEmpty( name ) ){
 						return name;
 					}
 					
 					// get header name
 					var header = getHeader( colIndex );
-					name = $(header).text().trim()
+					name = $(header).text().trim();
 					if( util.isNotEmpty( name ) ){
 						return name;
 					}
@@ -907,7 +930,7 @@ function($){
 				getCancelButtonId: function( ){
 					return this.getEditRowFormId() + "-cancel";
 				}	
-		}
+		};
 		
 
 		var util = {
@@ -933,7 +956,7 @@ function($){
 					}
 					
 					if( typeof obj.length !== 'undefined' ){
-						return obj.length == 0;
+						return obj.length === 0;
 					}
 					
 					return true;
@@ -941,10 +964,11 @@ function($){
 				
 				isEmpty: function( obj ){
 					return ( 
-							obj == null || obj === null || 
+							obj === undefined || 
+							obj === null || 
 							typeof obj === 'undefined' ||
 							 $.trim(obj) == 'null' || 
-							 $.trim(obj) == ''
+							 $.trim(obj) === ''
 						   );							
 				},
 				
@@ -985,7 +1009,7 @@ function($){
 						return false;
 					}
 				}
-		}
+		};
 		
 		
 		var inputUtil = {	
@@ -1037,7 +1061,7 @@ function($){
 				setCheckboxValue: function( input, value ){
 					$( input ).prop( "checked", util.toBoolean( value ) );
 				}
-		}
+		};
 		
 		
 		var template = {
@@ -1048,7 +1072,7 @@ function($){
 				button: "<button />",
 				textfield: "<input type='text' />",
 				checkbox: "<input type='checkbox' />"
-		}
+		};
 		
 
 		// Run initializer
@@ -1178,8 +1202,8 @@ function($){
 		
 
 		/* 
-		 * Called when the save button is clicked.  Can be overridden to perform your own save 
-		 * action.  
+		 * Called when the save button is clicked.  Can be overridden to perform 
+		 * your own save action. 
 		 * 
 		 * @example
 		 * function(form, rowIndex, row, rowValues){}. 
@@ -1310,7 +1334,7 @@ function($){
 		 * @param colIndex is the column index of the column.
 		 * @param computedValue is the value the plugin extracted from the input.
 		 * @param inputId is the id of the input.
-		 * @param is the form element.
+		 * @param form is the form element.
 		 * @param row is the row element.
 		 * @param cell is the cell element.
 		 * @param header is the header element.
@@ -1331,7 +1355,7 @@ function($){
 		 * @param colIndex is the column index of the column.
 		 * @param value is the value being set.
 		 * @param inputId is the id of the input.
-		 * @param is the form element.
+		 * @param form is the form element.
 		 * @param row is the row element.
 		 * @param cell is the cell element.
 		 * @param header is the header element.
