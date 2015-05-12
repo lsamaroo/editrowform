@@ -15,14 +15,13 @@ Include the javascript and css file in your page.  The style sheet is pretty sim
 </ul>
 
 <h3>Want to build it?</h3>
-You can use either the minified or source file as is however if you want to make tweaks 
-and build it you do the following.
-1.  If you don't have it already install gulp.
-	$ npm install --global gulp
-2.  Run npm install
-	$ npm install
-3.  Run gulp
-	$ gulp
+You can use the minified file or source file as is.  But if you really 
+want to build it, then follow the steps below.
+1.  $ npm install --global gulp  (you can skip this if you already have gulp installed)
+<br>
+2.  $ npm install
+<br>
+3.  $ gulp
 
 
 <h3>Examples:</h3>
@@ -39,16 +38,17 @@ Take a look at the test directory for examples.  The following are currently ava
 
 Below are a couple of screen shots.
 
-<br/>
+<br>
 ![alt tag](test/images/simple.png)
 ![alt tag](test/images/datepicker.png)
 ![alt tag](test/images/select.png)
 ![alt tag](test/images/ajax-save.png)
-<br/>
+<br>
 
 
 <h3>Like it?  Donate to the Lupus Research institute.</h3>
 Donating to the Lupus Research Institute (LRI) makes a real difference in the fight against lupus. Help cure this devastating disease.
+<br>
 https://secure.lupusresearchinstitute.org/donate
 
 
@@ -141,8 +141,8 @@ https://secure.lupusresearchinstitute.org/donate
 		
 		/* 
 		 * If set, it is used as the name of the input element for that column.
-		 * If empty, it will use the header text.  Finally if that is not 
-		 * available, then it generates a name.
+		 * If empty, it will use the id.  If the id is not set then it will use the 
+		 * header text.  Finally if that is not available, then it generates a name.
 		 */
 		name: "", 
 		
@@ -165,6 +165,11 @@ https://secure.lupusresearchinstitute.org/donate
 		 * for the column when set to true.
 		 */
 		ignore: "", 
+		
+		/* 
+		 * A default value to set the input to
+		 */			
+		defaultValue: ""		
 	}
     		
     		
@@ -350,7 +355,7 @@ https://secure.lupusresearchinstitute.org/donate
 
 
 
-<br/>
+<br>
 <h5>Public Methods</h5>
 
 	save

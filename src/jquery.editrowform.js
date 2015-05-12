@@ -623,6 +623,11 @@ function($){
 			var inputName = idGen.getInputName(colIndex);
 			var input = inputUtil.createInput( inputId, inputName, getColumnType( colIndex ) );	
 			
+			var defaultValue = getDefaultValue( colIndex );
+			if( util.isNotEmpty( defaultValue ) ){
+				input.val( defaultValue );
+			}					
+		
 			if( isDisabled( colIndex ) ){
 				input.prop( "disabled", true );
 			}
@@ -823,6 +828,11 @@ function($){
 		}
 		
 		
+		function getDefaultValue( colIndex ){
+			return _columnMap[colIndex].defaultValue;
+		}
+		
+		
 		function getColumnWidth(colIndex){
 			// check for header
 			var header = getHeader(colIndex);
@@ -900,7 +910,13 @@ function($){
 						return name;
 					}
 					
-					// get header name
+					// or else use id
+					name = _columnMap[colIndex].id;
+					if( util.isNotEmpty( name ) ){
+						return name;
+					}
+					
+					// or get header name
 					var header = getHeader( colIndex );
 					name = $(header).text().trim();
 					if( util.isNotEmpty( name ) ){
@@ -1172,8 +1188,8 @@ function($){
 			
 			/* 
 			 * If set, it is used as the name of the input element for that column.
-			 * If empty, it will use the header text.  Finally if that is not 
-			 * available, then it generates a name.
+			 * If empty, it will use the id.  If the id is not set then it will use the 
+			 * header text.  Finally if that is not available, then it generates a name.
 			 */
 			name: "", 
 			
@@ -1196,7 +1212,14 @@ function($){
 			 * Unlike disabled, ignore will simply not render any input 
 			 * for the column when set to true.
 			 */
-			ignore: ""
+			ignore: "",
+			
+			/* 
+			 * A default value to set the input to
+			 */			
+			defaultValue: ""
+			
+			
 		},
 		
 		
