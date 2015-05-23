@@ -1,7 +1,7 @@
 @CHARSET "ISO-8859-1";
 
 .erf {
-	white-space: nowrap;
+
 }
 
 .erf .row {
@@ -10,12 +10,12 @@
 
 .erf .row .cell {
 	display: table-cell;
-	text-align: center;
 	vertical-align: middle;
+	text-align: center;
 }
 
 .erf .row .cell input {
-	padding-left: 0px;
+
 }
 
 

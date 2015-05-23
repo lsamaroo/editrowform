@@ -36,7 +36,7 @@
 			$( "#table").editrowform(
 				{
 					click: true,  // for double clicking/clicking functionality
-					columns: [{colIndex:0, type:"checkbox"}],
+					columns: [{colIndex:0, type:"checkbox", defaultValue: "true", id: "myinput"}],
 					getInputValue: function( rowIndex, colIndex, value ){
 						if( colIndex === 0 ){
 							return value ? "Yes": "No";

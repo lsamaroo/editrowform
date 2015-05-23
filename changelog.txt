@@ -1,3 +1,11 @@
+v1.3.2 (2015-05-23)
+-------------------
+- Add event to reposition the pop-up when the window resizes.
+- Replaced the cloneExisting argument from addRow in favor rowTemplate argument.  The rowTemplate argument is an actual tr dom, string or function to create a row.
+However for backward compatibility you can still pass in true/false for old behavior.
+
+
+
 v1.3.1 (2015-05-11)
 -------------------
 - If a name isn't given in the column option but an id is, then it will use the id as the name as well.

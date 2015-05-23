@@ -1,5 +1,5 @@
 /*!
- * Edit Row Form v1.3.0
+ * Edit Row Form v1.3.2
  * Docs & License: https://github.com/lsamaroo/editrowform
  * (c) 2015 Leon Samaroo
  */
@@ -71,15 +71,19 @@ function($){
    
         /* 
          * Add a row to the table. 
-         * If cloneExisting is true which by default it is, it will try 
-         * to clone the last row.  Otherwise it will create a new row.
+         * If templateRow is passed in, it will use that to add the row.  
+         * Otherwise it will create a new row.
          *  
          * @example
-         * .editrowform( "addRow", cloneExisting )
+         * .editrowform( "addRow", templateRow )
          * 
-         * @param cloneExisting is an optional argument which default to true.  
-         * It will clone an existing row from the table (the last one) to 
-         * create a new row.  If false, it will create a brand new row.
+         * @param templateRow is an optional argument. It can be
+         * a dom element or string representing a row or a function
+ 		 * which return a row to add.
+         * 
+         * For backward compatibility if left empty or set to true, it will still   
+         * attempt to clone an the existing last row.  In future releases
+         * this will be removed.
          * 
          * @return the rowIndex of the newly created row or false if the 
          * function call did not add the row.
@@ -229,6 +233,13 @@ function($){
 					_public_show_called = false;	
 				});
             }
+            
+            
+            // Dynamically position the form based on window size 
+            $( window ).resize( function() {
+            	setFormPosition( _currentRow );
+            } );
+            
         }
         
         
@@ -294,14 +305,24 @@ function($){
 		}
 		
 		
-        function addRow( cloneExisting /* optional */){
-        	if( util.isEmpty( cloneExisting ) ){
-        		cloneExisting = true;
-        	}
+        function addRow( templateRow /* optional */){
         	var add = true;
-        	var rowCount = getRowCount();     	
-        	var newRow = (rowCount !== 0 && cloneExisting) ? cloneLastRow() : createRow();
-
+        	var rowCount = getRowCount();   
+        	var newRow;
+        	
+        	if( (templateRow === true ||  util.isEmpty( templateRow ) ) && rowCount !== 0){
+        		newRow = cloneLastRow();
+        	}
+        	else if( templateRow === true || templateRow === false || util.isEmpty( templateRow ) ){
+        		newRow = createRow();
+        	}
+        	else if(  util.functionExists( templateRow) ){
+        		newRow = cloneRow( templateRow() );
+        	}
+        	else{
+        		newRow = cloneRow( templateRow );
+        	}
+        	
 			var onAddRow = getOptions().onAddRow;		
 			if( util.functionExists( onAddRow ) ){
 				add = onAddRow( rowCount, newRow);
@@ -328,6 +349,11 @@ function($){
 			}
 		}
         
+		
+		function cloneRow( templateRow ){
+        	return $(templateRow).clone();
+		}
+		
 		
 		function cloneLastRow(){
         	var rowCount = getRowCount();
@@ -408,7 +434,7 @@ function($){
 			}
 
 			if( _formDiv !== null ){
-				setPluginWidthHeightForRow( rowIndex );			
+				setPluginWidthAndHeight( rowIndex );			
 				var row = getRow(rowIndex );
 				setFormPosition( row );	
 				setFormValues(rowIndex);						
@@ -760,6 +786,10 @@ function($){
 		
 		
 		function setFormPosition(row){
+			if( util.isEmpty(row) ){
+				return;
+			}
+			
 			var positionOfRow = $( row ).offset();
 			util.position( _formDiv, positionOfRow.top, positionOfRow.left );
 		}
@@ -860,9 +890,12 @@ function($){
 		}
 		
 		
-		function setPluginWidthHeightForRow( rowIndex ){
-			_formDiv.width( util.getWidth(base.el) );		
-			$( ".row .cell", _formDiv ).height( getRowHeight( rowIndex ) );
+		function setPluginWidthAndHeight( rowIndex ){
+			_formDiv.width( util.getWidth(base.el) );	
+			var height = getRowHeight( rowIndex );
+			
+			$( ".row", _formDiv ).height( height );
+			$( ".row .cell", _formDiv ).height( height );
 			
 			for( var i = 0; i < getColumnCount(); i++ ){
 				var cell = $(  "." + CELL_CLASS_PREFIX + i, _formDiv );
@@ -1007,6 +1040,7 @@ function($){
 				position: function( obj, top, left ){
 					$( obj ).css({top: top, left: left, position:'absolute'});
 				},
+				
 				
 				toBoolean: function( text ){
 					if( this.isEmpty( text ) ){
@@ -1296,8 +1330,8 @@ function($){
 		
 		/* 
 		 * Called when addRow is called.  Can be used to perform additional
-		 *  task associated with adding the row. For example you can add 
-		 *  a css class to the row.
+		 * task associated with adding the row. For example you can add 
+		 * a css class to the row.
 		 * 
 		 * @example
 		 * function(rowIndex, row){}. 

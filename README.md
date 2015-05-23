@@ -17,11 +17,11 @@ Include the javascript and css file in your page.  The style sheet is pretty sim
 <h3>Want to build it?</h3>
 You can use the minified file or source file as is.  But if you really 
 want to build it, then follow the steps below.
-1.  $ npm install --global gulp  (you can skip this if you already have gulp installed)
+$ npm install --global gulp  (you can skip this if you already have gulp installed)
 <br>
-2.  $ npm install
+$ npm install
 <br>
-3.  $ gulp
+$ gulp
 
 
 <h3>Examples:</h3>
@@ -246,8 +246,8 @@ https://secure.lupusresearchinstitute.org/donate
  	onAddRow   		
 		/* 
 		 * Called when addRow is called.  Can be used to perform additional
-		 *  task associated with adding the row. For example you can add 
-		 *  a css class to the row.
+		 * task associated with adding the row. For example you can add 
+		 * a css class to the row.
 		 * 
 		 * @example
 		 * function(rowIndex, row){}. 
@@ -370,20 +370,24 @@ https://secure.lupusresearchinstitute.org/donate
 	addRow
         /* 
          * Add a row to the table. 
-         * If cloneExisting is true which by default it is, it will try 
-         * to clone the last row.  Otherwise it will create a new row.
+         * If templateRow is passed in, it will use that to add the row.  
+         * Otherwise it will create a new row.
          *  
          * @example
-         * .editrowform( "addRow", cloneExisting )
+         * .editrowform( "addRow", templateRow )
          * 
-         * @param cloneExisting is an optional argument which default to true.  
-         * It will clone an existing row from the table (the last one) to 
-         * create a new row.  If false, it will create a brand new row.
-         * 
-         * @return the rowIndex of the newly created row or false if the 
-         * function call did not add the row.
-         */	 	   	        
-
+         * @param templateRow is an optional argument. It can be
+         * a dom element or string representing a row or a function
+ 			* which return a row to add.
+	        * 
+	        * For backward compatibility if left empty or set to true, it will still   
+	        * attempt to clone an the existing last row.  In future releases
+	        * this will be removed.
+	        * 
+	        * @return the rowIndex of the newly created row or false if the 
+	        * function call did not add the row.
+	        */	   
+         
 			
 	deleteRow			
         /* 
