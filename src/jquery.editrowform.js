@@ -1,5 +1,5 @@
 /*!
- * Edit Row Form v1.3.2
+ * Edit Row Form v1.3.3
  * Docs & License: https://github.com/lsamaroo/editrowform
  * (c) 2015 Leon Samaroo
  */
@@ -725,6 +725,11 @@ function($){
 			
 			var buttonBar = buildButtonBar();
 			buttonBar.appendTo( div );
+			
+			form.submit( function( event  ){
+				event.preventDefault();
+				save();
+			});
 			
 			// add to plugin global scope
 			_buttonBar = buttonBar;

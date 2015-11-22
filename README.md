@@ -15,9 +15,10 @@ Include the javascript and css file in your page.  The style sheet is pretty sim
 </ul>
 
 <h3>Want to build it?</h3>
-You can use the minified file or source file as is.  But if you really 
-want to build it, then follow the steps below.
-$ npm install --global gulp  (you can skip this if you already have gulp installed)
+You can use the minified file or source file as is.  But if you 
+want to make some changes and rebuild it, then follow the steps below.
+<br>
+$ npm install --global gulp  (skip if you already have gulp installed)
 <br>
 $ npm install
 <br>
