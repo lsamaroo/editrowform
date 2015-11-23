@@ -2,7 +2,8 @@ var gulp = require('gulp'),
     jshint = require('gulp-jshint'),
     rename = require('gulp-rename'),
     uglify = require('gulp-uglify'),
-    minifyCss = require('gulp-minify-css');
+    minifyCss = require('gulp-minify-css')
+    beautify = require('gulp-jsbeautifier');
 
 var sourceDirectory = 'src';
 var targetDirectory = 'src';
@@ -17,8 +18,19 @@ gulp.task('lint', function() {
     	.pipe(jshint.reporter('default'));
 });
 
+gulp.task('beautify', function() {
+	  gulp.src( [jsFiles, ignoreMinFiles] )
+	    .pipe(beautify({indentSize: 4}))
+	    .pipe(gulp.dest(targetDirectory))
+});
 
-gulp.task('minify', function() {
+gulp.task('beautify-css', function() {
+	  gulp.src( [cssFiles, ignoreMinFiles] )
+	    .pipe(beautify({indentSize: 4}))
+	    .pipe(gulp.dest(targetDirectory))
+});
+
+gulp.task('minify', ['beautify'], function() {
 	gulp.src( [jsFiles, ignoreMinFiles] )
 		.pipe(uglify())
 	    .pipe(rename({suffix: '.min'}))
@@ -26,11 +38,11 @@ gulp.task('minify', function() {
 });
 
 
-gulp.task('minify-css', function() {
+gulp.task('minify-css', ['beautify-css'], function() {
 	gulp.src([cssFiles, ignoreMinFiles])
     	.pipe(minifyCss({compatibility: 'ie8'}))
     	.pipe(rename({suffix: '.min'}))
     	.pipe(gulp.dest(targetDirectory));
 });
 
-gulp.task('default', ['lint','minify', 'minify-css'] );
+gulp.task('default', ['lint', 'minify', 'minify-css'] );

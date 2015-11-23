@@ -1,6 +1,6 @@
 {
   "name": "editrowform",
-  "version": "1.3.3",
+  "version": "1.3.4",
   "main": "src/jquery.editrowform.js",
   "ignore": [
   		".settings",

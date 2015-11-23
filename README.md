@@ -1,11 +1,11 @@
 # editrowform
-"A jquery plugin which allows you to edit each row of a table inline as a comprehensive form complete with a save and cancel button.  You can also use it to add or delete rows."
+"A jquery plugin which allows you to edit each row of a table in line complete with a save and cancel button.  You can also use it to add or delete rows."
 
 <h3>What's new?</h3>
 Check the changelog.txt for a complete listing of changes in each version.
 
 <h3>Usage:</h3>
-Include the javascript and css file in your page.  The style sheet is pretty simple so override it to fit your needs.  It can also be used as an AMD module.
+Include the javascript and css file in your page.  The style sheet is pretty simple so override it to fit your needs. 
 
 <h3>Where can I get it?</h3>
 <ul>
@@ -18,11 +18,13 @@ Include the javascript and css file in your page.  The style sheet is pretty sim
 You can use the minified file or source file as is.  But if you 
 want to make some changes and rebuild it, then follow the steps below.
 <br>
-$ npm install --global gulp  (skip if you already have gulp installed)
+Skip step 1 if you already have gulp installed.
 <br>
-$ npm install
+1. $ npm install --global gulp
 <br>
-$ gulp
+2. $ npm install
+<br>
+3. $ gulp
 
 
 <h3>Examples:</h3>
@@ -31,8 +33,8 @@ Take a look at the test directory for examples.  The following are currently ava
 <ul>
 	<li>A simple example showing check boxes and disabling a column</li>
 	<li>A datepicker example</li>
-	<li>A select dropdown example by overriding renderInput</li>
-	<li>Saving with a ajax call</li>
+	<li>A select dropdown example by overriding <code>renderInput</code></li>
+	<li>Saving with an ajax call</li>
 	<li>Removing the save and cancel button and saving when the form gets hidden.</li>
 	<li>An AMD example using require.js</li>
 </ul>
@@ -50,7 +52,8 @@ Below are a couple of screen shots.
 <h3>Like it?  Donate to the Lupus Research institute.</h3>
 Donating to the Lupus Research Institute (LRI) makes a real difference in the fight against lupus. Help cure this devastating disease.
 <br>
-https://secure.lupusresearchinstitute.org/donate
+[Donate to Lupus Research Institute](https://secure.lupusresearchinstitute.org/donate)
+
 
 
 <h3>API</h3>
