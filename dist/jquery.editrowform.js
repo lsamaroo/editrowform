@@ -245,12 +245,14 @@
 
 
             function doubleClick(tr) {
+                hide();
                 interal_show($(tr).index());
             }
 
 
             function singleClick(tr) {
                 if (!util.isHidden(_formDiv)) {
+                    hide();
                     interal_show($(tr).index());
                 }
             }
