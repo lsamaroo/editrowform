@@ -1,9 +1,9 @@
-v1.3.4 (2015-11-22)
+v1.3.4 (2015-11-23)
 -------------------
 - Include beautify as part of the build process.
 - Format source file to use single qoutes for strings.
-
-
+- Move binaries to the dist folder.
+- Point to the correct main file in the package.json file.
 
 
 v1.3.3 (2015-11-22)

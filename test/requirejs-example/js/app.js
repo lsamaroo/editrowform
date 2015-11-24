@@ -10,7 +10,7 @@ requirejs.config({
        * This is just for the demo.  You would be able to add the 
        * file directly to your baseUrl directory.
        */
-      "jquery.editrowform": "../../../../src/jquery.editrowform"
+      "jquery.editrowform": "../../../../dist/jquery.editrowform.min"
     }
 });
 
