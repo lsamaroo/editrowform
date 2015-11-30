@@ -18,7 +18,7 @@ Include the javascript and css file in your page.  The style sheet is pretty sim
 You can use the minified file or source file as is.  But if you 
 want to make some changes and rebuild it, then follow the steps below.
 <br>
-Skip step 1 if you already have gulp installed.
+*Skip step 1 if you already have gulp installed.
 <br>
 1. $ npm install --global gulp
 <br>

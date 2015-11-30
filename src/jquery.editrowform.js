@@ -189,7 +189,7 @@
             // ---------------------------------------
             // Private variables and functions
             // ---------------------------------------
-            var INPUT_OFFSET = 4;
+            var INPUT_OFFSET = 6;
             var PLUGIN_CSS_CLASS = 'erf';
             var INPUT_CLASS_PREFIX = 'input-';
             var CELL_CLASS_PREFIX = 'cell-';
@@ -711,7 +711,7 @@
                 var form = $(Template.form);
                 form.prop('id', idGen.getFormId());
                 form.prop('tabindex', 0);
-                form.addClass('form');
+                form.addClass(PLUGIN_CSS_CLASS + '-form');
                 form.appendTo(div);
 
                 var row = buildFormRow();
