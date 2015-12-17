@@ -1,9 +1,10 @@
 @CHARSET "ISO-8859-1";
-.erf {}
-
-.erf .row {
+.erf {
     background-color: lightgray;
+    position: absolute;
 }
+
+.erf .row {}
 
 .erf .row .cell {
     display: table-cell;
@@ -11,7 +12,9 @@
     text-align: center;
 }
 
-.erf .row .cell input {}
+.erf .row .cell .erf-input {
+    width: 93%
+}
 
 .erf .button-bar {
     display: inline;

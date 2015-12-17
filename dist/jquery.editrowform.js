@@ -1,5 +1,5 @@
 /*!
- * Edit Row Form v1.3.4
+ * Edit Row Form v1.3.5
  * Docs & License: https://github.com/lsamaroo/editrowform
  * (c) 2015 Leon Samaroo
  */
@@ -192,12 +192,14 @@
             var INPUT_OFFSET = 6;
             var PLUGIN_CSS_CLASS = 'erf';
             var INPUT_CLASS_PREFIX = 'input-';
+            var INPUT_CLASS_SUFFIX = '-input';
             var CELL_CLASS_PREFIX = 'cell-';
+            var CELL_CLASS_SUFFIX = '-cell';
             var DEFAULT_COL_TYPE = 'text';
             var _columnMap = {};
-            var _formDiv = null;
-            var _form = null;
-            var _buttonBar = null;
+            var _$formDiv = null;
+            var _$form = null;
+            var _$buttonBar = null;
             var _currentRow = null;
             var _currentRowIndex = null;
             var _public_show_called;
@@ -223,7 +225,7 @@
 
                 if (base.options.hideOnBlur) {
                     $(document).click(function(e) {
-                        var isClickOnForm = $(e.target).closest(_formDiv).length;
+                        var isClickOnForm = $(e.target).closest(_$formDiv).length;
                         var isClickOnTable = $(e.target).closest(base.el).length;
 
                         if (!(isClickOnForm || isClickOnTable) && !_public_show_called) {
@@ -241,7 +243,30 @@
                     setFormPosition(_currentRow);
                 });
 
+
+                // add up/down arrow key listener
+                _$formDiv.keydown(function(e) {
+                	if( base.options.disableArrowKeys){
+                		return;
+                	}
+                    switch (e.which) {
+                        case 38: // up
+                            arrowUpPressed();
+                            break;
+
+                        case 40: // down
+                            arrowDownPressed();
+                            break;
+
+                        default:
+                            return; // exit this handler for other keys
+                    }
+                    e.preventDefault(); // prevent the default action (scroll / move caret)
+                });
+
             }
+
+
 
 
             function doubleClick(tr) {
@@ -251,15 +276,32 @@
 
 
             function singleClick(tr) {
-                if (!util.isHidden(_formDiv)) {
+                if (isVisible()) {
                     hide();
                     interal_show($(tr).index());
                 }
             }
 
+            function arrowUpPressed() {
+                if (isVisible()) {
+                    interal_show(_currentRowIndex - 1);
+                }
+            }
+
+            function arrowDownPressed() {
+                if (isVisible()) {
+                    interal_show(_currentRowIndex + 1);
+                }
+            }
+
 
             function getForm() {
-                return _form;
+                return _$form;
+            }
+
+
+            function isVisible() {
+                return !util.isHidden(_$formDiv);
             }
 
 
@@ -279,7 +321,7 @@
 
                 var onSave = getOptions().onSave;
                 if (util.functionExists(onSave)) {
-                    saved = onSave(_form, _currentRowIndex, _currentRow, rowValues);
+                    saved = onSave(_$form, _currentRowIndex, _currentRow, rowValues);
                 }
 
                 if (saved || util.isEmpty(saved)) {
@@ -299,7 +341,7 @@
 
                 var onCancel = getOptions().onCancel;
                 if (util.functionExists(onCancel)) {
-                    cancelled = onCancel(_form, _currentRowIndex, _currentRow);
+                    cancelled = onCancel(_$form, _currentRowIndex, _currentRow);
                 }
 
                 if (cancelled || util.isEmpty(cancelled)) {
@@ -432,12 +474,12 @@
                     return;
                 }
 
-                if (_formDiv !== null) {
+                if (_$formDiv !== null) {
                     setPluginWidthAndHeight(rowIndex);
                     var row = getRow(rowIndex);
                     setFormPosition(row);
                     setFormValues(rowIndex);
-                    _formDiv.show();
+                    _$formDiv.show();
                     setButtonBarPosition();
                     if (getOptions().focusOnInput) {
                         focusFirstInput();
@@ -451,7 +493,7 @@
 
 
             function focusFirstInput() {
-                $('input', _formDiv).each(function(index, input) {
+                $('input', _$formDiv).each(function(index, input) {
                     var disabled = $(input).prop('disabled');
                     if (!disabled) {
                         $(input).focus();
@@ -463,11 +505,11 @@
 
             /* Hide the edit form if it is currently visible */
             function hide() {
-                if (_formDiv !== null && !util.isHidden(_formDiv)) {
-                    _formDiv.hide();
+                if (_$formDiv !== null && isVisible()) {
+                    _$formDiv.hide();
                     var onHide = getOptions().onHide;
                     if (util.functionExists(onHide)) {
-                        onHide(_form, _currentRowIndex, _currentRow);
+                        onHide(_$form, _currentRowIndex, _currentRow);
                     }
                 }
             }
@@ -476,9 +518,9 @@
             /* Remove the plugin from the DOM and cleanup */
             function destroy() {
                 base.$el.removeData('editrowform');
-                if (_formDiv) {
-                    _formDiv.remove();
-                    _formDiv = null;
+                if (_$formDiv) {
+                    _$formDiv.remove();
+                    _$formDiv = null;
                 }
             }
 
@@ -607,10 +649,10 @@
 
                 var func = getOptions().setInputValue;
                 if (util.functionExists(func)) {
-                    func(rowIndex, colIndex, value, inputId, _form, getRow(rowIndex), getCell(rowIndex, colIndex), getHeader(colIndex));
+                    func(rowIndex, colIndex, value, inputId, _$form, getRow(rowIndex), getCell(rowIndex, colIndex), getHeader(colIndex));
                 } else {
                     colType = getColumnType(colIndex);
-                    input = $('.' + INPUT_CLASS_PREFIX + colIndex, _form);
+                    input = $('.' + INPUT_CLASS_PREFIX + colIndex, _$form);
                     inputUtil.setValue(input, colType, value);
                 }
             }
@@ -619,7 +661,7 @@
             function getInputValue(colIndex) {
                 var value;
 
-                var input = $('.' + INPUT_CLASS_PREFIX + colIndex, _form);
+                var input = $('.' + INPUT_CLASS_PREFIX + colIndex, _$form);
                 if (!util.isEmptyArray(input)) {
                     value = inputUtil.getValue(input, getColumnType(colIndex));
                 }
@@ -627,7 +669,7 @@
                 var func = getOptions().getInputValue;
                 if (util.functionExists(func)) {
                     value = func(_currentRowIndex, colIndex, value, idGen.getInputId(colIndex),
-                        _form, _currentRow, getCell(_currentRowIndex, colIndex), getHeader(colIndex));
+                        _$form, _currentRow, getCell(_currentRowIndex, colIndex), getHeader(colIndex));
                 }
 
                 return value;
@@ -659,6 +701,7 @@
                 }
                 if (input) {
                     $(input).addClass(INPUT_CLASS_PREFIX + colIndex);
+                    $(input).addClass(PLUGIN_CSS_CLASS + INPUT_CLASS_SUFFIX);
                 }
                 return input;
             }
@@ -703,6 +746,7 @@
             function buildForm() {
                 var div = $(Template.div);
                 div.prop('id', idGen.getEditRowFormId());
+                div.prop('tabIndex', 0);
                 div.addClass(PLUGIN_CSS_CLASS);
                 div.addClass(getOptions().cssClass);
                 div.hide();
@@ -726,9 +770,9 @@
                 });
 
                 // add to plugin global scope
-                _buttonBar = buttonBar;
-                _formDiv = div;
-                _form = form;
+                _$buttonBar = buttonBar;
+                _$formDiv = div;
+                _$form = form;
             }
 
 
@@ -790,15 +834,15 @@
                 }
 
                 var positionOfRow = $(row).offset();
-                util.position(_formDiv, positionOfRow.top, positionOfRow.left);
+                util.position(_$formDiv, positionOfRow.top, positionOfRow.left);
             }
 
 
             function setButtonBarPosition() {
-                var barWidth = $(_buttonBar).innerWidth();
+                var barWidth = $(_$buttonBar).innerWidth();
                 var width = base.$el.innerWidth();
                 var offset = (width - barWidth) / 2;
-                _buttonBar.css({
+                _$buttonBar.css({
                     left: offset,
                     position: 'absolute'
                 });
@@ -867,14 +911,12 @@
                 // check for header
                 var header = getHeader(colIndex);
                 if (util.isNotEmpty(header)) {
-                    var innerWidth = $(header).innerWidth();
-                    var width = $(header).innerWidth();
-                    return $(header).innerWidth();
+                    return $(header).outerWidth();
                 }
 
                 var cell = getCell(_currentRowIndex, colIndex);
                 if (util.isNotEmpty(cell)) {
-                    return $(cell).innerWidth();
+                    return $(cell).outerWidth();
                 }
 
                 return 0;
@@ -891,22 +933,22 @@
 
 
             function setPluginWidthAndHeight(rowIndex) {
-                _formDiv.width(util.getWidth(base.el));
+                _$formDiv.width(util.getWidth(base.el));
                 var height = getRowHeight(rowIndex);
 
-                $('.row', _formDiv).height(height);
-                $('.row .cell', _formDiv).height(height);
+                $('.row', _$formDiv).height(height);
+                $('.row .cell', _$formDiv).height(height);
 
                 for (var i = 0; i < getColumnCount(); i++) {
-                    var cell = $('.' + CELL_CLASS_PREFIX + i, _formDiv);
+                    var cell = $('.' + CELL_CLASS_PREFIX + i, _$formDiv);
                     var colWidth = getColumnWidth(i);
                     cell.width(colWidth);
 
-                    var colType = getColumnType(i);
-                    if (colType !== 'checkbox') {
-                        // set input width
-                        $('.' + INPUT_CLASS_PREFIX + i, cell).width(colWidth - INPUT_OFFSET);
-                    }
+                    //                    var colType = getColumnType(i);
+                    //                    if (colType !== 'checkbox') {
+                    //                        // set input width
+                    //                        $('.' + INPUT_CLASS_PREFIX + i, cell).width(colWidth - INPUT_OFFSET);
+                    //                    }
                 }
             }
 
@@ -933,7 +975,7 @@
                     }
 
                     // default to generating an id
-                    return this.getEditRowFormId() + '-input' + colIndex;
+                    return this.getEditRowFormId() + INPUT_CLASS_SUFFIX + colIndex;
                 },
 
 
@@ -957,7 +999,7 @@
                     }
 
                     // default to generating an id
-                    return this.getEditRowFormId() + '-input' + colIndex;
+                    return this.getEditRowFormId() + INPUT_CLASS_SUFFIX + colIndex;
                 },
 
                 getFormCellId: function(colIndex) {
@@ -1040,8 +1082,7 @@
                 position: function(obj, top, left) {
                     $(obj).css({
                         top: top,
-                        left: left,
-                        position: 'absolute'
+                        left: left
                     });
                 },
 
@@ -1190,6 +1231,12 @@
              * Defaults to false.
              */
             focusOnInput: false,
+            
+            /* 
+             * True to disable the up and down arrow keys for navigating the table.
+             * Defaults to false.
+             */
+            disableArrowKeys: false,
 
 
             /* 

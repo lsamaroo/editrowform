@@ -1,1 +1,1 @@
-.erf .button-bar div,.erf .row{background-color:#d3d3d3}.erf .row .cell{display:table-cell;vertical-align:middle;text-align:center}.erf .button-bar{display:inline}.erf .button-bar div{display:inline-block;padding-bottom:1px;padding-left:2px;padding-right:2px}
+.erf{background-color:#d3d3d3;position:absolute}.erf .row .cell{display:table-cell;vertical-align:middle;text-align:center}.erf .row .cell .erf-input{width:93%}.erf .button-bar{display:inline}.erf .button-bar div{display:inline-block;background-color:#d3d3d3;padding-bottom:1px;padding-left:2px;padding-right:2px}

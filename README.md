@@ -114,7 +114,13 @@ Donating to the Lupus Research Institute (LRI) makes a real difference in the fi
 	 * Defaults to false.
 	 */
 	focusOnInput: false,
-		
+
+
+    /* 
+     * True to disable the up and down arrow keys for navigating the table.
+     * Defaults to false.
+     */
+   	 disableArrowKeys: false,		
 			
 	/* 
 	 * A array of column objects.  The column object has the same set of properties 
