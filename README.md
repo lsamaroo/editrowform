@@ -42,10 +42,10 @@ Take a look at the test directory for examples.  The following are currently ava
 Below are a couple of screen shots.
 
 <br>
-![alt tag](test/images/simple.png)
-![alt tag](test/images/datepicker.png)
-![alt tag](test/images/select.png)
-![alt tag](test/images/ajax-save.png)
+![alt tag](https://github.com/lsamaroo/editrowform/blob/master/test/images/simple.png?raw=true)
+![alt tag](https://github.com/lsamaroo/editrowform/blob/master/test/images/datepicker.png?raw=true)
+![alt tag](https://github.com/lsamaroo/editrowform/blob/master/test/images/select.png?raw=true)
+![alt tag](https://github.com/lsamaroo/editrowform/blob/master/test/images/ajax-save.png?raw=true)
 <br>
 
 
