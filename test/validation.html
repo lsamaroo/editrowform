@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="ISO-8859-1">
+	<title>Simple Example</title>
+	<style>
+		body{
+			margin-left: 50px;
+		}
+		
+		.simple-table{
+			font-family: sans-serif;
+		    border: 1px solid #cbcbcb;
+		    border-collapse: collapse;
+		    border-spacing: 0;
+		}
+		
+		.simple-table thead {
+		  background-color: #e0e0e0;
+		  color: #000;
+		}
+		
+		.simple-table td,
+		.simple-table th{
+			text-align: center;
+			padding: 0.5em 1em;
+		}
+	</style>
+	
+	
+	<script src="https://code.jquery.com/jquery-2.1.3.min.js"></script>
+	<link rel="stylesheet" href="../dist/jquery.editrowform.min.css">
+	<script src="../dist/jquery.editrowform.min.js"></script>
+	
+	<script type="text/javascript">
+		$(function() {
+			$( "#table").editrowform(
+				{
+					columns: [ 
+					           { colIndex:2, disabled: true  }
+					          ],
+					click: true,  // for double clicking/clicking functionality
+					onSave: function(form, rowIndex, row, rowValues){ 
+						console.log("I'm saving!!");
+					},
+					onCancel: function(form, rowIndex, row){
+						console.log("I'm cancelling.");
+					}
+				}		
+			);
+
+		});
+	</script>	
+		
+</head>
+<body>
+	<div class="error">Error messages will display here.</div>
+	<br>
+	Double click on me.
+	<table id="table" class="simple-table">
+		<thead>
+			<tr>
+				<th>
+					First Name
+				</th>
+				<th>
+					Last Name
+				</th>
+				<th>
+					Email
+				</th>
+				<th>
+					Receive Alerts
+				</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<td>
+					Bruce
+				</td>
+				<td>
+					Banner
+				</td>
+				<td>
+					bbanner@marvel.com
+				</td>
+				<td>
+					Yes
+				</td>
+			</tr>
+			<tr>
+				<td>
+					Clark
+				</td>
+				<td>
+					Kent
+				</td>
+				<td>
+					ckent@dailyplanet.com
+				</td>
+				<td>
+					No
+				</td>
+			</tr>				
+		</tbody>
+	</table>
+</body>
+</html>

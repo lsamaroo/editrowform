@@ -11,7 +11,7 @@ Include the javascript and css file in your page.  The style sheet is pretty sim
 <ul>
 	<li>GitHub - https://github.com/lsamaroo/editrowform</li>
 	<li>NPM - https://www.npmjs.com/package/editrowform</li>
-	<li>Bower</li>
+	<li>Bower - http://bower.io/search/?q=edit%20row%20form%20jquery%20table </li>
 </ul>
 
 <h3>Want to build it?</h3>

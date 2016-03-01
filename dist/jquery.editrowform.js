@@ -246,9 +246,9 @@
 
                 // add up/down arrow key listener
                 _$formDiv.keydown(function(e) {
-                	if( base.options.disableArrowKeys){
-                		return;
-                	}
+                    if (base.options.disableArrowKeys) {
+                        return;
+                    }
                     switch (e.which) {
                         case 38: // up
                             arrowUpPressed();
@@ -1231,7 +1231,7 @@
              * Defaults to false.
              */
             focusOnInput: false,
-            
+
             /* 
              * True to disable the up and down arrow keys for navigating the table.
              * Defaults to false.

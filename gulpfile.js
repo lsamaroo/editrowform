@@ -2,7 +2,7 @@ var gulp = require('gulp'),
     jshint = require('gulp-jshint'),
     rename = require('gulp-rename'),
     uglify = require('gulp-uglify'),
-    minifyCss = require('gulp-minify-css')
+    minifyCss = require('gulp-cssnano')
     beautify = require('gulp-jsbeautifier');
 
 var sourceDirectory = 'src';
