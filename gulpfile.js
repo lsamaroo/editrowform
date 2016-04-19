@@ -27,7 +27,7 @@ gulp.task('beautify', function() {
 
 gulp.task('beautify-css', function() {
 	  gulp.src( [cssFiles, ignoreMinFiles] )
-	    .pipe(beautify({indentSize: 4}))
+	    .pipe(beautify())
 	    .pipe(gulp.dest(sourceDirectory))
 });
 

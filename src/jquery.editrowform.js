@@ -7,9 +7,11 @@
 ! function(root, factory) {
     if (typeof define === 'function' && define.amd) {
         define(['jquery'], factory);
-    } else if (typeof exports === 'object') { // Node/CommonJS
+    }
+    else if (typeof exports === 'object') { // Node/CommonJS
         module.exports = factory(require('jquery'));
-    } else {
+    }
+    else {
         factory(root.jQuery);
     }
 }(this,
@@ -357,11 +359,14 @@
 
                 if ((templateRow === true || util.isEmpty(templateRow)) && rowCount !== 0) {
                     newRow = cloneLastRow();
-                } else if (templateRow === true || templateRow === false || util.isEmpty(templateRow)) {
+                }
+                else if (templateRow === true || templateRow === false || util.isEmpty(templateRow)) {
                     newRow = createRow();
-                } else if (util.functionExists(templateRow)) {
+                }
+                else if (util.functionExists(templateRow)) {
                     newRow = cloneRow(templateRow());
-                } else {
+                }
+                else {
                     newRow = cloneRow(templateRow);
                 }
 
@@ -385,7 +390,8 @@
                     // add the new row to the table
                     newRow.appendTo(base.$el);
                     return rowCount;
-                } else {
+                }
+                else {
                     return false;
                 }
             }
@@ -573,7 +579,8 @@
                 var input = $('input', cell);
                 if (!util.isEmptyArray(input)) {
                     value = inputUtil.getValue(input, colType);
-                } else {
+                }
+                else {
                     value = $(cell).text().trim();
                 }
 
@@ -593,11 +600,13 @@
                 var func = getOptions().setCellValue;
                 if (util.functionExists(func)) {
                     func(rowIndex, colIndex, value, getRow(rowIndex), cell);
-                } else {
+                }
+                else {
                     input = $('input', cell);
                     if (!util.isEmptyArray(input)) {
                         inputUtil.setValue(input, colType, value);
-                    } else {
+                    }
+                    else {
                         $(cell).text(value);
                     }
                 }
@@ -608,7 +617,8 @@
                 var headerRow = getHeaderRow();
                 if (!util.isEmptyArray(headerRow)) {
                     return $('th', headerRow).length;
-                } else {
+                }
+                else {
                     return $('td', getRow(0)).length;
                 }
             }
@@ -650,7 +660,8 @@
                 var func = getOptions().setInputValue;
                 if (util.functionExists(func)) {
                     func(rowIndex, colIndex, value, inputId, _$form, getRow(rowIndex), getCell(rowIndex, colIndex), getHeader(colIndex));
-                } else {
+                }
+                else {
                     colType = getColumnType(colIndex);
                     input = $('.' + INPUT_CLASS_PREFIX + colIndex, _$form);
                     inputUtil.setValue(input, colType, value);
@@ -876,9 +887,11 @@
 
                 if (util.isNotEmpty(type) && type.indexOf('select') != -1) {
                     return 'select';
-                } else if (util.isNotEmpty(type)) {
+                }
+                else if (util.isNotEmpty(type)) {
                     return type;
-                } else {
+                }
+                else {
                     return DEFAULT_COL_TYPE;
                 }
             }
@@ -1099,7 +1112,8 @@
                     text = text.toLowerCase();
                     if (text == 'y' || text == 'true' || text == 'yes' || text == '1') {
                         return true;
-                    } else {
+                    }
+                    else {
                         return false;
                     }
                 }
@@ -1114,12 +1128,14 @@
                         input = $(Template.checkbox);
                         input.prop('id', id);
                         input.prop('name', name);
-                    } else if (colType == 'datepicker') {
+                    }
+                    else if (colType == 'datepicker') {
                         input = $(Template.textfield);
                         input.prop('id', id);
                         input.prop('name', name);
                         $(input).datepicker();
-                    } else {
+                    }
+                    else {
                         input = $(Template.textfield);
                         input.prop('id', id);
                         input.prop('name', name);
@@ -1131,7 +1147,8 @@
                 getValue: function(input, colType) {
                     if (colType == 'checkbox') {
                         return this.getCheckboxValue(input);
-                    } else {
+                    }
+                    else {
                         return $(input).val();
                     }
                 },
@@ -1139,7 +1156,8 @@
                 setValue: function(input, colType, value) {
                     if (colType == 'checkbox') {
                         this.setCheckboxValue(input, value);
-                    } else {
+                    }
+                    else {
                         $(input).val(value);
                     }
                 },
