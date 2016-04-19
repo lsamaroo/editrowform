@@ -53,6 +53,7 @@ Below are a couple of screen shots.
 Donating to the Lupus Research Institute (LRI) makes a real difference in the fight against lupus. Help cure this devastating disease.
 <br>
 [Donate to Lupus Research Institute](https://secure.lupusresearchinstitute.org/donate)
+<br>
 ![alt tag](http://lupusresearchinstitute.org/sites/default/files/images/logo_180x85.png)
 
 
