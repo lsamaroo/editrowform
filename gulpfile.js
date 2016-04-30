@@ -1,8 +1,8 @@
 var gulp = require('gulp'),
-    jshint = require('gulp-jshint'),
+    eslint = require('gulp-eslint'),    
     rename = require('gulp-rename'),
     uglify = require('gulp-uglify'),
-    minifyCss = require('gulp-cssnano')
+    minifyCss = require('gulp-cssnano'),
     beautify = require('gulp-jsbeautifier');
 
 var sourceDirectory = 'src';
@@ -12,12 +12,14 @@ var cssFiles = sourceDirectory + '/*.css';
 var ignoreMinFiles = '!' + sourceDirectory + '/*.min.*';
 
 
-gulp.task('lint', function() {
-	return gulp.src([jsFiles, ignoreMinFiles ])
-    	.pipe(jshint({"expr": "true"}))
-    	.pipe(jshint.reporter('default'));
+gulp.task('eslint', function() {
+  return gulp.src(jsFiles)
+	    .pipe(eslint({
+	    	fix: true
+	    }))
+        .pipe(eslint.format())
+        .pipe(eslint.failAfterError());
 });
-
 
 gulp.task('beautify', function() {
 	  gulp.src( [jsFiles, ignoreMinFiles] )
@@ -51,4 +53,4 @@ gulp.task('minify-css', ['beautify-css'], function() {
 
 
 
-gulp.task('default', ['lint', 'minify', 'minify-css'] );
+gulp.task('default', ['eslint', 'minify', 'minify-css'] );

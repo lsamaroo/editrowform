@@ -1,1174 +1,437 @@
-/*!
- * Edit Row Form v1.3.5
- * Docs & License: https://github.com/lsamaroo/editrowform
- * (c) 2015 Leon Samaroo
+/**
+ * Documents & License: https://github.com/lsamaroo/editrowform
+ * 
+ * @author  Leon Samaroo
+ * @version 1.3.6
+ * @requires jQuery
+ * 
+ * The jQuery plugin namespace.
+ * @external "jQuery.fn"
+ * @see {@link http://learn.jquery.com/plugins/|jQuery Plugins}
+ * 
  */
 
-! function(root, factory) {
+/**
+ * A jQuery plugin which allows you to edit each row of a table in line complete with a save and cancel button.  
+ * You can also use it to add or delete rows.
+ * 
+ * @function external:"jQuery.fn".editrowform
+ */
+
+'use strict';
+
+/* eslint no-unused-expressions: 0 */
+(function(root, factory) {
     if (typeof define === 'function' && define.amd) {
         define(['jquery'], factory);
-    } else if (typeof exports === 'object') { // Node/CommonJS
+    }
+    // Node and CommonJS
+    else if (typeof module === 'object' && module.exports) {
         module.exports = factory(require('jquery'));
-    } else {
+    }
+    // Global
+    else {
         factory(root.jQuery);
     }
-}(this,
+}(this, function($) {
+    $.fn.editrowform = function(options) {
+        var args = Array.prototype.slice.call(arguments, 1); // for a possible method call
+        var ret = this; // what this function will return (this jQuery object by default)
+        var singleRes; // the returned value of this single method call
 
-    function($) {
-        'use strict';
+        this.each(function(i, el) {
+            var element = $(el);
+            var thisplugin = element.data('editrowform'); // get the existing plug-in object (if one exist)
 
-        // Add plugin to JQuery
-        $.fn.editrowform = function(options) {
-            var args = Array.prototype.slice.call(arguments, 1); // for a possible method call
-            var ret = this; // what this function will return (this jQuery object by default)
-            var singleRes; // the returned value of this single method call
-
-            this.each(function(i, el) {
-                var element = $(el);
-                var thisplugin = element.data('editrowform'); // get the existing plugin object (if any)
-
-                // a method call
-                if (typeof options === 'string') {
-                    if (thisplugin && $.isFunction(thisplugin[options])) {
-                        singleRes = thisplugin[options].apply(thisplugin, args);
-                        if (!i) {
-                            ret = singleRes; // record the first method call result
-                        }
+            // If options is a string then it's a method call
+            if (typeof options === 'string') {
+                // Check if the method exists
+                if (thisplugin && $.isFunction(thisplugin[options])) {
+                    singleRes = thisplugin[options].apply(thisplugin, args);
+                    if (!i) {
+                        ret = singleRes; // record the first method call result
                     }
                 }
+            }
+            // Otherwise it was an instantiation so we create a 
+            // new plug-in and initialize because one does not exist
+            else if (!thisplugin) {
+                /* eslint new-cap: 0 */
+                (new $.editrowform(el, options));
+            }
+        });
+        return ret;
+    };
 
-                // a new plug-in initialization because one does not exist
-                else if (!thisplugin) {
-                    thisplugin = (new $.editrowform(el, options));
+    $.editrowform = function(el, options) {
+
+
+        // ---------------------------------------
+        // Private variables
+        // ---------------------------------------
+        var base = this;
+
+        // Access to jQuery and DOM versions of element
+        base.$el = $(el);
+        base.el = el;
+
+        // Add a reverse reference to the DOM object
+        base.$el.data('editrowform', base);
+
+        var PLUGIN_CSS_CLASS = 'erf';
+        var INPUT_CLASS_PREFIX = 'input-';
+        var INPUT_CLASS_SUFFIX = '-input';
+        var CELL_CLASS_PREFIX = 'cell-';
+        var DEFAULT_COL_TYPE = 'text';
+        var currentColumnMap = {};
+        var $formDiv = null;
+        var $form = null;
+        var $buttonBar = null;
+        var currentRow = null;
+        var currentRowIndex = null;
+        var publicShowCalled;
+
+
+        // ---------------------------------------
+        // Utility & template classes
+        // ---------------------------------------
+
+        var Template = {
+            table: '<table />',
+            tr: '<tr />',
+            td: '<td />',
+            div: '<div />',
+            form: '<form />',
+            button: '<button />',
+            textfield: '<input type="text" />',
+            checkbox: '<input type="checkbox" />'
+        };
+
+        var Util = {
+            timeoutButton: function(id, time) {
+                if (!time) {
+                    time = 1000; // default one second
                 }
-            });
+                var itemId = '#' + id;
+                $(itemId).prop('disabled', true);
 
-            return ret;
+                setTimeout(function() {
+                    $(itemId).prop('disabled', false);
+                }, time);
+            },
+
+            functionExists: function(func) {
+                return typeof func !== 'undefined' && $.isFunction(func);
+            },
+
+            isEmptyArray: function(obj) {
+                if (this.isEmpty(obj)) {
+                    return true;
+                }
+
+                if (typeof obj.length !== 'undefined') {
+                    return obj.length === 0;
+                }
+
+                return true;
+            },
+
+            /* eslint eqeqeq:0 */
+            isEmpty: function(obj) {
+                var isNill = obj === undefined ||
+                    obj === null ||
+                    typeof obj === 'undefined';
+
+                return (
+                    isNill ||
+                    $.trim(obj) === 'null' ||
+                    $.trim(obj) === ''
+                );
+            },
+
+            isNotEmpty: function(obj) {
+                return !this.isEmpty(obj);
+            },
+
+            clone: function(obj) {
+                return $.extend(true, {}, obj);
+            },
+
+            isHidden: function(element) {
+                return $(element).css('display') === 'none';
+            },
+
+            position: function(obj, top, left) {
+                $(obj).css({
+                    top: top,
+                    left: left
+                });
+            },
+
+            toBoolean: function(text) {
+                if (this.isEmpty(text)) {
+                    return false;
+                }
+
+                if (text === true || text === false) {
+                    return text;
+                }
+
+                text = text.toLowerCase();
+                return text === 'y' || text === 'true' || text === 'yes' || text === '1';
+            }
+        };
+
+        var IdGenerator = {
+            idSuffix: '-erf',
+
+            getEditRowFormId: function() {
+                var id = base.options.id;
+                if (Util.isEmpty(id)) {
+                    id = base.el.id;
+                }
+
+                if (Util.isEmpty(id)) {
+                    id = 'no-id-' + new Date().getTime();
+                }
+                return id + this.idSuffix;
+            },
+
+            getInputId: function(colIndex) {
+                var id = currentColumnMap[colIndex].id;
+                if (Util.isNotEmpty(id)) {
+                    return id;
+                }
+
+                // default to generating an id
+                return this.getEditRowFormId() + INPUT_CLASS_SUFFIX + colIndex;
+            },
+
+
+            getInputName: function(colIndex) {
+                var name = currentColumnMap[colIndex].name;
+                if (Util.isNotEmpty(name)) {
+                    return name;
+                }
+
+                // or else use id
+                name = currentColumnMap[colIndex].id;
+                if (Util.isNotEmpty(name)) {
+                    return name;
+                }
+
+                // or get header name
+                var header = getHeader(colIndex);
+                name = $(header).text().trim();
+                if (Util.isNotEmpty(name)) {
+                    return name;
+                }
+
+                // default to generating an id
+                return this.getEditRowFormId() + INPUT_CLASS_SUFFIX + colIndex;
+            },
+
+            getFormCellId: function(colIndex) {
+                return this.getEditRowFormId() + '-cell-' + colIndex;
+            },
+
+            getFormRowId: function() {
+                return this.getEditRowFormId() + '-row';
+            },
+
+            getFormId: function() {
+                return this.getEditRowFormId() + '-form';
+            },
+
+            getSaveButtonId: function() {
+                return this.getEditRowFormId() + '-save';
+            },
+
+            getCancelButtonId: function() {
+                return this.getEditRowFormId() + '-cancel';
+            }
         };
 
 
-
-        // Plugin definition
-        $.editrowform = function(el, options) {
-            var base = this;
-
-            // Access to jQuery and DOM versions of element
-            base.$el = $(el);
-            base.el = el;
-
-
-            // ---------------------------------------
-            // Public API
-            // ---------------------------------------
-
-            /**
-             * Saves the input to the table and hides the dialog.
-             * 
-             * @example
-             * .editrowform( 'save' )
-             */
-            base.save = save;
-
-
-            /* 
-             * Add a row to the table. 
-             * If templateRow is passed in, it will use that to add the row.  
-             * Otherwise it will create a new row.
-             *  
-             * @example
-             * .editrowform( 'addRow', templateRow )
-             * 
-             * @param templateRow is an optional argument. It can be
-             * a dom element or string representing a row or a function
-             * which return a row to add.
-             * 
-             * For backward compatibility if left empty or set to true, it will still   
-             * attempt to clone an the existing last row.  In future releases
-             * this will be removed.
-             * 
-             * @return the rowIndex of the newly created row or false if the 
-             * function call did not add the row.
-             */
-            base.addRow = addRow;
-
-
-            /* 
-             * Remove the indicated row from the table.  This will remove it 
-             * from the table DOM. 
-             *
-             * @example
-             * .editrowform( 'deleteRow', rowIndex )
-             *  
-             * @param rowIndex is the row index to perform the operation on.
-             */
-            base.deleteRow = deleteRow;
-
-
-            /* 
-             * Set the value for the given row index.  Takes an array of values.
-             *
-             * @example
-             * .editrowform( 'setRowValues', rowIndex, rowValues )
-             *  
-             * @param rowIndex is the row index to set the values for.
-             *  
-             * @param rowValues is an array of values to set for the row.  The index 
-             * of the array corresponds to the column index.   
-             */
-            base.setRowValues = setRowValues;
-
-
-            /* 
-             * Shows the edit form for the specified row.  Does nothing for invalid row index.
-             * 
-             * @example
-             * .editrowform( 'show', rowIndex )
-             * 
-             * @param rowIndex is the row index to show the form for.
-             */
-            base.show = show;
-
-
-            /* 
-             * Hides the edit form if it is currently visible. 
-             * 
-             * @example
-             * .editrowform( 'hide' )
-             * 
-             */
-            base.hide = hide;
-
-
-            /* 
-             * Remove the plugin from the DOM and cleanup.
-             * 
-             * @example
-             * .editrowform( 'destroy')
-             * 
-             */
-            base.destroy = destroy;
-
-
-            /* 
-             * Get the number of rows in the table.
-             * 
-             * @example
-             * .editrowform( 'getRowCount' )
-             * 
-             * @return the number of rows in the table associated with this plugin
-             */
-            base.getRowCount = getRowCount;
-
-
-            /* 
-             * Get the number of columns in the table.
-             * 
-             * @example
-             * .editrowform( 'getColumnCount' )
-             * 
-             * @return the number of columns in the table associated with this plugin
-             */
-            base.getColumnCount = getColumnCount;
-
-
-
-            /* 
-             * Get the form created by this plugin.
-             * 
-             * @example
-             * .editrowform( 'getForm' )
-             * 
-             * @return the form object created by this plugin
-             * 
-             */
-            base.getForm = getForm;
-
-
-
-
-            // ---------------------------------------
-            // Private variables and functions
-            // ---------------------------------------
-            var INPUT_OFFSET = 6;
-            var PLUGIN_CSS_CLASS = 'erf';
-            var INPUT_CLASS_PREFIX = 'input-';
-            var INPUT_CLASS_SUFFIX = '-input';
-            var CELL_CLASS_PREFIX = 'cell-';
-            var CELL_CLASS_SUFFIX = '-cell';
-            var DEFAULT_COL_TYPE = 'text';
-            var _columnMap = {};
-            var _$formDiv = null;
-            var _$form = null;
-            var _$buttonBar = null;
-            var _currentRow = null;
-            var _currentRowIndex = null;
-            var _public_show_called;
-
-            function init() {
-                // Add a reverse reference to the DOM object
-                base.$el.data('editrowform', base);
-                base.options = $.extend({}, $.editrowform.defaultOptions, options);
-
-                build();
-
-                // add listeners
-                if (base.options.click) {
-                    var tr = $('tr td', base.el).parent();
-                    tr.dblclick(function(e) {
-                        doubleClick(this);
-                    });
-
-                    tr.click(function(e) {
-                        singleClick(this);
-                    });
-                }
-
-                if (base.options.hideOnBlur) {
-                    $(document).click(function(e) {
-                        var isClickOnForm = $(e.target).closest(_$formDiv).length;
-                        var isClickOnTable = $(e.target).closest(base.el).length;
-
-                        if (!(isClickOnForm || isClickOnTable) && !_public_show_called) {
-                            hide();
-                        }
-
-                        // reset
-                        _public_show_called = false;
-                    });
-                }
-
-
-                // Dynamically position the form based on window size 
-                $(window).resize(function() {
-                    setFormPosition(_currentRow);
-                });
-
-
-                // add up/down arrow key listener
-                _$formDiv.keydown(function(e) {
-                    if (base.options.disableArrowKeys) {
-                        return;
-                    }
-                    switch (e.which) {
-                        case 38: // up
-                            arrowUpPressed();
-                            break;
-
-                        case 40: // down
-                            arrowDownPressed();
-                            break;
-
-                        default:
-                            return; // exit this handler for other keys
-                    }
-                    e.preventDefault(); // prevent the default action (scroll / move caret)
-                });
-
-            }
-
-
-
-
-            function doubleClick(tr) {
-                hide();
-                interal_show($(tr).index());
-            }
-
-
-            function singleClick(tr) {
-                if (isVisible()) {
-                    hide();
-                    interal_show($(tr).index());
-                }
-            }
-
-            function arrowUpPressed() {
-                if (isVisible()) {
-                    interal_show(_currentRowIndex - 1);
-                }
-            }
-
-            function arrowDownPressed() {
-                if (isVisible()) {
-                    interal_show(_currentRowIndex + 1);
-                }
-            }
-
-
-            function getForm() {
-                return _$form;
-            }
-
-
-            function isVisible() {
-                return !util.isHidden(_$formDiv);
-            }
-
-
-            function save() {
-                var timeout = getOptions().saveButtonTimeout;
-                if (util.isNotEmpty(timeout)) {
-                    util.timeoutButton(idGen.getSaveButtonId(), timeout);
-                }
-                var inputValue;
-                var saved = true;
-                var rowValues = [];
-
-                for (var i = 0; i < getColumnCount(); i++) {
-                    inputValue = getInputValue(i);
-                    rowValues.push(inputValue);
-                }
-
-                var onSave = getOptions().onSave;
-                if (util.functionExists(onSave)) {
-                    saved = onSave(_$form, _currentRowIndex, _currentRow, rowValues);
-                }
-
-                if (saved || util.isEmpty(saved)) {
-                    setRowValues(_currentRowIndex, rowValues);
-                    hide();
-                }
-            }
-
-
-            function cancel() {
-                var timeout = getOptions().cancelButtonTimeout;
-                if (util.isNotEmpty(timeout)) {
-                    util.timeoutButton(idGen.getCancelButtonId(), timeout);
-                }
-
-                var cancelled = true;
-
-                var onCancel = getOptions().onCancel;
-                if (util.functionExists(onCancel)) {
-                    cancelled = onCancel(_$form, _currentRowIndex, _currentRow);
-                }
-
-                if (cancelled || util.isEmpty(cancelled)) {
-                    hide();
-                }
-            }
-
-
-            function addRow(templateRow /* optional */ ) {
-                var add = true;
-                var rowCount = getRowCount();
-                var newRow;
-
-                if ((templateRow === true || util.isEmpty(templateRow)) && rowCount !== 0) {
-                    newRow = cloneLastRow();
-                } else if (templateRow === true || templateRow === false || util.isEmpty(templateRow)) {
-                    newRow = createRow();
-                } else if (util.functionExists(templateRow)) {
-                    newRow = cloneRow(templateRow());
-                } else {
-                    newRow = cloneRow(templateRow);
-                }
-
-                var onAddRow = getOptions().onAddRow;
-                if (util.functionExists(onAddRow)) {
-                    add = onAddRow(rowCount, newRow);
-                }
-
-                if ((add || util.isEmpty(add)) && !util.isEmpty(newRow)) {
-                    // add click listener if it's enabled
-                    if (getOptions().click) {
-                        newRow.dblclick(function(e) {
-                            doubleClick(this);
-                        });
-
-                        newRow.click(function(e) {
-                            singleClick(this);
-                        });
-                    }
-
-                    // add the new row to the table
-                    newRow.appendTo(base.$el);
-                    return rowCount;
-                } else {
-                    return false;
-                }
-            }
-
-
-            function cloneRow(templateRow) {
-                return $(templateRow).clone();
-            }
-
-
-            function cloneLastRow() {
-                var rowCount = getRowCount();
-                var row = getRow(getRowCount() - 1);
-                var newRow = $(row).clone();
-
-                // blank out any id 
-                newRow.prop('id', '');
-
-                // blank out the row
-                $('td', newRow).each(function(index, cell) {
-                    var column = _columnMap[index];
-                    if (!column.ignore) {
-                        $(this).html('&nbsp;');
-                    }
-                });
-                return newRow;
-            }
-
-
-            function createRow() {
-                var columnCount = getColumnCount();
-                var row = $(Template.tr);
-                var cell;
-
-                for (var i = 0; i < columnCount; i++) {
-                    cell = $(Template.td);
-                    cell.appendTo(row);
-                    cell.html('&nbsp;');
-                }
-
-                return row;
-            }
-
-
-            function deleteRow(rowIndex) {
-                if (!isValidRowIndex(rowIndex)) {
-                    return;
-                }
-
-                var deleted = true;
-                var row = getRow(rowIndex);
-
-                var onDeleteRow = getOptions().onDeleteRow;
-                if (util.functionExists(onDeleteRow)) {
-                    deleted = onDeleteRow(rowIndex, row);
-                }
-
-                if ((deleted || util.isEmpty(deleted)) && !util.isEmptyArray(row)) {
-                    // remove the row from the DOM.
-                    row.remove();
-                }
-            }
-
-
-            function setRowValues(rowIndex, rowValues) {
-                if (!isValidRowIndex(rowIndex)) {
-                    return;
-                }
-
-                for (var i = 0; i < getColumnCount(); i++) {
-                    if (!isDisabled(i) && !ignoreColumn(i)) {
-                        setCellValue(rowIndex, i, rowValues[i]);
-                    }
-                }
-            }
-
-
-            function show(rowIndex) {
-                _public_show_called = true;
-                interal_show(rowIndex);
-            }
-
-
-            function interal_show(rowIndex) {
-                if (!isValidRowIndex(rowIndex)) {
-                    return;
-                }
-
-                if (_$formDiv !== null) {
-                    setPluginWidthAndHeight(rowIndex);
-                    var row = getRow(rowIndex);
-                    setFormPosition(row);
-                    setFormValues(rowIndex);
-                    _$formDiv.show();
-                    setButtonBarPosition();
-                    if (getOptions().focusOnInput) {
-                        focusFirstInput();
-                    }
-
-                    // set plugin global
-                    _currentRow = row;
-                    _currentRowIndex = rowIndex;
-                }
-            }
-
-
-            function focusFirstInput() {
-                $('input', _$formDiv).each(function(index, input) {
-                    var disabled = $(input).prop('disabled');
-                    if (!disabled) {
-                        $(input).focus();
-                        return false;
-                    }
-                });
-            }
-
-
-            /* Hide the edit form if it is currently visible */
-            function hide() {
-                if (_$formDiv !== null && isVisible()) {
-                    _$formDiv.hide();
-                    var onHide = getOptions().onHide;
-                    if (util.functionExists(onHide)) {
-                        onHide(_$form, _currentRowIndex, _currentRow);
-                    }
-                }
-            }
-
-
-            /* Remove the plugin from the DOM and cleanup */
-            function destroy() {
-                base.$el.removeData('editrowform');
-                if (_$formDiv) {
-                    _$formDiv.remove();
-                    _$formDiv = null;
-                }
-            }
-
-
-            function getOptions() {
-                return base.options;
-            }
-
-
-            function getHeaderRow() {
-                var header = $('thead tr', base.el);
-                if (util.isNotEmpty(header)) {
-                    return header;
-                }
-                return $('th', base.el).parent();
-            }
-
-
-            function getHeader(colIndex) {
-                var headerRow = getHeaderRow();
-
-                var header;
-                if (util.isNotEmpty(headerRow)) {
-                    header = $('th', headerRow)[colIndex];
-                }
-                return header;
-            }
-
-
-            function getRow(rowIndex) {
-                return $('tbody tr', base.el).eq(rowIndex);
-            }
-
-
-            function getCell(rowIndex, colIndex) {
-                var row = getRow(rowIndex);
-                var cell;
-                if (util.isNotEmpty(row)) {
-                    cell = $('td', row)[colIndex];
-                }
-                return cell;
-            }
-
-
-            function getCellValue(rowIndex, colIndex) {
-                var value;
-                var cell = getCell(rowIndex, colIndex);
-                var colType = getColumnType(colIndex);
-
-                var input = $('input', cell);
-                if (!util.isEmptyArray(input)) {
-                    value = inputUtil.getValue(input, colType);
-                } else {
-                    value = $(cell).text().trim();
-                }
-
-                var getCellValueFunc = getOptions().getCellValue;
-                if (util.functionExists(getCellValueFunc)) {
-                    value = getCellValueFunc(rowIndex, colIndex, value, getRow(rowIndex), cell);
-                }
-                return value;
-            }
-
-
-            function setCellValue(rowIndex, colIndex, value) {
-                var colType = getColumnType(colIndex);
-                var cell = getCell(rowIndex, colIndex);
+        var InputUtil = {
+            createInput: function(id, name, colType) {
                 var input;
 
-                var func = getOptions().setCellValue;
-                if (util.functionExists(func)) {
-                    func(rowIndex, colIndex, value, getRow(rowIndex), cell);
-                } else {
-                    input = $('input', cell);
-                    if (!util.isEmptyArray(input)) {
-                        inputUtil.setValue(input, colType, value);
-                    } else {
-                        $(cell).text(value);
-                    }
+                if (colType === 'checkbox') {
+                    input = $(Template.checkbox);
+                    input.prop('id', id);
+                    input.prop('name', name);
                 }
-            }
-
-
-            function getColumnCount() {
-                var headerRow = getHeaderRow();
-                if (!util.isEmptyArray(headerRow)) {
-                    return $('th', headerRow).length;
-                } else {
-                    return $('td', getRow(0)).length;
+                else if (colType === 'datepicker') {
+                    input = $(Template.textfield);
+                    input.prop('id', id);
+                    input.prop('name', name);
+                    $(input).datepicker();
                 }
-            }
-
-
-            function getRowCount() {
-                return $('tbody tr', base.el).length;
-            }
-
-
-            function isValidRowIndex(rowIndex) {
-                if (util.isEmpty(rowIndex)) {
-                    return false;
+                else {
+                    input = $(Template.textfield);
+                    input.prop('id', id);
+                    input.prop('name', name);
                 }
 
-                if (isNaN(rowIndex)) {
-                    return false;
-                }
-
-                if (rowIndex < 0 || rowIndex >= getRowCount()) {
-                    return false;
-                }
-                return true;
-            }
-
-
-            function setFormValues(rowIndex) {
-                for (var i = 0; i < getColumnCount(); i++) {
-                    setInputValue(rowIndex, i, getCellValue(rowIndex, i));
-                }
-            }
-
-
-            function setInputValue(rowIndex, colIndex, value) {
-                var inputId = idGen.getInputId(colIndex);
-                var row = getRow(rowIndex);
-                var colType, input;
-
-                var func = getOptions().setInputValue;
-                if (util.functionExists(func)) {
-                    func(rowIndex, colIndex, value, inputId, _$form, getRow(rowIndex), getCell(rowIndex, colIndex), getHeader(colIndex));
-                } else {
-                    colType = getColumnType(colIndex);
-                    input = $('.' + INPUT_CLASS_PREFIX + colIndex, _$form);
-                    inputUtil.setValue(input, colType, value);
-                }
-            }
-
-
-            function getInputValue(colIndex) {
-                var value;
-
-                var input = $('.' + INPUT_CLASS_PREFIX + colIndex, _$form);
-                if (!util.isEmptyArray(input)) {
-                    value = inputUtil.getValue(input, getColumnType(colIndex));
-                }
-
-                var func = getOptions().getInputValue;
-                if (util.functionExists(func)) {
-                    value = func(_currentRowIndex, colIndex, value, idGen.getInputId(colIndex),
-                        _$form, _currentRow, getCell(_currentRowIndex, colIndex), getHeader(colIndex));
-                }
-
-                return value;
-            }
-
-
-            function renderInput(colIndex) {
-                if (ignoreColumn(colIndex)) {
-                    return;
-                }
-
-                var inputId = idGen.getInputId(colIndex);
-                var inputName = idGen.getInputName(colIndex);
-                var input = inputUtil.createInput(inputId, inputName, getColumnType(colIndex));
-
-                var defaultValue = getDefaultValue(colIndex);
-                if (util.isNotEmpty(defaultValue)) {
-                    input.val(defaultValue);
-                }
-
-                if (isDisabled(colIndex)) {
-                    input.prop('disabled', true);
-                }
-
-                // Check if a function was passed into the option and execute that
-                var func = getOptions().renderInput;
-                if (util.functionExists(func)) {
-                    input = func(input, _currentRowIndex, colIndex, getHeader(colIndex));
-                }
-                if (input) {
-                    $(input).addClass(INPUT_CLASS_PREFIX + colIndex);
-                    $(input).addClass(PLUGIN_CSS_CLASS + INPUT_CLASS_SUFFIX);
-                }
                 return input;
-            }
+            },
 
-
-            function build() {
-                buildColumnMap();
-                buildForm();
-            }
-
-
-            function buildColumnMap() {
-                var columns = base.options.columns;
-                var i = 0;
-                var col, index;
-                var columnMap = {};
-
-                // fill with default values;
-                for (i = 0; i < getColumnCount(); i++) {
-                    columnMap[i] = util.clone(base.options.defaultColumn);
+            getValue: function(input, colType) {
+                if (colType === 'checkbox') {
+                    return this.getCheckboxValue(input);
                 }
-
-                if (util.isNotEmpty(columns) && $.isArray(columns)) {
-                    for (i = 0; i < columns.length; i++) {
-                        col = columns[i];
-                        if (util.isNotEmpty(col)) {
-                            index = col.colIndex;
-                            if (util.isEmpty(index)) {
-                                index = i;
-                            }
-                            columnMap[index] = col;
-                        }
-                    }
+                else {
+                    return $(input).val();
                 }
+            },
 
-                // set plugin global
-                _columnMap = columnMap;
+            setValue: function(input, colType, value) {
+                if (colType === 'checkbox') {
+                    this.setCheckboxValue(input, value);
+                }
+                else {
+                    $(input).val(value);
+                }
+            },
+
+            getCheckboxValue: function(input) {
+                return $(input).prop('checked');
+            },
+
+            setCheckboxValue: function(input, value) {
+                $(input).prop('checked', Util.toBoolean(value));
             }
-
-
-
-            function buildForm() {
-                var div = $(Template.div);
-                div.prop('id', idGen.getEditRowFormId());
-                div.prop('tabIndex', 0);
-                div.addClass(PLUGIN_CSS_CLASS);
-                div.addClass(getOptions().cssClass);
-                div.hide();
-                div.appendTo(document.body);
-
-                var form = $(Template.form);
-                form.prop('id', idGen.getFormId());
-                form.prop('tabindex', 0);
-                form.addClass(PLUGIN_CSS_CLASS + '-form');
-                form.appendTo(div);
-
-                var row = buildFormRow();
-                row.appendTo(form);
-
-                var buttonBar = buildButtonBar();
-                buttonBar.appendTo(div);
-
-                form.submit(function(event) {
-                    event.preventDefault();
-                    save();
-                });
-
-                // add to plugin global scope
-                _$buttonBar = buttonBar;
-                _$formDiv = div;
-                _$form = form;
-            }
-
-
-            function buildFormRow() {
-                var div = $(Template.div);
-                div.prop('id', idGen.getFormRowId());
-                div.addClass('row');
-
-                var cell = null;
-                for (var i = 0; i < getColumnCount(); i++) {
-                    cell = buildFormCell(i);
-                    cell.appendTo(div);
-                }
-                return div;
-            }
-
-
-            function buildFormCell(colIndex) {
-                var div = $(Template.div);
-                div.prop('id', idGen.getFormCellId(colIndex));
-                div.addClass('cell');
-                div.addClass(CELL_CLASS_PREFIX + colIndex);
-                var input = renderInput(colIndex);
-                if (input) {
-                    input.appendTo(div);
-                }
-                return div;
-            }
-
-
-            function buildButtonBar() {
-                var div = $(Template.div);
-
-                var saveButton = $(Template.button);
-                saveButton.prop('id', idGen.getSaveButtonId());
-                saveButton.addClass('save');
-                saveButton.appendTo(div);
-                saveButton.text(getOptions().saveText);
-                saveButton.on('click', save);
-
-                var cancelButton = $(Template.button);
-                cancelButton.prop('id', idGen.getCancelButtonId());
-                cancelButton.addClass('cancel');
-                cancelButton.appendTo(div);
-                cancelButton.text(getOptions().cancelText);
-                cancelButton.on('click', cancel);
-
-                var wrapper = $(Template.div);
-                wrapper.addClass('save-and-cancel-bar');
-                wrapper.addClass('button-bar');
-                div.appendTo(wrapper);
-                return wrapper;
-            }
-
-
-            function setFormPosition(row) {
-                if (util.isEmpty(row)) {
-                    return;
-                }
-
-                var positionOfRow = $(row).offset();
-                util.position(_$formDiv, positionOfRow.top, positionOfRow.left);
-            }
-
-
-            function setButtonBarPosition() {
-                var barWidth = $(_$buttonBar).innerWidth();
-                var width = base.$el.innerWidth();
-                var offset = (width - barWidth) / 2;
-                _$buttonBar.css({
-                    left: offset,
-                    position: 'absolute'
-                });
-            }
-
-
-            function getColumnType(colIndex) {
-                var type = _columnMap[colIndex].type;
-                if (type === 'datepicker' && !$.datepicker) {
-                    // if jquery ui datepicker is not available default to text
-                    return DEFAULT_COL_TYPE;
-                }
-
-                if (util.isNotEmpty(type)) {
-                    return type;
-                }
-
-                // try to auto-detect type
-                return getColumnTypeFromCell(colIndex);
-            }
-
-
-            function getColumnTypeFromCell(colIndex) {
-                // May not need all of this logic since the table cell will 
-                // probably only have html or checkbox  and not other types 
-                // of input or select.
-
-                //var rowIndex =  util.isEmpty( _currentRowIndex ) ? 0 : _currentRowIndex;
-                var cell = getCell(0, colIndex);
-                var type = $('input, select, textarea', cell).prop('type');
-
-                if (util.isNotEmpty(type) && type.indexOf('select') != -1) {
-                    return 'select';
-                } else if (util.isNotEmpty(type)) {
-                    return type;
-                } else {
-                    return DEFAULT_COL_TYPE;
-                }
-            }
-
-
-            function isDisabled(colIndex) {
-                var disabled = _columnMap[colIndex].disabled;
-                if (util.isNotEmpty(disabled)) {
-                    return util.toBoolean(disabled);
-                }
-                return false;
-            }
-
-
-            function ignoreColumn(colIndex) {
-                var ignore = _columnMap[colIndex].ignore;
-                if (util.isNotEmpty(ignore)) {
-                    return util.toBoolean(ignore);
-                }
-                return false;
-            }
-
-
-            function getDefaultValue(colIndex) {
-                return _columnMap[colIndex].defaultValue;
-            }
-
-
-            function getColumnWidth(colIndex) {
-                // check for header
-                var header = getHeader(colIndex);
-                if (util.isNotEmpty(header)) {
-                    return $(header).outerWidth();
-                }
-
-                var cell = getCell(_currentRowIndex, colIndex);
-                if (util.isNotEmpty(cell)) {
-                    return $(cell).outerWidth();
-                }
-
-                return 0;
-            }
-
-
-            function getRowHeight(rowIndex) {
-                var row = getRow(rowIndex);
-                if (util.isNotEmpty(row)) {
-                    return $(row).outerHeight();
-                }
-                return 0;
-            }
-
-
-            function setPluginWidthAndHeight(rowIndex) {
-                _$formDiv.width(util.getWidth(base.el));
-                var height = getRowHeight(rowIndex);
-
-                $('.row', _$formDiv).height(height);
-                $('.row .cell', _$formDiv).height(height);
-
-                for (var i = 0; i < getColumnCount(); i++) {
-                    var cell = $('.' + CELL_CLASS_PREFIX + i, _$formDiv);
-                    var colWidth = getColumnWidth(i);
-                    cell.width(colWidth);
-
-                    //                    var colType = getColumnType(i);
-                    //                    if (colType !== 'checkbox') {
-                    //                        // set input width
-                    //                        $('.' + INPUT_CLASS_PREFIX + i, cell).width(colWidth - INPUT_OFFSET);
-                    //                    }
-                }
-            }
-
-
-            var idGen = {
-                idSuffix: '-erf',
-
-                getEditRowFormId: function(colIndex) {
-                    var id = base.options.id;
-                    if (util.isEmpty(id)) {
-                        id = base.el.id;
-                    }
-
-                    if (util.isEmpty(id)) {
-                        id = 'no-id-' + new Date().getTime();
-                    }
-                    return id + this.idSuffix;
-                },
-
-                getInputId: function(colIndex) {
-                    var id = _columnMap[colIndex].id;
-                    if (util.isNotEmpty(id)) {
-                        return id;
-                    }
-
-                    // default to generating an id
-                    return this.getEditRowFormId() + INPUT_CLASS_SUFFIX + colIndex;
-                },
-
-
-                getInputName: function(colIndex) {
-                    var name = _columnMap[colIndex].name;
-                    if (util.isNotEmpty(name)) {
-                        return name;
-                    }
-
-                    // or else use id
-                    name = _columnMap[colIndex].id;
-                    if (util.isNotEmpty(name)) {
-                        return name;
-                    }
-
-                    // or get header name
-                    var header = getHeader(colIndex);
-                    name = $(header).text().trim();
-                    if (util.isNotEmpty(name)) {
-                        return name;
-                    }
-
-                    // default to generating an id
-                    return this.getEditRowFormId() + INPUT_CLASS_SUFFIX + colIndex;
-                },
-
-                getFormCellId: function(colIndex) {
-                    return this.getEditRowFormId() + '-cell-' + colIndex;
-                },
-
-                getFormRowId: function() {
-                    return this.getEditRowFormId() + '-row';
-                },
-
-                getFormId: function() {
-                    return this.getEditRowFormId() + '-form';
-                },
-
-                getSaveButtonId: function() {
-                    return this.getEditRowFormId() + '-save';
-                },
-
-                getCancelButtonId: function() {
-                    return this.getEditRowFormId() + '-cancel';
-                }
-            };
-
-
-            var util = {
-                timeoutButton: function(id, time) {
-                    if (!time) {
-                        time = 1000; // default one second
-                    }
-                    var itemId = '#' + id;
-                    $(itemId).prop('disabled', true);
-
-                    setTimeout(function() {
-                        $(itemId).prop('disabled', false);
-                    }, time);
-                },
-
-                functionExists: function(func) {
-                    return typeof func !== 'undefined' && $.isFunction(func);
-                },
-
-                isEmptyArray: function(obj) {
-                    if (this.isEmpty(obj)) {
-                        return true;
-                    }
-
-                    if (typeof obj.length !== 'undefined') {
-                        return obj.length === 0;
-                    }
-
-                    return true;
-                },
-
-                isEmpty: function(obj) {
-                    return (
-                        obj === undefined ||
-                        obj === null ||
-                        typeof obj === 'undefined' ||
-                        $.trim(obj) == 'null' ||
-                        $.trim(obj) === ''
-                    );
-                },
-
-                isNotEmpty: function(obj) {
-                    return !this.isEmpty(obj);
-                },
-
-                getWidth: function(el) {
-                    return $(el).width();
-                },
-
-                clone: function(obj) {
-                    return $.extend(true, {}, obj);
-                },
-
-                isHidden: function(el) {
-                    return $(el).css('display') == 'none';
-                },
-
-                position: function(obj, top, left) {
-                    $(obj).css({
-                        top: top,
-                        left: left
-                    });
-                },
-
-
-                toBoolean: function(text) {
-                    if (this.isEmpty(text)) {
-                        return false;
-                    }
-
-                    if (text === true || text === false) {
-                        return text;
-                    }
-
-                    text = text.toLowerCase();
-                    if (text == 'y' || text == 'true' || text == 'yes' || text == '1') {
-                        return true;
-                    } else {
-                        return false;
-                    }
-                }
-            };
-
-
-            var inputUtil = {
-                createInput: function(id, name, colType) {
-                    var input;
-
-                    if (colType == 'checkbox') {
-                        input = $(Template.checkbox);
-                        input.prop('id', id);
-                        input.prop('name', name);
-                    } else if (colType == 'datepicker') {
-                        input = $(Template.textfield);
-                        input.prop('id', id);
-                        input.prop('name', name);
-                        $(input).datepicker();
-                    } else {
-                        input = $(Template.textfield);
-                        input.prop('id', id);
-                        input.prop('name', name);
-                    }
-
-                    return input;
-                },
-
-                getValue: function(input, colType) {
-                    if (colType == 'checkbox') {
-                        return this.getCheckboxValue(input);
-                    } else {
-                        return $(input).val();
-                    }
-                },
-
-                setValue: function(input, colType, value) {
-                    if (colType == 'checkbox') {
-                        this.setCheckboxValue(input, value);
-                    } else {
-                        $(input).val(value);
-                    }
-                },
-
-                getCheckboxValue: function(input) {
-                    return $(input).prop('checked');
-                },
-
-                setCheckboxValue: function(input, value) {
-                    $(input).prop('checked', util.toBoolean(value));
-                }
-            };
-
-
-            var Template = {
-                table: '<table />',
-                tr: '<tr />',
-                td: '<td />',
-                div: '<div />',
-                form: '<form />',
-                button: '<button />',
-                textfield: '<input type="text" />',
-                checkbox: '<input type="checkbox" />'
-            };
-
-
-            // Run initializer
-            init();
         };
+
+
+
+
+        // ---------------------------------------
+        // Public API
+        // ---------------------------------------
+
+        /**
+         * Saves the input to the table and hides the dialog.
+         * 
+         * @example
+         * .editrowform( 'save' )
+         */
+        base.save = save;
+
+
+        /* 
+         * Add a row to the table. 
+         * If templateRow is passed in, it will use that to add the row.  
+         * Otherwise it will create a new row.
+         *  
+         * @example
+         * .editrowform( 'addRow', templateRow )
+         * 
+         * @param templateRow is an optional argument. It can be
+         * a dom element or string representing a row or a function
+         * which return a row to add.
+         * 
+         * For backward compatibility if left empty or set to true, it will still   
+         * attempt to clone an the existing last row.  In future releases
+         * this will be removed.
+         * 
+         * @return the rowIndex of the newly created row or false if the 
+         * function call did not add the row.
+         */
+        base.addRow = addRow;
+
+
+        /* 
+         * Remove the indicated row from the table.  This will remove it 
+         * from the table DOM. 
+         *
+         * @example
+         * .editrowform( 'deleteRow', rowIndex )
+         *  
+         * @param rowIndex is the row index to perform the operation on.
+         */
+        base.deleteRow = deleteRow;
+
+
+        /* 
+         * Set the value for the given row index.  Takes an array of values.
+         *
+         * @example
+         * .editrowform( 'setRowValues', rowIndex, rowValues )
+         *  
+         * @param rowIndex is the row index to set the values for.
+         *  
+         * @param rowValues is an array of values to set for the row.  The index 
+         * of the array corresponds to the column index.   
+         */
+        base.setRowValues = setRowValues;
+
+
+        /* 
+         * Shows the edit form for the specified row.  Does nothing for invalid row index.
+         * 
+         * @example
+         * .editrowform( 'show', rowIndex )
+         * 
+         * @param rowIndex is the row index to show the form for.
+         */
+        base.show = show;
+
+
+        /* 
+         * Hides the edit form if it is currently visible. 
+         * 
+         * @example
+         * .editrowform( 'hide' )
+         * 
+         */
+        base.hide = hide;
+
+
+        /* 
+         * Remove the plugin from the DOM and cleanup.
+         * 
+         * @example
+         * .editrowform( 'destroy')
+         * 
+         */
+        base.destroy = destroy;
+
+
+        /* 
+         * Get the number of rows in the table.
+         * 
+         * @example
+         * .editrowform( 'getRowCount' )
+         * 
+         * @return the number of rows in the table associated with this plugin
+         */
+        base.getRowCount = getRowCount;
+
+
+        /* 
+         * Get the number of columns in the table.
+         * 
+         * @example
+         * .editrowform( 'getColumnCount' )
+         * 
+         * @return the number of columns in the table associated with this plugin
+         */
+        base.getColumnCount = getColumnCount;
+
+
+
+        /* 
+         * Get the form created by this plugin.
+         * 
+         * @example
+         * .editrowform( 'getForm' )
+         * 
+         * @return the form object created by this plugin
+         * 
+         */
+        base.getForm = getForm;
 
 
 
@@ -1485,4 +748,750 @@
             renderInput: ''
         };
 
-    });
+
+        // ---------------------------------------
+        // Private functions
+        // ---------------------------------------
+        function init() {
+            base.options = $.extend({}, $.editrowform.defaultOptions, options);
+
+            build();
+
+            // add listeners
+            if (base.options.click) {
+                var tr = $('tr td', base.el).parent();
+                tr.dblclick(function() {
+                    doubleClick(this);
+                });
+
+                tr.click(function() {
+                    singleClick(this);
+                });
+            }
+
+            if (base.options.hideOnBlur) {
+                $(document).click(function(e) {
+                    var isClickOnForm = $(e.target).closest($formDiv).length;
+                    var isClickOnTable = $(e.target).closest(base.el).length;
+
+                    if (!(isClickOnForm || isClickOnTable) && !publicShowCalled) {
+                        hide();
+                    }
+
+                    // reset
+                    publicShowCalled = false;
+                });
+            }
+
+
+            // Dynamically position the form based on window size 
+            $(window).resize(function() {
+                setFormPosition(currentRow);
+            });
+
+
+            // add up/down arrow key listener
+            $formDiv.keydown(function(e) {
+                keydown(e);
+            });
+
+        }
+
+
+        // run initiallizer
+        init();
+
+        function keydown(e) {
+            if (base.options.disableArrowKeys) {
+                return;
+            }
+            switch (e.which) {
+                case 38: // up
+                    arrowUpPressed();
+                    break;
+
+                case 40: // down
+                    arrowDownPressed();
+                    break;
+
+                default:
+                    return; // exit this handler for other keys
+            }
+            e.preventDefault(); // prevent the default action (scroll / move caret)
+        }
+
+        function doubleClick(tr) {
+            hide();
+            internalShow($(tr).index());
+        }
+
+
+        function singleClick(tr) {
+            if (isVisible()) {
+                hide();
+                internalShow($(tr).index());
+            }
+        }
+
+        function arrowUpPressed() {
+            if (isVisible()) {
+                internalShow(currentRowIndex - 1);
+            }
+        }
+
+        function arrowDownPressed() {
+            if (isVisible()) {
+                internalShow(currentRowIndex + 1);
+            }
+        }
+
+
+        function getForm() {
+            return $form;
+        }
+
+
+        function isVisible() {
+            return !Util.isHidden($formDiv);
+        }
+
+
+        function save() {
+            var timeout = getOptions().saveButtonTimeout;
+            if (Util.isNotEmpty(timeout)) {
+                Util.timeoutButton(IdGenerator.getSaveButtonId(), timeout);
+            }
+            var inputValue;
+            var saved = true;
+            var rowValues = [];
+
+            for (var i = 0; i < getColumnCount(); i++) {
+                inputValue = getInputValue(i);
+                rowValues.push(inputValue);
+            }
+
+            var onSave = getOptions().onSave;
+            if (Util.functionExists(onSave)) {
+                saved = onSave($form, currentRowIndex, currentRow, rowValues);
+            }
+
+            if (saved || Util.isEmpty(saved)) {
+                setRowValues(currentRowIndex, rowValues);
+                hide();
+            }
+        }
+
+
+        function cancel() {
+            var timeout = getOptions().cancelButtonTimeout;
+            if (Util.isNotEmpty(timeout)) {
+                Util.timeoutButton(IdGenerator.getCancelButtonId(), timeout);
+            }
+
+            var cancelled = true;
+
+            var onCancel = getOptions().onCancel;
+            if (Util.functionExists(onCancel)) {
+                cancelled = onCancel($form, currentRowIndex, currentRow);
+            }
+
+            if (cancelled || Util.isEmpty(cancelled)) {
+                hide();
+            }
+        }
+
+
+        function addRow(templateRow /* optional */ ) {
+            var add = true;
+            var rowCount = getRowCount();
+            var newRow;
+
+            if ((templateRow === true || Util.isEmpty(templateRow)) && rowCount !== 0) {
+                newRow = cloneLastRow();
+            }
+            else if (templateRow === true || templateRow === false || Util.isEmpty(templateRow)) {
+                newRow = createRow();
+            }
+            else if (Util.functionExists(templateRow)) {
+                newRow = cloneRow(templateRow());
+            }
+            else {
+                newRow = cloneRow(templateRow);
+            }
+
+            var onAddRow = getOptions().onAddRow;
+            if (Util.functionExists(onAddRow)) {
+                add = onAddRow(rowCount, newRow);
+            }
+
+            if ((add || Util.isEmpty(add)) && !Util.isEmpty(newRow)) {
+                // add click listener if it's enabled
+                if (getOptions().click) {
+                    newRow.dblclick(function() {
+                        doubleClick(this);
+                    });
+
+                    newRow.click(function() {
+                        singleClick(this);
+                    });
+                }
+
+                // add the new row to the table
+                newRow.appendTo(base.$el);
+                return rowCount;
+            }
+            else {
+                return false;
+            }
+        }
+
+
+        function cloneRow(templateRow) {
+            return $(templateRow).clone();
+        }
+
+
+        function cloneLastRow() {
+            var row = getRow(getRowCount() - 1);
+            var newRow = $(row).clone();
+
+            // blank out any id 
+            newRow.prop('id', '');
+
+            // blank out the row
+            $('td', newRow).each(function(index) {
+                var column = currentColumnMap[index];
+                if (!column.ignore) {
+                    $(this).html('&nbsp;');
+                }
+            });
+            return newRow;
+        }
+
+
+        function createRow() {
+            var columnCount = getColumnCount();
+            var row = $(Template.tr);
+            var cell;
+
+            for (var i = 0; i < columnCount; i++) {
+                cell = $(Template.td);
+                cell.appendTo(row);
+                cell.html('&nbsp;');
+            }
+            return row;
+        }
+
+
+        function deleteRow(rowIndex) {
+            if (!isValidRowIndex(rowIndex)) {
+                return;
+            }
+
+            var deleted = true;
+            var row = getRow(rowIndex);
+
+            var onDeleteRow = getOptions().onDeleteRow;
+            if (Util.functionExists(onDeleteRow)) {
+                deleted = onDeleteRow(rowIndex, row);
+            }
+
+            if ((deleted || Util.isEmpty(deleted)) && !Util.isEmptyArray(row)) {
+                // remove the row from the DOM.
+                row.remove();
+            }
+        }
+
+
+        function setRowValues(rowIndex, rowValues) {
+            if (!isValidRowIndex(rowIndex)) {
+                return;
+            }
+
+            for (var i = 0; i < getColumnCount(); i++) {
+                if (!isDisabled(i) && !ignoreColumn(i)) {
+                    setCellValue(rowIndex, i, rowValues[i]);
+                }
+            }
+        }
+
+
+        function show(rowIndex) {
+            publicShowCalled = true;
+            internalShow(rowIndex);
+        }
+
+
+        function internalShow(rowIndex) {
+            if (!isValidRowIndex(rowIndex)) {
+                return;
+            }
+
+            if ($formDiv !== null) {
+                setPluginWidthAndHeight(rowIndex);
+                var row = getRow(rowIndex);
+                setFormPosition(row);
+                setFormValues(rowIndex);
+                $formDiv.show();
+                setButtonBarPosition();
+                if (getOptions().focusOnInput) {
+                    focusFirstInput();
+                }
+
+                // set plugin global
+                currentRow = row;
+                currentRowIndex = rowIndex;
+            }
+        }
+
+
+        function focusFirstInput() {
+            $('input', $formDiv).each(function(index, input) {
+                var disabled = $(input).prop('disabled');
+                if (!disabled) {
+                    $(input).focus();
+                    return false;
+                }
+            });
+        }
+
+
+        /* Hide the edit form if it is currently visible */
+        function hide() {
+            if ($formDiv !== null && isVisible()) {
+                $formDiv.hide();
+                var onHide = getOptions().onHide;
+                if (Util.functionExists(onHide)) {
+                    onHide($form, currentRowIndex, currentRow);
+                }
+            }
+        }
+
+
+        /* Remove the plugin from the DOM and cleanup */
+        function destroy() {
+            base.$el.removeData('editrowform');
+            if ($formDiv) {
+                $formDiv.remove();
+                $formDiv = null;
+            }
+        }
+
+
+        function getOptions() {
+            return base.options;
+        }
+
+
+        function getHeaderRow() {
+            var header = $('thead tr', base.el);
+            if (Util.isNotEmpty(header)) {
+                return header;
+            }
+            return $('th', base.el).parent();
+        }
+
+
+        function getHeader(colIndex) {
+            var headerRow = getHeaderRow();
+
+            var header;
+            if (Util.isNotEmpty(headerRow)) {
+                header = $('th', headerRow)[colIndex];
+            }
+            return header;
+        }
+
+
+        function getRow(rowIndex) {
+            return $('tbody tr', base.el).eq(rowIndex);
+        }
+
+
+        function getCell(rowIndex, colIndex) {
+            var row = getRow(rowIndex);
+            var cell;
+            if (Util.isNotEmpty(row)) {
+                cell = $('td', row)[colIndex];
+            }
+            return cell;
+        }
+
+
+        function getCellValue(rowIndex, colIndex) {
+            var value;
+            var cell = getCell(rowIndex, colIndex);
+            var colType = getColumnType(colIndex);
+
+            var input = $('input', cell);
+            if (!Util.isEmptyArray(input)) {
+                value = InputUtil.getValue(input, colType);
+            }
+            else {
+                value = $(cell).text().trim();
+            }
+
+            var getCellValueFunc = getOptions().getCellValue;
+            if (Util.functionExists(getCellValueFunc)) {
+                value = getCellValueFunc(rowIndex, colIndex, value, getRow(rowIndex), cell);
+            }
+            return value;
+        }
+
+
+        function setCellValue(rowIndex, colIndex, value) {
+            var colType = getColumnType(colIndex);
+            var cell = getCell(rowIndex, colIndex);
+            var input;
+
+            var func = getOptions().setCellValue;
+            if (Util.functionExists(func)) {
+                func(rowIndex, colIndex, value, getRow(rowIndex), cell);
+            }
+            else {
+                input = $('input', cell);
+                if (!Util.isEmptyArray(input)) {
+                    InputUtil.setValue(input, colType, value);
+                }
+                else {
+                    $(cell).text(value);
+                }
+            }
+        }
+
+
+        function getColumnCount() {
+            var headerRow = getHeaderRow();
+            if (!Util.isEmptyArray(headerRow)) {
+                return $('th', headerRow).length;
+            }
+            else {
+                return $('td', getRow(0)).length;
+            }
+        }
+
+
+        function getRowCount() {
+            return $('tbody tr', base.el).length;
+        }
+
+
+        function isValidRowIndex(rowIndex) {
+            if (Util.isEmpty(rowIndex)) {
+                return false;
+            }
+
+            if (isNaN(rowIndex)) {
+                return false;
+            }
+
+            if (rowIndex < 0 || rowIndex >= getRowCount()) {
+                return false;
+            }
+            return true;
+        }
+
+
+        function setFormValues(rowIndex) {
+            for (var i = 0; i < getColumnCount(); i++) {
+                setInputValue(rowIndex, i, getCellValue(rowIndex, i));
+            }
+        }
+
+
+        function setInputValue(rowIndex, colIndex, value) {
+            var inputId = IdGenerator.getInputId(colIndex);
+            var colType, input;
+
+            var func = getOptions().setInputValue;
+            if (Util.functionExists(func)) {
+                func(rowIndex, colIndex, value, inputId, $form, getRow(rowIndex), getCell(rowIndex, colIndex), getHeader(colIndex));
+            }
+            else {
+                colType = getColumnType(colIndex);
+                input = $('.' + INPUT_CLASS_PREFIX + colIndex, $form);
+                InputUtil.setValue(input, colType, value);
+            }
+        }
+
+
+        function getInputValue(colIndex) {
+            var value;
+
+            var input = $('.' + INPUT_CLASS_PREFIX + colIndex, $form);
+            if (!Util.isEmptyArray(input)) {
+                value = InputUtil.getValue(input, getColumnType(colIndex));
+            }
+
+            var func = getOptions().getInputValue;
+            if (Util.functionExists(func)) {
+                value = func(currentRowIndex, colIndex, value, IdGenerator.getInputId(colIndex),
+                    $form, currentRow, getCell(currentRowIndex, colIndex), getHeader(colIndex));
+            }
+
+            return value;
+        }
+
+
+        function renderInput(colIndex) {
+            if (ignoreColumn(colIndex)) {
+                return;
+            }
+
+            var inputId = IdGenerator.getInputId(colIndex);
+            var inputName = IdGenerator.getInputName(colIndex);
+            var input = InputUtil.createInput(inputId, inputName, getColumnType(colIndex));
+
+            var defaultValue = getDefaultValue(colIndex);
+            if (Util.isNotEmpty(defaultValue)) {
+                input.val(defaultValue);
+            }
+
+            if (isDisabled(colIndex)) {
+                input.prop('disabled', true);
+            }
+
+            // Check if a function was passed into the option and execute that
+            var func = getOptions().renderInput;
+            if (Util.functionExists(func)) {
+                input = func(input, currentRowIndex, colIndex, getHeader(colIndex));
+            }
+            if (input) {
+                $(input).addClass(INPUT_CLASS_PREFIX + colIndex);
+                $(input).addClass(PLUGIN_CSS_CLASS + INPUT_CLASS_SUFFIX);
+            }
+            return input;
+        }
+
+
+        function build() {
+            buildColumnMap();
+            buildForm();
+        }
+
+
+        function buildColumnMap() {
+            var columns = base.options.columns;
+            var i, col, index;
+            var columnMap = {};
+
+            // Fill with default values;
+            for (i = 0; i < getColumnCount(); i++) {
+                columnMap[i] = Util.clone(base.options.defaultColumn);
+            }
+
+            if (Util.isNotEmpty(columns) && $.isArray(columns)) {
+                for (i = 0; i < columns.length; i++) {
+                    index = i;
+                    col = columns[i];
+                    if (Util.isNotEmpty(col) && col.colIndex) {
+                        index = col.colIndex;
+                    }
+                    columnMap[index] = col;
+                }
+            }
+            // set plugin global
+            currentColumnMap = columnMap;
+        }
+
+
+
+        function buildForm() {
+            var div = $(Template.div);
+            div.prop('id', IdGenerator.getEditRowFormId());
+            div.prop('tabIndex', 0);
+            div.addClass(PLUGIN_CSS_CLASS);
+            div.addClass(getOptions().cssClass);
+            div.hide();
+            div.appendTo(document.body);
+
+            var form = $(Template.form);
+            form.prop('id', IdGenerator.getFormId());
+            form.prop('tabindex', 0);
+            form.addClass(PLUGIN_CSS_CLASS + '-form');
+            form.appendTo(div);
+
+            var row = buildFormRow();
+            row.appendTo(form);
+
+            var buttonBar = buildButtonBar();
+            buttonBar.appendTo(div);
+
+            form.submit(function(event) {
+                event.preventDefault();
+                save();
+            });
+
+            // add to plugin global scope
+            $buttonBar = buttonBar;
+            $formDiv = div;
+            $form = form;
+        }
+
+
+        function buildFormRow() {
+            var div = $(Template.div);
+            div.prop('id', IdGenerator.getFormRowId());
+            div.addClass('row');
+
+            for (var i = 0; i < getColumnCount(); i++) {
+                var cell = buildFormCell(i);
+                cell.appendTo(div);
+            }
+            return div;
+        }
+
+
+        function buildFormCell(colIndex) {
+            var div = $(Template.div);
+            div.prop('id', IdGenerator.getFormCellId(colIndex));
+            div.addClass('cell');
+            div.addClass(CELL_CLASS_PREFIX + colIndex);
+            var input = renderInput(colIndex);
+            if (input) {
+                input.appendTo(div);
+            }
+            return div;
+        }
+
+
+        function buildButtonBar() {
+            var div = $(Template.div);
+
+            var saveButton = $(Template.button);
+            saveButton.prop('id', IdGenerator.getSaveButtonId());
+            saveButton.addClass('save');
+            saveButton.appendTo(div);
+            saveButton.text(getOptions().saveText);
+            saveButton.on('click', save);
+
+            var cancelButton = $(Template.button);
+            cancelButton.prop('id', IdGenerator.getCancelButtonId());
+            cancelButton.addClass('cancel');
+            cancelButton.appendTo(div);
+            cancelButton.text(getOptions().cancelText);
+            cancelButton.on('click', cancel);
+
+            var wrapper = $(Template.div);
+            wrapper.addClass('save-and-cancel-bar');
+            wrapper.addClass('button-bar');
+            div.appendTo(wrapper);
+            return wrapper;
+        }
+
+
+        function setFormPosition(row) {
+            if (Util.isEmpty(row)) {
+                return;
+            }
+            var positionOfRow = $(row).offset();
+            Util.position($formDiv, positionOfRow.top, positionOfRow.left);
+        }
+
+
+        function setButtonBarPosition() {
+            var barWidth = $($buttonBar).innerWidth();
+            var width = base.$el.innerWidth();
+            var offset = (width - barWidth) / 2;
+            $buttonBar.css({
+                left: offset,
+                position: 'absolute'
+            });
+        }
+
+
+        function getColumnType(colIndex) {
+            var type = currentColumnMap[colIndex].type;
+            if (type === 'datepicker' && !$.datepicker) {
+                // if jquery ui datepicker is not available default to text
+                return DEFAULT_COL_TYPE;
+            }
+
+            if (Util.isNotEmpty(type)) {
+                return type;
+            }
+
+            // try to auto-detect type
+            return getColumnTypeFromCell(colIndex);
+        }
+
+
+        function getColumnTypeFromCell(colIndex) {
+            var cell = getCell(0, colIndex);
+            var type = $('input, select, textarea', cell).prop('type');
+
+            if (Util.isNotEmpty(type) && type.indexOf('select') !== -1) {
+                return 'select';
+            }
+            else if (Util.isNotEmpty(type)) {
+                return type;
+            }
+            else {
+                return DEFAULT_COL_TYPE;
+            }
+        }
+
+
+        function isDisabled(colIndex) {
+            var disabled = currentColumnMap[colIndex].disabled;
+            if (Util.isNotEmpty(disabled)) {
+                return Util.toBoolean(disabled);
+            }
+            return false;
+        }
+
+
+        function ignoreColumn(colIndex) {
+            var ignore = currentColumnMap[colIndex].ignore;
+            if (Util.isNotEmpty(ignore)) {
+                return Util.toBoolean(ignore);
+            }
+            return false;
+        }
+
+
+        function getDefaultValue(colIndex) {
+            return currentColumnMap[colIndex].defaultValue;
+        }
+
+
+        function getColumnWidth(colIndex) {
+            // check for header
+            var header = getHeader(colIndex);
+            if (Util.isNotEmpty(header)) {
+                return $(header).outerWidth();
+            }
+
+            var cell = getCell(currentRowIndex, colIndex);
+            if (Util.isNotEmpty(cell)) {
+                return $(cell).outerWidth();
+            }
+
+            return 0;
+        }
+
+
+        function getRowHeight(rowIndex) {
+            var row = getRow(rowIndex);
+            if (Util.isNotEmpty(row)) {
+                return $(row).outerHeight();
+            }
+            return 0;
+        }
+
+
+        function setPluginWidthAndHeight(rowIndex) {
+            $formDiv.width(base.$el.width());
+            var height = getRowHeight(rowIndex);
+
+            $('.row', $formDiv).height(height);
+            $('.row .cell', $formDiv).height(height);
+
+            for (var i = 0; i < getColumnCount(); i++) {
+                var cell = $('.' + CELL_CLASS_PREFIX + i, $formDiv);
+                var colWidth = getColumnWidth(i);
+                cell.width(colWidth);
+            }
+        }
+    };
+}));
