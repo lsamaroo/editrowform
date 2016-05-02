@@ -1,5 +1,7 @@
 var gulp = require('gulp'),
-    eslint = require('gulp-eslint'),    
+    shell = require('gulp-shell'),
+    eslint = require('gulp-eslint'), 
+    gulpSequence = require('gulp-sequence'),
     rename = require('gulp-rename'),
     uglify = require('gulp-uglify'),
     minifyCss = require('gulp-cssnano'),
@@ -7,6 +9,7 @@ var gulp = require('gulp'),
 
 var sourceDirectory = 'src';
 var targetDirectory = 'dist';
+var documentDirectory = 'doc';
 var jsFiles = sourceDirectory + '/*.js';
 var cssFiles = sourceDirectory + '/*.css';
 var ignoreMinFiles = '!' + sourceDirectory + '/*.min.*';
@@ -51,6 +54,15 @@ gulp.task('minify-css', ['beautify-css'], function() {
     	.pipe(gulp.dest(targetDirectory));
 });
 
+gulp.task('jsdoc', shell.task([
+    'node node_modules/jsdoc/jsdoc.js --readme ./README.md ' + sourceDirectory + ' -r -c jsdoc-conf.json -d ' +   documentDirectory
+]));
 
 
-gulp.task('default', ['eslint', 'minify', 'minify-css'] );
+gulp.task('build', function(cb) {
+	gulpSequence('eslint', 'minify', 'minify-css', 'jsdoc')(cb);
+});
+
+
+
+gulp.task('default', ['build'] );
