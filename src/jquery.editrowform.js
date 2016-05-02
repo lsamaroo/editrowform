@@ -1,25 +1,31 @@
 /**
- * Documents & License: https://github.com/lsamaroo/editrowform
- * 
- * @author  Leon Samaroo
+ * @fileOverview jquery plugin pattern (featured)
+ *               <p>License MIT
+ *               <br />Copyright 2015 Leon Samaroo
+ *
  * @version 1.3.6
+ * @author Leon Samaroo
  * @requires jQuery
- * 
- * The jQuery plugin namespace.
- * @external "jQuery.fn"
- * @see {@link http://learn.jquery.com/plugins/|jQuery Plugins}
- * 
  */
 
 /**
- * A jQuery plugin which allows you to edit each row of a table in line complete with a save and cancel button.  
- * You can also use it to add or delete rows.
- * 
- * @function external:"jQuery.fn".editrowform
+ * See <a href="http://jquery.com">http://jquery.com</a>.
+ * @name $
+ * @class
+ * See the jQuery Library  (<a href="http://jquery.com">http://jquery.com</a>) for full details.  This just
+ * documents the function and classes that are added to jQuery by this plug-in.
+ */
+
+/**
+ * See <a href="http://jquery.com">http://jquery.com</a>
+ * @name fn
+ * @class
+ * See the jQuery Library  (<a href="http://jquery.com">http://jquery.com</a>) for full details.  This just
+ * documents the function and classes that are added to jQuery by this plug-in.
+ * @memberOf $
  */
 
 'use strict';
-
 /* eslint no-unused-expressions: 0 */
 (function(root, factory) {
     if (typeof define === 'function' && define.amd) {
@@ -64,7 +70,6 @@
     };
 
     $.editrowform = function(el, options) {
-
 
         // ---------------------------------------
         // Private variables
@@ -752,55 +757,7 @@
         // ---------------------------------------
         // Private functions
         // ---------------------------------------
-        function init() {
-            base.options = $.extend({}, $.editrowform.defaultOptions, options);
-
-            build();
-
-            // add listeners
-            if (base.options.click) {
-                var tr = $('tr td', base.el).parent();
-                tr.dblclick(function() {
-                    doubleClick(this);
-                });
-
-                tr.click(function() {
-                    singleClick(this);
-                });
-            }
-
-            if (base.options.hideOnBlur) {
-                $(document).click(function(e) {
-                    var isClickOnForm = $(e.target).closest($formDiv).length;
-                    var isClickOnTable = $(e.target).closest(base.el).length;
-
-                    if (!(isClickOnForm || isClickOnTable) && !publicShowCalled) {
-                        hide();
-                    }
-
-                    // reset
-                    publicShowCalled = false;
-                });
-            }
-
-
-            // Dynamically position the form based on window size 
-            $(window).resize(function() {
-                setFormPosition(currentRow);
-            });
-
-
-            // add up/down arrow key listener
-            $formDiv.keydown(function(e) {
-                keydown(e);
-            });
-
-        }
-
-
-        // run initiallizer
-        init();
-
+		
         function keydown(e) {
             if (base.options.disableArrowKeys) {
                 return;
@@ -1493,5 +1450,54 @@
                 cell.width(colWidth);
             }
         }
+
+
+        // ---------------------------------------
+        // Initialize everything!!
+        // ---------------------------------------
+        (function() {
+            base.options = $.extend({}, $.editrowform.defaultOptions, options);
+
+            build();
+
+            // add listeners
+            if (base.options.click) {
+                var tr = $('tr td', base.el).parent();
+                tr.dblclick(function() {
+                    doubleClick(this);
+                });
+
+                tr.click(function() {
+                    singleClick(this);
+                });
+            }
+
+            if (base.options.hideOnBlur) {
+                $(document).click(function(e) {
+                    var isClickOnForm = $(e.target).closest($formDiv).length;
+                    var isClickOnTable = $(e.target).closest(base.el).length;
+
+                    if (!(isClickOnForm || isClickOnTable) && !publicShowCalled) {
+                        hide();
+                    }
+
+                    // reset
+                    publicShowCalled = false;
+                });
+            }
+
+
+            // Dynamically position the form based on window size 
+            $(window).resize(function() {
+                setFormPosition(currentRow);
+            });
+
+
+            // add up/down arrow key listener
+            $formDiv.keydown(function(e) {
+                keydown(e);
+            });
+
+        }());
     };
 }));
