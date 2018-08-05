@@ -1,3 +1,9 @@
+v1.3.7 (2018-08-05)
+-------------------
+- add check for 'active' and 'on' as boolean true when dealing with checkbox
+
+
+
 v1.3.6 (2015-12-16)
 -------------------
 - Update and generate jsdoc.

@@ -3,7 +3,7 @@
  *               <p>License MIT
  *               <br />Copyright 2015 Leon Samaroo
  *
- * @version 1.3.6
+ * @version 1.3.7
  * @author Leon Samaroo
  * @requires jQuery
  */
@@ -183,7 +183,7 @@
                 }
 
                 text = text.toLowerCase();
-                return text === 'y' || text === 'true' || text === 'yes' || text === '1';
+                return text === 'y' || text === 'true' || text === 'yes' || text === '1' || text == 'active' || text == 'on';
             }
         };
 
@@ -1407,7 +1407,7 @@
 
 
             /* 
-             * Override to determine how the plugin sets the value of the plugin.
+             * Override to determine how the plugin sets the value of the input.
              * 
              * @example
              * function( rowIndex, colIndex, value, inputId, form, row, cell, header ){} 
